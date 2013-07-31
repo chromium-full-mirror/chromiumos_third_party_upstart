@@ -5702,7 +5702,7 @@ test_handler (void)
 
 	/* Check that we can handle the running task of the job terminating,
 	 * which should set the goal to stop and transition a state change
-	 * into the stopping state.  This should not be considered a failure.
+	 * into the stopping state.
 	 */
 	TEST_FEATURE ("with running process");
 	TEST_ALLOC_FAIL {
@@ -5733,13 +5733,11 @@ test_handler (void)
 		TEST_EQ (job->state, JOB_STOPPING);
 		TEST_EQ (job->pid[PROCESS_MAIN], 0);
 
-		TEST_EQ (event->blockers, 1);
-		TEST_EQ (event->failed, FALSE);
+		TEST_EQ (event->blockers, 0);
+		TEST_EQ (event->failed, TRUE);
 
-		TEST_LIST_NOT_EMPTY (&job->blocking);
-		TEST_NOT_FREE (blocked);
-		TEST_EQ_P (blocked->event, event);
-		event_unblock (event);
+		TEST_LIST_EMPTY (&job->blocking);
+		TEST_FREE (blocked);
 
 		TEST_NE_P (job->blocker, NULL);
 
@@ -5754,8 +5752,8 @@ test_handler (void)
 
 		TEST_LIST_EMPTY (&job->blocker->blocking);
 
-		TEST_EQ (job->failed, FALSE);
-		TEST_EQ (job->failed_process, PROCESS_INVALID);
+		TEST_EQ (job->failed, TRUE);
+		TEST_EQ (job->failed_process, PROCESS_MAIN);
 		TEST_EQ (job->exit_status, 0);
 
 		nih_free (job);
@@ -6857,7 +6855,7 @@ test_handler (void)
 
 
 	/* A running task exiting with the zero exit code is considered
-	 * a normal termination if not marked respawn.
+	 * a failed termination.
 	 */
 	TEST_FEATURE ("with running task and zero exit");
 	TEST_ALLOC_FAIL {
@@ -6888,13 +6886,11 @@ test_handler (void)
 		TEST_EQ (job->state, JOB_STOPPING);
 		TEST_EQ (job->pid[PROCESS_MAIN], 0);
 
-		TEST_EQ (event->blockers, 1);
-		TEST_EQ (event->failed, FALSE);
+		TEST_EQ (event->blockers, 0);
+		TEST_EQ (event->failed, TRUE);
 
-		TEST_LIST_NOT_EMPTY (&job->blocking);
-		TEST_NOT_FREE (blocked);
-		TEST_EQ_P (blocked->event, event);
-		event_unblock (event);
+		TEST_LIST_EMPTY (&job->blocking);
+		TEST_FREE (blocked);
 
 		TEST_NE_P (job->blocker, NULL);
 
@@ -6909,8 +6905,8 @@ test_handler (void)
 
 		TEST_LIST_EMPTY (&job->blocker->blocking);
 
-		TEST_EQ (job->failed, FALSE);
-		TEST_EQ (job->failed_process, PROCESS_INVALID);
+		TEST_EQ (job->failed, TRUE);
+		TEST_EQ (job->failed_process, PROCESS_MAIN);
 		TEST_EQ (job->exit_status, 0);
 
 		nih_free (job);
@@ -7170,13 +7166,11 @@ test_handler (void)
 		TEST_EQ (job->state, JOB_STOPPING);
 		TEST_EQ (job->pid[PROCESS_MAIN], 0);
 
-		TEST_EQ (event->blockers, 1);
-		TEST_EQ (event->failed, FALSE);
+		TEST_EQ (event->blockers, 0);
+		TEST_EQ (event->failed, TRUE);
 
-		TEST_LIST_NOT_EMPTY (&job->blocking);
-		TEST_NOT_FREE (blocked);
-		TEST_EQ_P (blocked->event, event);
-		event_unblock (event);
+		TEST_LIST_EMPTY (&job->blocking);
+		TEST_FREE (blocked);
 
 		TEST_NE_P (job->blocker, NULL);
 
@@ -7191,8 +7185,8 @@ test_handler (void)
 
 		TEST_LIST_EMPTY (&job->blocker->blocking);
 
-		TEST_EQ (job->failed, FALSE);
-		TEST_EQ (job->failed_process, PROCESS_INVALID);
+		TEST_EQ (job->failed, TRUE);
+		TEST_EQ (job->failed_process, PROCESS_MAIN);
 		TEST_EQ (job->exit_status, 0);
 
 		nih_free (job);
@@ -7241,18 +7235,16 @@ test_handler (void)
 		TEST_EQ (job->pid[PROCESS_MAIN], 0);
 		TEST_EQ (job->pid[PROCESS_POST_START], 2);
 
-		TEST_EQ (event->blockers, 1);
-		TEST_EQ (event->failed, FALSE);
+		TEST_EQ (event->blockers, 0);
+		TEST_EQ (event->failed, TRUE);
 
 		TEST_EQ_P (job->blocker, NULL);
 
-		TEST_LIST_NOT_EMPTY (&job->blocking);
-		TEST_NOT_FREE (blocked);
-		TEST_EQ_P (blocked->event, event);
-		event_unblock (event);
+		TEST_LIST_EMPTY (&job->blocking);
+		TEST_FREE (blocked);
 
-		TEST_EQ (job->failed, FALSE);
-		TEST_EQ (job->failed_process, PROCESS_INVALID);
+		TEST_EQ (job->failed, TRUE);
+		TEST_EQ (job->failed_process, PROCESS_MAIN);
 		TEST_EQ (job->exit_status, 0);
 
 		nih_free (job);
@@ -7301,17 +7293,16 @@ test_handler (void)
 		TEST_EQ (job->pid[PROCESS_MAIN], 0);
 		TEST_EQ (job->pid[PROCESS_POST_START], 2);
 
-		TEST_EQ (event->blockers, 1);
-		TEST_EQ (event->failed, FALSE);
+		TEST_EQ (event->blockers, 0);
+		TEST_EQ (event->failed, TRUE);
 
 		TEST_EQ_P (job->blocker, NULL);
 
-		TEST_LIST_NOT_EMPTY (&job->blocking);
-		TEST_NOT_FREE (blocked);
-		TEST_EQ_P (blocked->event, event);
+		TEST_LIST_EMPTY (&job->blocking);
+		TEST_FREE (blocked);
 
-		TEST_EQ (job->failed, FALSE);
-		TEST_EQ (job->failed_process, PROCESS_INVALID);
+		TEST_EQ (job->failed, TRUE);
+		TEST_EQ (job->failed_process, PROCESS_MAIN);
 		TEST_EQ (job->exit_status, 0);
 
 		job_process_handler (NULL, 2, NIH_CHILD_EXITED, 0);
@@ -7321,13 +7312,8 @@ test_handler (void)
 		TEST_EQ (job->pid[PROCESS_MAIN], 0);
 		TEST_EQ (job->pid[PROCESS_POST_START], 0);
 
-		TEST_EQ (event->blockers, 1);
-		TEST_EQ (event->failed, FALSE);
-
-		TEST_LIST_NOT_EMPTY (&job->blocking);
-		TEST_NOT_FREE (blocked);
-		TEST_EQ_P (blocked->event, event);
-		event_unblock (event);
+		TEST_EQ (event->blockers, 0);
+		TEST_EQ (event->failed, TRUE);
 
 		TEST_NE_P (job->blocker, NULL);
 
@@ -7342,8 +7328,8 @@ test_handler (void)
 
 		TEST_LIST_EMPTY (&job->blocker->blocking);
 
-		TEST_EQ (job->failed, FALSE);
-		TEST_EQ (job->failed_process, PROCESS_INVALID);
+		TEST_EQ (job->failed, TRUE);
+		TEST_EQ (job->failed_process, PROCESS_MAIN);
 		TEST_EQ (job->exit_status, 0);
 
 		nih_free (job);
