@@ -122,6 +122,15 @@ AM_CONDITIONAL([HAVE_ABI_CHECKER], [test ! -z "$ABI_COMPLIANCE_CHECKER" && test 
 # Checks for header files.
 AC_CHECK_HEADERS([valgrind/valgrind.h, sys/prctl.h])
 
+AC_ARG_ENABLE(selinux,
+	AS_HELP_STRING([--enable-selinux], [enable SELinux support]),
+	[], [enable_selinux=no])
+
+if test "x$enable_selinux" = "xyes" ; then
+	PKG_CHECK_MODULES(SELINUX, [libselinux])
+	AC_DEFINE(HAVE_SELINUX, 1, [Define if we have SELinux])
+fi
+
 # Checks for typedefs, structures, and compiler characteristics.
 NIH_C_THREAD
 

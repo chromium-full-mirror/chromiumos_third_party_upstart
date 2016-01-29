@@ -38,6 +38,9 @@
 #endif
 #endif
 
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include <errno.h>
 #include <stdio.h>
 #include <limits.h>
@@ -46,6 +49,10 @@
 #include <string.h>
 #include <syslog.h>
 #include <unistd.h>
+
+#ifdef HAVE_SELINUX
+#include <selinux/selinux.h>
+#endif
 
 #include <linux/kd.h>
 
@@ -241,6 +248,31 @@ main (int   argc,
 	conf_dirs = NIH_MUST (nih_str_array_new (NULL));
 	append_conf_dirs = NIH_MUST (nih_str_array_new (NULL));
 	prepend_conf_dirs = NIH_MUST (nih_str_array_new (NULL));
+
+#ifdef HAVE_SELINUX
+	int    enforce = 0;
+
+	if (getpid() == 1 && getenv ("SELINUX_INIT") == NULL) {
+		const char *old_program_name = program_name;
+		program_name = "selinux";  /* for logger_kmsg before NIH init */
+		putenv ("SELINUX_INIT=YES");
+		if (selinux_init_load_policy (&enforce) == 0 ) {
+			logger_kmsg (NIH_LOG_MESSAGE,
+				     "policy loaded, doing self-exec\n");
+			execv (argv[0], argv);
+		} else {
+			logger_kmsg (NIH_LOG_WARN, "policy failed to load\n");
+			if (enforce > 0) {
+				/* Enforcing mode, must quit. */
+				logger_kmsg (NIH_LOG_FATAL,
+					     "no policy in enforcing "
+					     "mode: quit\n");
+				exit (1);
+			}
+		}
+		program_name = old_program_name;  /* put things back */
+	}
+#endif
 
 	args_copy = NIH_MUST (nih_str_array_copy (NULL, NULL, argv));
 
