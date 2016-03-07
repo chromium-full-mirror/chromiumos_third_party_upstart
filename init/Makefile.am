@@ -78,6 +78,7 @@ init_LDADD = \
 	$(JSON_LIBS) \
 	$(CGMANAGER_LIBS) \
 	$(SELINUX_LIBS) \
+	$(KEYUTILS_LIBS) \
 	-lrt
 
 if ENABLE_CGROUPS
