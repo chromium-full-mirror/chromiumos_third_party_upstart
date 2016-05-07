@@ -560,8 +560,8 @@ job_add_socket (Job *  job,
 				          val, job->path);
 				goto error;
 			}
-		} else if (! strncmp (*env, "PATH", name_len)
-		           && (sock->sun_addr.sun_family == AF_UNIX)) {
+		} else if (! strncmp (*env, "SOCKET_PATH", name_len)
+			   && (sock->sun_addr.sun_family == AF_UNIX)) {
 			strncpy (sock->sun_addr.sun_path, val,
 			         sizeof sock->sun_addr.sun_path);
 
