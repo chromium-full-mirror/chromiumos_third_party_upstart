@@ -56,7 +56,10 @@ enum {
 	CONTROL_NAME_TAKEN,
 
 	/* Errors while manipulating cgroups */
-	CGROUP_ERROR
+	CGROUP_ERROR,
+
+	/* SELinux handling errors */
+	SELINUX_POLICY_LOAD_FAIL,
 };
 
 /* Error strings for defined messages */
@@ -80,5 +83,6 @@ enum {
 #define PARSE_EXPECTED_VARIABLE_STR	N_("Expected variable name before value")
 #define PARSE_MISMATCHED_PARENS_STR	N_("Mismatched parentheses")
 #define CONTROL_NAME_TAKEN_STR		N_("Name already taken")
+#define SELINUX_POLICY_LOAD_FAIL_STR	N_("Failed to load SELinux policy while in enforcing mode")
 
 #endif /* INIT_ERRORS_H */

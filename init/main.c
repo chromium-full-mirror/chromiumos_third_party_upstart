@@ -73,6 +73,7 @@
 #include <nih/logging.h>
 
 #include "paths.h"
+#include "errors.h"
 #include "events.h"
 #include "system.h"
 #include "job_class.h"
@@ -96,8 +97,6 @@ static void kbd_handler     (void *data, NihSignal *signal);
 static void pwr_handler     (void *data, NihSignal *signal);
 static void hup_handler     (void *data, NihSignal *signal);
 static void usr1_handler    (void *data, NihSignal *signal);
-#else
-static int  logger_kmsg     (NihLogLevel priority, const char *message) {}
 #endif /* DEBUG */
 
 static void handle_confdir          (void);
@@ -107,10 +106,8 @@ static int  conf_dir_setter         (NihOption *option, const char *arg);
 static int  prepend_conf_dir_setter (NihOption *option, const char *arg);
 static int  append_conf_dir_setter  (NihOption *option, const char *arg);
 #ifdef HAVE_SELINUX
-#define CHECKREQPROT_PATH "/sys/fs/selinux/checkreqprot"
-static void initialize_selinux (char **argv);
+static int initialize_selinux (void);
 #endif
-
 
 /**
  * state_fd:
@@ -254,6 +251,7 @@ main (int   argc,
       char *argv[])
 {
 	char **args = NULL;
+	char  *arg_end = NULL;
 	int    ret;
 #ifdef ADD_DIRCRYPTO_RING
 	int    root_fd;
@@ -264,12 +262,6 @@ main (int   argc,
 	conf_dirs = NIH_MUST (nih_str_array_new (NULL));
 	append_conf_dirs = NIH_MUST (nih_str_array_new (NULL));
 	prepend_conf_dirs = NIH_MUST (nih_str_array_new (NULL));
-
-#ifdef HAVE_SELINUX
-	if (getpid () == 1 && getenv ("SELINUX_INIT") == NULL) {
-		initialize_selinux (argv);
-	}
-#endif
 
 	args_copy = NIH_MUST (nih_str_array_copy (NULL, NULL, argv));
 
@@ -336,8 +328,6 @@ main (int   argc,
 		 * will show whitespace in their place.
 		 */
 		if (argc > 1) {
-			char *arg_end;
-
 			arg_end = argv[argc-1] + strlen (argv[argc-1]);
 			*arg_end = ' ';
 		}
@@ -464,6 +454,55 @@ main (int   argc,
 		nih_debug ("Running with UID %d as PID %d (PPID %d)",
 				(int)getuid (), (int)getpid (), (int)getppid ());
 	}
+
+#ifdef HAVE_SELINUX
+	if (getpid () == 1 && !getenv ("SELINUX_INIT")) {
+		/*
+		 * We mount selinuxfs ourselves instead of letting
+		 * libselinux do it so that our standard mount options
+		 * (nosuid and noexec) will be applied. Note that
+		 * we leave devices on since there is null device in
+		 * selinuxfs.
+		 */
+		if (system_mount ("selinuxfs", "/sys/fs/selinux",
+				  MS_NOEXEC | MS_NOSUID, NULL) < 0) {
+			NihError *err;
+
+			err = nih_error_get ();
+			nih_fatal ("%s: %s",
+				   _("Unable to mount /sys/fs/selinux filesystem"),
+				   err->message);
+			nih_free (err);
+
+			exit (1);
+		}
+
+		if (initialize_selinux () < 0) {
+			NihError *err;
+
+			err = nih_error_get ();
+			nih_fatal ("%s: %s",
+				   _("Failed to initialize SELinux"),
+				   err->message);
+			nih_free (err);
+
+			exit (1);
+		}
+
+		putenv ("SELINUX_INIT=YES");
+		nih_info (_("SELinux policy loaded, doing self-exec"));
+
+		/* Unmangle argv and re-execute */
+		if (arg_end)
+			*arg_end = '\0';
+		execv (args_copy[0], argv);
+
+		nih_fatal ("%s: %s",
+			   _("Failed to re-exec init"),
+			   strerror (errno));
+		exit (1);
+	}
+#endif
 
 #else /* DEBUG */
 	nih_log_set_priority (NIH_LOG_DEBUG);
@@ -1259,58 +1298,49 @@ append_conf_dir_setter (NihOption *option, const char *arg)
 }
 #ifdef HAVE_SELINUX
 /**
+ * selinux_set_checkreqprot:
+ *
+ * Forces /sys/fs/selinux/checkreqprot to 0 to ensure that
+ * SELinux will check the protection for mmap and mprotect
+ * calls that will be applied by the kernel and not the
+ * one requested by the application.
+ **/
+static int selinux_set_checkreqprot (void)
+{
+	static const char path[] = "/sys/fs/selinux/checkreqprot";
+	FILE *checkreqprot_file;
+
+	checkreqprot_file = fopen (path, "w");
+	if (!checkreqprot_file)
+		nih_return_system_error (-1);
+
+	if (fputc ('0', checkreqprot_file) == EOF)
+		nih_return_system_error (-1);
+
+	if (fclose (checkreqprot_file) != 0)
+		nih_return_system_error (-1);
+
+	return 0;
+}
+
+/**
  * initialize_selinux:
  *
- * Loads an SELinux policy and reexecs init to enter the the proper SELinux
- * context.
+ * Loads an SELinux policy.
  **/
-void initialize_selinux (char **argv)
+static int initialize_selinux (void)
 {
 	int         enforce = 0;
-	FILE       *checkreqprot_file;
-	const char *errstr;
 
-	program_name = argv[0];  /* for logger_kmsg before NIH init */
-	putenv ("SELINUX_INIT=YES");
 	if (selinux_init_load_policy (&enforce) != 0) {
-		logger_kmsg (NIH_LOG_WARN, "SELinux policy failed to load");
+		nih_warn (_("SELinux policy failed to load"));
 		if (enforce > 0) {
 			/* Enforcing mode, must quit. */
-			logger_kmsg (NIH_LOG_FATAL,
-				     "no SELinux policy in enforcing mode: quit");
-			exit (1);
+			nih_return_error (-1, SELINUX_POLICY_LOAD_FAIL,
+					  _(SELINUX_POLICY_LOAD_FAIL_STR));
 		}
 	}
 
-	checkreqprot_file = fopen (CHECKREQPROT_PATH, "w");
-	if (checkreqprot_file == NULL) {
-		errstr = strerror(errno);
-		logger_kmsg (NIH_LOG_FATAL,
-			     "Failed to open " CHECKREQPROT_PATH);
-		logger_kmsg (NIH_LOG_FATAL, errstr);
-		exit (1);
-	}
-	if (fputc ('0', checkreqprot_file) == EOF) {
-		errstr = strerror(errno);
-		logger_kmsg (NIH_LOG_FATAL,
-			     "Failed to write " CHECKREQPROT_PATH);
-		logger_kmsg (NIH_LOG_FATAL, errstr);
-		exit (1);
-	}
-	if (fclose (checkreqprot_file) != 0) {
-		errstr = strerror(errno);
-		logger_kmsg (NIH_LOG_FATAL,
-			     "Failed to close " CHECKREQPROT_PATH);
-		logger_kmsg (NIH_LOG_FATAL, errstr);
-		exit (1);
-	}
-
-	logger_kmsg (NIH_LOG_MESSAGE, "SELinux policy loaded, doing self-exec");
-	execv (argv[0], argv);
-	errstr = strerror(errno);
-
-	logger_kmsg (NIH_LOG_FATAL, "Failed to re-exec init.");
-	logger_kmsg (NIH_LOG_FATAL, errstr);
-	exit (1);
+	return selinux_set_checkreqprot ();
 }
 #endif /* HAVE_SELINUX */
