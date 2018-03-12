@@ -40,6 +40,7 @@
 #include "event.h"
 #include "blocked.h"
 
+#include "test_util_common.h"
 
 void
 test_new (void)
@@ -530,7 +531,7 @@ test_pending_handle_jobs (void)
 
 
 	/* Check that the environment variables from the event are also copied
-	 * into the job's environment.
+	 * into the job's environment if imported.
 	 */
 	TEST_FEATURE ("with environment in start event");
 	TEST_ALLOC_FAIL {
@@ -559,6 +560,10 @@ test_pending_handle_jobs (void)
 						   NULL, "FOO=BAR"));
 			assert (nih_str_array_add (&(class->env), class,
 						   NULL, "BAR=BAZ"));
+
+			class->import = nih_str_array_new (class);
+			assert (nih_str_array_add (&class->import, class, NULL,
+						   "FRODO"));
 
 			class->start_on = event_operator_new (
 				class, EVENT_AND, NULL, NULL);
@@ -765,7 +770,7 @@ test_pending_handle_jobs (void)
 
 		TEST_NE_P (job->start_env, NULL);
 		TEST_ALLOC_PARENT (job->start_env, job);
-		TEST_ALLOC_SIZE (job->start_env, sizeof (char *) * 9);
+		TEST_ALLOC_SIZE (job->start_env, sizeof (char *) * 8);
 		TEST_ALLOC_PARENT (job->start_env[0], job->start_env);
 		TEST_EQ_STRN (job->start_env[0], "PATH=");
 		TEST_ALLOC_PARENT (job->start_env[1], job->start_env);
@@ -978,6 +983,10 @@ test_pending_handle_jobs (void)
 			class->instance = "$FRODO";
 			class->task = TRUE;
 
+			class->import = nih_str_array_new (class);
+			assert (nih_str_array_add (&class->import, class, NULL,
+						   "FRODO"));
+
 			class->start_on = event_operator_new (
 				class, EVENT_MATCH, "wibble", NULL);
 
@@ -1057,6 +1066,10 @@ test_pending_handle_jobs (void)
 			class->console = CONSOLE_NONE;
 			class->instance = "$FRODO";
 			class->task = TRUE;
+
+			class->import = nih_str_array_new (class);
+			assert (nih_str_array_add (&class->import, class, NULL,
+						   "FRODO"));
 
 			class->start_on = event_operator_new (
 				class, EVENT_MATCH, "wibble", NULL);
@@ -1162,8 +1175,8 @@ test_pending_handle_jobs (void)
 		TEST_EQ (oper->value, FALSE);
 		TEST_EQ_P (oper->event, NULL);
 
-		TEST_FILE_EQ (output, ("test: Failed to obtain test instance: "
-				       "Unknown parameter: TIPPLE\n"));
+		TEST_FILE_CONTAINS (output, ("test: Failed to obtain test instance: "
+					     "Unknown parameter: TIPPLE\n"));
 		TEST_FILE_END (output);
 		TEST_FILE_RESET (output);
 
@@ -1294,7 +1307,7 @@ test_pending_handle_jobs (void)
 
 
 	/* Check that the environment variables from the event are also copied
-	 * into the job's stop_env member.
+	 * into the job's stop_env member if imported.
 	 */
 	TEST_FEATURE ("with environment in stop event");
 	TEST_ALLOC_FAIL {
@@ -1310,6 +1323,10 @@ test_pending_handle_jobs (void)
 			class = job_class_new (NULL, "test", NULL);
 			class->console = CONSOLE_NONE;
 			class->task = TRUE;
+
+			class->import = nih_str_array_new (class);
+			assert (nih_str_array_add (&class->import, class, NULL,
+						   "FOO"));
 
 			class->process[PROCESS_POST_STOP] = process_new (class);
 			class->process[PROCESS_POST_STOP]->command = "echo";

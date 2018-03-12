@@ -25,7 +25,6 @@
 
 #include "event.h"
 
-
 /**
  * EventOperatorType:
  *
