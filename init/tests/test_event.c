@@ -770,7 +770,7 @@ test_pending_handle_jobs (void)
 
 		TEST_NE_P (job->start_env, NULL);
 		TEST_ALLOC_PARENT (job->start_env, job);
-		TEST_ALLOC_SIZE (job->start_env, sizeof (char *) * 8);
+		TEST_ALLOC_SIZE (job->start_env, sizeof (char *) * 6);
 		TEST_ALLOC_PARENT (job->start_env[0], job->start_env);
 		TEST_EQ_STRN (job->start_env[0], "PATH=");
 		TEST_ALLOC_PARENT (job->start_env[1], job->start_env);
@@ -780,14 +780,8 @@ test_pending_handle_jobs (void)
 		TEST_ALLOC_PARENT (job->start_env[3], job->start_env);
 		TEST_EQ_STR (job->start_env[3], "BAR=BAZ");
 		TEST_ALLOC_PARENT (job->start_env[4], job->start_env);
-		TEST_EQ_STR (job->start_env[4], "FRODO=brandybuck");
-		TEST_ALLOC_PARENT (job->start_env[5], job->start_env);
-		TEST_EQ_STR (job->start_env[5], "BILBO=took");
-		TEST_ALLOC_PARENT (job->start_env[6], job->start_env);
-		TEST_EQ_STR (job->start_env[6], "TEA=MILK");
-		TEST_ALLOC_PARENT (job->start_env[7], job->start_env);
-		TEST_EQ_STR (job->start_env[7], "UPSTART_EVENTS=wibble wobble");
-		TEST_EQ_P (job->start_env[8], NULL);
+		TEST_EQ_STR (job->start_env[4], "UPSTART_EVENTS=wibble wobble");
+		TEST_EQ_P (job->start_env[5], NULL);
 
 		oper = class->start_on;
 		TEST_EQ (oper->value, FALSE);
@@ -1465,14 +1459,10 @@ test_pending_handle_jobs (void)
 
 		TEST_NE_P (job->stop_env, NULL);
 		TEST_ALLOC_PARENT (job->stop_env, job);
-		TEST_ALLOC_SIZE (job->stop_env, sizeof (char *) * 4);
+		TEST_ALLOC_SIZE (job->stop_env, sizeof (char *) * 2);
 		TEST_ALLOC_PARENT (job->stop_env[0], job->stop_env);
-		TEST_EQ_STR (job->stop_env[0], "FOO=foo");
-		TEST_ALLOC_PARENT (job->stop_env[1], job->stop_env);
-		TEST_EQ_STR (job->stop_env[1], "BAR=bar");
-		TEST_ALLOC_PARENT (job->stop_env[2], job->stop_env);
-		TEST_EQ_STR (job->stop_env[2], "UPSTART_STOP_EVENTS=wibble");
-		TEST_EQ_P (job->stop_env[3], NULL);
+		TEST_EQ_STR (job->stop_env[0], "UPSTART_STOP_EVENTS=wibble");
+		TEST_EQ_P (job->stop_env[1], NULL);
 
 
 		oper = job->stop_on;
@@ -1645,14 +1635,10 @@ test_pending_handle_jobs (void)
 
 		TEST_NE_P (job->stop_env, NULL);
 		TEST_ALLOC_PARENT (job->stop_env, job);
-		TEST_ALLOC_SIZE (job->stop_env, sizeof (char *) * 4);
+		TEST_ALLOC_SIZE (job->stop_env, sizeof (char *) * 2);
 		TEST_ALLOC_PARENT (job->stop_env[0], job->stop_env);
-		TEST_EQ_STR (job->stop_env[0], "SNITCH=GOLD");
-		TEST_ALLOC_PARENT (job->stop_env[1], job->stop_env);
-		TEST_EQ_STR (job->stop_env[1], "SEAKER=WIZARD");
-		TEST_ALLOC_PARENT (job->stop_env[2], job->stop_env);
-		TEST_EQ_STR (job->stop_env[2], "UPSTART_STOP_EVENTS=wibble");
-		TEST_EQ_P (job->stop_env[3], NULL);
+		TEST_EQ_STR (job->stop_env[0], "UPSTART_STOP_EVENTS=wibble");
+		TEST_EQ_P (job->stop_env[1], NULL);
 
 
 		oper = job->stop_on;
