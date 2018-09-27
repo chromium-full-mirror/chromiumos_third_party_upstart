@@ -1949,8 +1949,7 @@ test_start (void)
 	TEST_EQ_STRN (job->env[0], "PATH=");
 	TEST_EQ_STRN (job->env[1], "TERM=");
 	TEST_EQ_STR (job->env[2], "FOO=wibble");
-        TEST_EQ_STR (job->env[3], "BAR=wobble");
-	TEST_EQ_P (job->env[4], NULL);
+	TEST_EQ_P (job->env[3], NULL);
 
 	TEST_NE_P (job->env, env);
 
@@ -2418,8 +2417,7 @@ test_stop (void)
 	TEST_EQ_STRN (job->stop_env[0], "PATH=");
 	TEST_EQ_STRN (job->stop_env[1], "TERM=");
 	TEST_EQ_STR (job->stop_env[2], "FOO=wibble");
-	TEST_EQ_STR (job->stop_env[3], "BAR=wobble");
-	TEST_EQ_P (job->stop_env[4], NULL);
+	TEST_EQ_P (job->stop_env[3], NULL);
 
 	TEST_NE_P (job->stop_env, env);
 
@@ -2908,8 +2906,7 @@ test_restart (void)
 	TEST_EQ_STRN (job->start_env[0], "PATH=");
 	TEST_EQ_STRN (job->start_env[1], "TERM=");
 	TEST_EQ_STR (job->start_env[2], "FOO=wibble");
-	TEST_EQ_STR (job->start_env[3], "BAR=wobble");
-	TEST_EQ_P (job->start_env[4], NULL);
+	TEST_EQ_P (job->start_env[3], NULL);
 
 	TEST_LIST_NOT_EMPTY (&job->blocking);
 
@@ -2934,8 +2931,7 @@ test_restart (void)
 	TEST_EQ_STRN (job->env[0], "PATH=");
 	TEST_EQ_STRN (job->env[1], "TERM=");
 	TEST_EQ_STR (job->env[2], "FOO=wibble");
-	TEST_EQ_STR (job->env[3], "BAR=wobble");
-	TEST_EQ_P (job->env[4], NULL);
+	TEST_EQ_P (job->env[3], NULL);
 
 	TEST_NOT_FREE (blocked);
 
