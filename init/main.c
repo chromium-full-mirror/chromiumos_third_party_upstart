@@ -445,6 +445,16 @@ main (int   argc,
 			nih_free (err);
 		}
 
+		if (system_mount ("tmpfs", "/tmp", MS_NOSUID | MS_NODEV | MS_NOEXEC,
+					NULL) < 0) {
+			NihError *err;
+
+			err = nih_error_get ();
+			nih_warn ("%s: %s", _("Unable to mount /tmp filesystem"),
+					err->message);
+			nih_free (err);
+		}
+
 	} else {
 		nih_debug ("Running with UID %d as PID %d (PPID %d)",
 				(int)getuid (), (int)getpid (), (int)getppid ());
