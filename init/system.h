@@ -44,6 +44,10 @@ void system_mknod        (const char *path, mode_t mode, dev_t dev);
 int  system_check_file   (const char *path, mode_t type, dev_t dev)
 	__attribute__ ((warn_unused_result));
 
+int system_seccomp       (unsigned int operation, unsigned int flags,
+			  void *args)
+	__attribute__ ((warn_unused_result));
+
 NIH_END_EXTERN
 
 #endif /* INIT_SYSTEM_H */

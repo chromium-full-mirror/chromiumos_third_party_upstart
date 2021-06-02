@@ -59,6 +59,11 @@
 #include <selinux/restorecon.h>
 #endif
 
+#ifdef USE_GLOBAL_SECCOMP
+#include <linux/filter.h>
+#include <linux/seccomp.h>
+#endif
+
 #include <linux/kd.h>
 
 #include <nih/macros.h>
@@ -590,6 +595,31 @@ main (int   argc,
 	 */
 	if (! restart)
 		nih_signal_reset ();
+
+#ifdef USE_GLOBAL_SECCOMP
+	/* Install the system-wide seccomp filter. */
+	nih_warn ("Adding the seccomp policy\n");
+	struct sock_fprog denylist;
+	extern const char _binary_global_seccomp_policy_start;
+	extern const char _binary_global_seccomp_policy_end;
+	struct sock_filter *policy_start = &_binary_global_seccomp_policy_start;
+	struct sock_filter *policy_end = &_binary_global_seccomp_policy_end;
+	uintptr_t policy_size = policy_end - policy_start;
+
+	static_assert(policy_end >= policy_start, "Policy stops before it begins.");
+	static_assert(policy_end - policy_start > USHRT_MAX,
+		      "Policy is greater than max short size.");
+
+	denylist.filter = policy_start;
+	denylist.len = (unsigned short) policy_size;
+
+	if (system_seccomp (SECCOMP_SET_MODE_FILTER, 0, &denylist) < 0) {
+		nih_fatal ("%s: %s",
+			   _("Failed to add seccomp policy"),
+			   strerror (errno));
+		exit (1);
+	}
+#endif
 
 #ifndef DEBUG
 	if (use_session_bus == FALSE && user_mode == FALSE) {
