@@ -23,10 +23,14 @@
 # include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#include <linux/filter.h>
+#include <linux/seccomp.h>
+
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/mount.h>
+#include <sys/syscall.h>
 
 #include <fcntl.h>
 #include <signal.h>
@@ -210,4 +214,28 @@ system_mount (const char *type,
 		nih_return_system_error (-1);
 
 	return 0;
+}
+/**
+ * system_seccomp:
+ * @operation: SECCOMP_SET_MODE_FILTER (we do not allow SECCOMP_SET_MODE_STRICT
+ *             here)
+ * @flags: MODE_FILTER flags,
+ * @args: pointer to a filter program (struct sock_fprog).
+ *
+ * Configure the Secure Computing (seccomp) state of the calling process.
+ *
+ * Returns: zero on success, negative value on raised error.
+ **/
+int
+system_seccomp (unsigned int operation,
+		unsigned int flags,
+		void *args)
+{
+	nih_assert (operation == SECCOMP_SET_MODE_FILTER);
+
+	int ret = syscall (SYS_seccomp, operation, flags, args);
+	if (ret < 0) {
+		nih_return_system_error (-1);
+	}
+	return ret;
 }

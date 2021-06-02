@@ -39,6 +39,10 @@ int system_mount         (const char *type, const char *dir, unsigned int opts,
 			  const char *options)
 	__attribute__ ((warn_unused_result));
 
+int system_seccomp       (unsigned int operation, unsigned int flags,
+			  void *args)
+	__attribute__ ((warn_unused_result));
+
 NIH_END_EXTERN
 
 #endif /* INIT_SYSTEM_H */

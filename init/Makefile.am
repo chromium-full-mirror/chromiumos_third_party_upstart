@@ -31,6 +31,8 @@ dist_man_MANS = \
 	man/upstart.7 \
 	man/inittab.5
 
+global_seccomp_policy.o: global_seccomp.policy compile_global_seccomp_policy.sh
+	./compile_global_seccomp_policy.sh $(SECCOMP_CONSTANTS)
 
 sbin_PROGRAMS = init
 
@@ -56,7 +58,8 @@ nodist_init_SOURCES = \
 	$(com_ubuntu_Upstart_OUTPUTS) \
 	$(com_ubuntu_Upstart_Job_OUTPUTS) \
 	$(com_ubuntu_Upstart_Instance_OUTPUTS)
-init_LDADD = \
+
+base_init_LDADD = \
 	$(LTLIBINTL) \
 	$(NIH_LIBS) \
 	$(NIH_DBUS_LIBS) \
@@ -65,6 +68,12 @@ init_LDADD = \
 	$(KEYUTILS_LIBS) \
 	-lrt
 
+if USE_GLOBAL_SECCOMP
+init_LDADD = global_seccomp_policy.o \
+	$(base_init_LDADD)
+else
+init_LDADD = $(base_init_LDADD)
+endif
 
 com_ubuntu_Upstart_OUTPUTS = \
 	com.ubuntu.Upstart.c \

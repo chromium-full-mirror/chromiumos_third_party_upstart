@@ -78,6 +78,21 @@ if test "x$enable_selinux" = "xyes" ; then
 	AC_DEFINE(RESTORE_PATHS, [{"/dev", "/run"}], [Define restorecon paths])
 fi
 
+# If this argument is set, it means that we want to generate and include the
+# global seccomp policy in Upstart.
+AC_ARG_WITH([seccomp-constants],
+	[AS_HELP_STRING([--with-seccomp-constants],
+	[provide the path to minijail seccomp constants file])],
+	[], [])
+
+if test "x$with_seccomp_constants" != "x" ; then
+	AM_CONDITIONAL([USE_GLOBAL_SECCOMP], [true])
+	AC_DEFINE(USE_GLOBAL_SECCOMP, 1, [Define if we want to include the global seccomp policy])
+	AC_SUBST(SECCOMP_CONSTANTS, "$with_seccomp_constants")
+else
+	AM_CONDITIONAL([USE_GLOBAL_SECCOMP], [false])
+fi
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_PROG_CC_C99
 AM_PROG_CC_C_O
