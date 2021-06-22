@@ -370,7 +370,7 @@ main (int   argc,
 		}
 
 		if (system_mount ("devpts", "/dev/pts", MS_NOEXEC | MS_NOSUID,
-				  "gid=5,mode=0620") < 0) {
+				  "gid=5,mode=0666") < 0) {
 			NihError *err;
 
 			err = nih_error_get ();
@@ -424,6 +424,19 @@ main (int   argc,
 		if (chdir ("/"))
 			nih_warn ("%s: %s", _("Unable to set root directory"),
 				strerror (errno));
+
+		/* The kernel has mounted /dev, so mount some subpaths. */
+		if ((mkdir ("/dev/shm", 01777) < 0 && errno != EEXIST) ||
+		    system_mount ("tmpfs", "/dev/shm",
+				  MS_NODEV | MS_NOEXEC | MS_NOSUID,
+				  "mode=1777,size=50%") < 0) {
+			NihError *err;
+
+			err = nih_error_get ();
+			nih_warn ("%s: %s", _("Unable to setup /dev/shm"),
+				  err->message);
+			nih_free (err);
+		}
 
 		/* Mount the /proc and /sys filesystems, which are pretty much
 		 * essential for any Linux system; not to mention used by
