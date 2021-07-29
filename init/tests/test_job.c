@@ -665,7 +665,7 @@ test_change_goal (void)
 void
 test_change_state (void)
 {
-	FILE            *output;
+	FILE            *output, *f;
 	ConfSource      *source = NULL;
 	ConfFile        *file = NULL;
 	JobClass        *class, *replacement = NULL, *ptr;
@@ -1015,10 +1015,25 @@ test_change_state (void)
 	class->export = NULL;
 
 
-	/* Check that a job with a start process can move from starting
-	 * to pre-start, and have the process run.
+	/* Check that a job with a tmpfiles process can move from starting
+	 * to pre-start, and go all the way through to the running state.
+	 * Because we get there, we should get a started event emitted.
 	 */
-	TEST_FEATURE ("starting to pre-start");
+	TEST_FEATURE ("starting to tmpfiles");
+	tmp = class->process[PROCESS_TMPFILES];
+	class->process[PROCESS_TMPFILES] = process_new (class);
+	class->process[PROCESS_TMPFILES]->script = FALSE;
+	class->process[PROCESS_TMPFILES]->command =
+	    "/bin/systemd-tmpfiles --create --clean --remove "
+	    "/tmp/upstart-tmpfiles-test.conf";
+
+	/* Write a test configuration. */
+	f = fopen ("/tmp/upstart-tmpfiles-test.conf", "w");
+	TEST_NE_P (f, NULL);
+	TEST_GT (fprintf (f, "d= /tmp/upstart-tmpfiles-test.conf.d - - -\n"),
+		 0);
+	close(f);
+
 	TEST_ALLOC_FAIL {
 		TEST_ALLOC_SAFE {
 			job = job_new (class, "");
@@ -1030,6 +1045,65 @@ test_change_state (void)
 
 		job->goal = JOB_START;
 		job->state = JOB_STARTING;
+		job->pid[PROCESS_MAIN] = 0;
+
+		job->blocker = NULL;
+		cause->failed = FALSE;
+
+		TEST_FREE_TAG (blocked);
+
+		job->failed = FALSE;
+		job->failed_process = -1;
+		job->exit_status = 0;
+
+		job_change_state (job, JOB_TMPFILES);
+
+		TEST_EQ (job->goal, JOB_START);
+		TEST_EQ (job->state, JOB_TMPFILES);
+		TEST_NE (job->pid[PROCESS_TMPFILES], 0);
+
+		waitpid (job->pid[PROCESS_TMPFILES], &status, 0);
+		TEST_TRUE (WIFEXITED (status));
+		TEST_EQ (WEXITSTATUS (status), 0);
+
+		TEST_EQ (cause->blockers, 1);
+		TEST_EQ (cause->failed, FALSE);
+
+		TEST_EQ_P (job->blocker, NULL);
+
+		TEST_NOT_FREE (blocked);
+		TEST_LIST_NOT_EMPTY (&job->blocking);
+		TEST_EQ_P (blocked->event, cause);
+		event_unblock (cause);
+
+		TEST_LIST_EMPTY (events);
+
+		TEST_EQ (job->failed, FALSE);
+		TEST_EQ (job->failed_process, (ProcessType)-1);
+		TEST_EQ (job->exit_status, 0);
+
+		nih_free (job);
+	}
+
+	nih_unref (class->process[PROCESS_TMPFILES], class);
+	class->process[PROCESS_TMPFILES] = NULL;
+
+
+	/* Check that a job with a start process can move from starting
+	 * to pre-start, and have the process run.
+	 */
+	TEST_FEATURE ("tmpfiles to pre-start");
+	TEST_ALLOC_FAIL {
+		TEST_ALLOC_SAFE {
+			job = job_new (class, "");
+
+			blocked = blocked_new (job, BLOCKED_EVENT, cause);
+			event_block (cause);
+			nih_list_add (&job->blocking, &blocked->entry);
+		}
+
+		job->goal = JOB_START;
+		job->state = JOB_TMPFILES;
 		job->pid[PROCESS_PRE_START] = 0;
 
 		job->blocker = NULL;
@@ -1077,9 +1151,9 @@ test_change_state (void)
 
 
 	/* Check that a job without a start process can move from starting
-	 * to pre-start, skipping over that state, and instead going all
-	 * the way through to the running state.  Because we get there,
-	 * we should get a started event emitted.
+	 * to tmpfiles and pre-start, skipping over those states, and instead
+	 * going all the way through to the running state.  Because we get
+	 * there, we should get a started event emitted.
 	 */
 	TEST_FEATURE ("starting to pre-start without process");
 	tmp = class->process[PROCESS_PRE_START];
@@ -1107,7 +1181,7 @@ test_change_state (void)
 		job->failed_process = -1;
 		job->exit_status = 0;
 
-		job_change_state (job, JOB_PRE_START);
+		job_change_state (job, JOB_TMPFILES);
 
 		TEST_EQ (job->goal, JOB_START);
 		TEST_EQ (job->state, JOB_RUNNING);
@@ -1155,7 +1229,7 @@ test_change_state (void)
 	 * from starting to pre-start, the goal gets changed to stop, the
 	 * status to stopping and the failed information set correctly.
 	 */
-	TEST_FEATURE ("starting to pre-start for failed process");
+	TEST_FEATURE ("tmpfiles to pre-start for failed process");
 	tmp = class->process[PROCESS_PRE_START];
 	class->process[PROCESS_PRE_START] = fail;
 
@@ -1169,7 +1243,7 @@ test_change_state (void)
 		}
 
 		job->goal = JOB_START;
-		job->state = JOB_STARTING;
+		job->state = JOB_TMPFILES;
 		job->pid[PROCESS_PRE_START] = 0;
 
 		job->blocker = NULL;
@@ -3982,11 +4056,31 @@ test_next_state (void)
 
 
 	/* Check that the next state if we're starting a starting job is
-	 * pre-start.
+	 * tmpfiles.
 	 */
 	TEST_FEATURE ("with starting job and a goal of start");
 	job->goal = JOB_START;
 	job->state = JOB_STARTING;
+
+	TEST_EQ (job_next_state (job), JOB_TMPFILES);
+
+
+	/* Check that the next state if we're stopping a tmpfiles job is
+	 * stopping.
+	 */
+	TEST_FEATURE ("with tmpfiles job and a goal of stop");
+	job->goal = JOB_STOP;
+	job->state = JOB_TMPFILES;
+
+	TEST_EQ (job_next_state (job), JOB_STOPPING);
+
+
+	/* Check that the next state if we're starting a tmpfiles job is
+	 * pre-start.
+	 */
+	TEST_FEATURE ("with tmpfiles job and a goal of start");
+	job->goal = JOB_START;
+	job->state = JOB_TMPFILES;
 
 	TEST_EQ (job_next_state (job), JOB_PRE_START);
 

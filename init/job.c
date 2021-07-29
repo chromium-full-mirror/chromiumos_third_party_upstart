@@ -344,9 +344,24 @@ job_change_state (Job      *job,
 			job->blocker = job_emit_event (job);
 
 			break;
-		case JOB_PRE_START:
+		case JOB_TMPFILES:
 			nih_assert (job->goal == JOB_START);
 			nih_assert (old_state == JOB_STARTING);
+
+			/* Apply any registered tmpfiles.d configurations. */
+			if (job->class->process[PROCESS_TMPFILES]) {
+				if (job_process_run (job, PROCESS_TMPFILES) < 0) {
+					job_failed (job, PROCESS_TMPFILES, -1);
+					job_change_goal (job, JOB_STOP);
+					state = job_next_state (job);
+				}
+			} else {
+				state = job_next_state (job);
+			}
+			break;
+		case JOB_PRE_START:
+			nih_assert (job->goal == JOB_START);
+			nih_assert (old_state == JOB_TMPFILES);
 
 			if (job->class->process[PROCESS_PRE_START]) {
 				if (job_process_run (job, PROCESS_PRE_START) < 0) {
@@ -541,6 +556,15 @@ job_next_state (Job *job)
 			nih_assert_not_reached ();
 		}
 	case JOB_STARTING:
+		switch (job->goal) {
+		case JOB_STOP:
+			return JOB_STOPPING;
+		case JOB_START:
+			return JOB_TMPFILES;
+		default:
+			nih_assert_not_reached ();
+		}
+	case JOB_TMPFILES:
 		switch (job->goal) {
 		case JOB_STOP:
 			return JOB_STOPPING;
@@ -1018,6 +1042,8 @@ job_state_name (JobState state)
 		return N_("waiting");
 	case JOB_STARTING:
 		return N_("starting");
+	case JOB_TMPFILES:
+		return N_("tmpfiles");
 	case JOB_PRE_START:
 		return N_("pre-start");
 	case JOB_SPAWNED:
@@ -1056,6 +1082,8 @@ job_state_from_name (const char *state)
 		return JOB_WAITING;
 	} else if (! strcmp (state, "starting")) {
 		return JOB_STARTING;
+	} else if (! strcmp (state, "tmpfiles")) {
+		return JOB_TMPFILES;
 	} else if (! strcmp (state, "pre-start")) {
 		return JOB_PRE_START;
 	} else if (! strcmp (state, "spawned")) {

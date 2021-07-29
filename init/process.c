@@ -84,6 +84,8 @@ process_name (ProcessType process)
 		return N_("pre-stop");
 	case PROCESS_POST_STOP:
 		return N_("post-stop");
+	case PROCESS_TMPFILES:
+		return N_("tmpfiles");
 	default:
 		return NULL;
 	}
@@ -112,6 +114,8 @@ process_from_name (const char *process)
 		return PROCESS_PRE_STOP;
 	} else if (! strcmp (process, "post-stop")) {
 		return PROCESS_POST_STOP;
+	} else if (! strcmp (process, "tmpfiles")) {
+		return PROCESS_TMPFILES;
 	} else {
 		return -1;
 	}

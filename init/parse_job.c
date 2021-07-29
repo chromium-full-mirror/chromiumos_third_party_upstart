@@ -222,6 +222,11 @@ static int stanza_manual      (JobClass *class, NihConfigStanza *stanza,
 			       size_t *pos, size_t *lineno)
 	__attribute__ ((warn_unused_result));
 
+static int stanza_tmpfiles    (JobClass *class, NihConfigStanza *stanza,
+			       const char *file, size_t len,
+			       size_t *pos, size_t *lineno)
+	__attribute__ ((warn_unused_result));
+
 
 /**
  * stanzas:
@@ -260,6 +265,7 @@ static NihConfigStanza stanzas[] = {
 	{ "chdir",       (NihConfigHandler)stanza_chdir       },
 	{ "debug",       (NihConfigHandler)stanza_debug       },
 	{ "manual",      (NihConfigHandler)stanza_manual      },
+	{ "tmpfiles",    (NihConfigHandler)stanza_tmpfiles    },
 
 	NIH_CONFIG_LAST
 };
@@ -2586,4 +2592,90 @@ stanza_chdir (JobClass        *class,
 		return -1;
 
 	return nih_config_skip_comment (file, len, pos, lineno);
+}
+
+
+/**
+ * stanza_tmpfiles:
+ * @class: job class being parsed,
+ * @stanza: stanza found,
+ * @file: file or string to parse,
+ * @len: length of @file,
+ * @pos: offset within @file,
+ * @lineno: line number.
+ *
+ * Parse an tmpfiles stanza from @file, extracting one or more arguments
+ * containing paths to tmpfiles.d configuration files to execute as part of
+ * pre-startup. These are appended to a systemd-tmpfiles call which is set
+ * in process[PROCESS_TMPFILES] and called at the begining of pre-startup.
+ *
+ * Returns: zero on success, negative value on error.
+ **/
+static int
+stanza_tmpfiles (JobClass        *class,
+	       NihConfigStanza *stanza,
+	       const char      *file,
+	       size_t           len,
+	       size_t          *pos,
+	       size_t          *lineno)
+{
+	static const char prefix[] =
+	    "/bin/systemd-tmpfiles --create --clean --remove ";
+	static const size_t prefix_strlen =
+	    sizeof(prefix) / sizeof(prefix[0]) - sizeof(prefix[0]);
+	char   *cmd = NULL;
+	size_t  cmd_start, cmd_len, cmd_end;
+
+	nih_assert (class != NULL);
+	nih_assert (stanza != NULL);
+	nih_assert (file != NULL);
+	nih_assert (pos != NULL);
+
+	if (! nih_config_has_token (file, len, pos, lineno))
+		nih_return_error (-1, NIH_CONFIG_EXPECTED_TOKEN,
+				  _(NIH_CONFIG_EXPECTED_TOKEN_STR));
+
+	/* Allocate a new Process structure if we need to */
+	if (! class->process[PROCESS_TMPFILES]) {
+		class->process[PROCESS_TMPFILES] = process_new (class->process);
+		if (! class->process[PROCESS_TMPFILES])
+			nih_return_system_error (-1);
+	}
+
+	/* The following is a modified version of nih_config_parse_command that
+	 * injects prefix before the parsed command
+	 */
+
+	/* Find the length of string up to the first unescaped comment
+	 * or newline.
+	 */
+	cmd_start = *pos;
+	if (nih_config_token (file, len, pos, lineno, NULL,
+			      NIH_CONFIG_CNL, FALSE, &cmd_len) < 0)
+		nih_return_system_error (-1);
+	cmd_end = *pos;
+
+	/* nih_config_token will eat up to the end of the file, a comment
+	 * or a newline; so this must always succeed.
+	 */
+	if (nih_config_skip_comment (file, len, pos, lineno) < 0)
+		nih_assert_not_reached ();
+
+	cmd = nih_alloc (class->process[PROCESS_TMPFILES],
+			 prefix_strlen + cmd_len + 1);
+	if (! cmd)
+		nih_return_system_error (-1);
+
+	memcpy (cmd, prefix, prefix_strlen);
+	if (nih_config_token (file + cmd_start, cmd_end - cmd_start, NULL,
+			      NULL, cmd + prefix_strlen, NIH_CONFIG_CNL, FALSE,
+			      NULL) < 0)
+		nih_return_system_error (-1);
+
+	class->process[PROCESS_TMPFILES]->script = FALSE;
+	if (class->process[PROCESS_TMPFILES]->command)
+		nih_unref (class->process[PROCESS_TMPFILES]->command,
+			   class->process[PROCESS_TMPFILES]);
+	class->process[PROCESS_TMPFILES]->command = cmd;
+	return 0;
 }

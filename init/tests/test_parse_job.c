@@ -467,6 +467,159 @@ test_stanza_script (void)
 }
 
 void
+test_stanza_tmpfiles (void)
+{
+	JobClass *job;
+	Process  *process;
+	NihError *err;
+	size_t    pos, lineno;
+	char      buf[1024];
+
+	TEST_FUNCTION ("stanza_tmpfiles");
+
+	/* Check that a tmpfiles stanza sets the process of the job as a single
+	 * string with the expected content for a single configuration file.
+	 */
+	TEST_FEATURE ("with single configuration");
+	strcpy (buf, "tmpfiles /usr/lib/tmpfiles.d/chromeos.conf\n");
+
+	TEST_ALLOC_FAIL {
+		pos = 0;
+		lineno = 1;
+		job = parse_job (NULL, NULL, "test", buf, strlen (buf),
+				 &pos, &lineno);
+
+		if (test_alloc_failed) {
+			TEST_EQ_P (job, NULL);
+
+			err = nih_error_get ();
+			TEST_EQ (err->number, ENOMEM);
+			nih_free (err);
+
+			continue;
+		}
+
+		TEST_EQ (pos, strlen (buf));
+		TEST_EQ (lineno, 2);
+
+		TEST_ALLOC_SIZE (job, sizeof (JobClass));
+
+		process = job->process[PROCESS_TMPFILES];
+		TEST_ALLOC_PARENT (process, job->process);
+		TEST_ALLOC_SIZE (process, sizeof (Process));
+		TEST_EQ (process->script, FALSE);
+		TEST_ALLOC_PARENT (process->command, process);
+		TEST_EQ_STR (process->command,
+			     "/bin/systemd-tmpfiles --create --clean --remove "
+			     "/usr/lib/tmpfiles.d/chromeos.conf");
+
+		nih_free (job);
+	}
+
+
+	/* Check that a tmpfiles stanza sets the process of the job as a single
+	 * string with the expected content for more than one configuration file.
+	 */
+	TEST_FEATURE ("with more than one configuration");
+	strcpy (buf, "tmpfiles /usr/lib/tmpfiles.d/chromeos.conf "
+		     "/usr/lib/tmpfiles.d/dbus.conf\n");
+
+	TEST_ALLOC_FAIL {
+		pos = 0;
+		lineno = 1;
+		job = parse_job (NULL, NULL, "test", buf, strlen (buf),
+				 &pos, &lineno);
+
+		if (test_alloc_failed) {
+			TEST_EQ_P (job, NULL);
+
+			err = nih_error_get ();
+			TEST_EQ (err->number, ENOMEM);
+			nih_free (err);
+
+			continue;
+		}
+
+		TEST_EQ (pos, strlen (buf));
+		TEST_EQ (lineno, 2);
+
+		TEST_ALLOC_SIZE (job, sizeof (JobClass));
+
+		process = job->process[PROCESS_TMPFILES];
+		TEST_ALLOC_PARENT (process, job->process);
+		TEST_ALLOC_SIZE (process, sizeof (Process));
+		TEST_EQ (process->script, FALSE);
+		TEST_ALLOC_PARENT (process->command, process);
+		TEST_EQ_STR (process->command,
+			     "/bin/systemd-tmpfiles --create --clean --remove "
+			     "/usr/lib/tmpfiles.d/chromeos.conf "
+			     "/usr/lib/tmpfiles.d/dbus.conf");
+
+		nih_free (job);
+	}
+
+
+	/* Check that if multiple tmpfiles stanzas are set, the last one is
+	 * used.
+	 */
+	TEST_FEATURE ("with multiple tmpfiles stanzas");
+	strcpy (buf, "tmpfiles /usr/lib/tmpfiles.d/chromeos.conf\n"
+		     "tmpfiles /usr/lib/tmpfiles.d/dbus.conf\n");
+
+	TEST_ALLOC_FAIL {
+		pos = 0;
+		lineno = 1;
+		job = parse_job (NULL, NULL, "test", buf, strlen (buf),
+				 &pos, &lineno);
+
+		if (test_alloc_failed) {
+			TEST_EQ_P (job, NULL);
+
+			err = nih_error_get ();
+			TEST_EQ (err->number, ENOMEM);
+			nih_free (err);
+
+			continue;
+		}
+
+		TEST_EQ (pos, strlen (buf));
+		TEST_EQ (lineno, 3);
+
+		TEST_ALLOC_SIZE (job, sizeof (JobClass));
+
+		process = job->process[PROCESS_TMPFILES];
+		TEST_ALLOC_PARENT (process, job->process);
+		TEST_ALLOC_SIZE (process, sizeof (Process));
+		TEST_EQ (process->script, FALSE);
+		TEST_ALLOC_PARENT (process->command, process);
+		TEST_EQ_STR (process->command,
+			     "/bin/systemd-tmpfiles --create --clean --remove "
+			     "/usr/lib/tmpfiles.d/dbus.conf");
+
+		nih_free (job);
+	}
+
+
+	/* Check that a tmpfiles stanza without any arguments results in a
+	 * syntax error.
+	 */
+	TEST_FEATURE ("with no command");
+	strcpy (buf, "tmpfiles\n");
+
+	pos = 0;
+	lineno = 1;
+	job = parse_job (NULL, NULL, "test", buf, strlen (buf), &pos, &lineno);
+
+	TEST_EQ_P (job, NULL);
+
+	err = nih_error_get ();
+	TEST_EQ (err->number, NIH_CONFIG_EXPECTED_TOKEN);
+	TEST_EQ (pos, 8);
+	TEST_EQ (lineno, 1);
+	nih_free (err);
+}
+
+void
 test_stanza_pre_start (void)
 {
 	JobClass *job;
@@ -7955,6 +8108,7 @@ main (int   argc,
 
 	test_stanza_exec ();
 	test_stanza_script ();
+	test_stanza_tmpfiles ();
 	test_stanza_pre_start ();
 	test_stanza_post_start ();
 	test_stanza_pre_stop ();
