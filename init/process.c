@@ -88,6 +88,8 @@ process_name (ProcessType process)
 		return N_("post-stop");
 	case PROCESS_SECURITY:
 		return N_("security");
+	case PROCESS_TMPFILES:
+		return N_("tmpfiles");
 	default:
 		return NULL;
 	}
@@ -118,6 +120,8 @@ process_from_name (const char *process)
 		return PROCESS_POST_STOP;
 	} else if (! strcmp (process, "security")) {
 		return PROCESS_SECURITY;
+	} else if (! strcmp (process, "tmpfiles")) {
+		return PROCESS_TMPFILES;
 	} else {
 		return -1;
 	}
@@ -314,6 +318,7 @@ process_type_enum_to_str (ProcessType type)
 	state_enum_to_str (PROCESS_PRE_STOP, type);
 	state_enum_to_str (PROCESS_POST_STOP, type);
 	state_enum_to_str (PROCESS_SECURITY, type);
+	state_enum_to_str (PROCESS_TMPFILES, type);
 
 	return NULL;
 }
@@ -339,6 +344,7 @@ process_type_str_to_enum (const char *type)
 	state_str_to_enum (PROCESS_PRE_STOP, type);
 	state_str_to_enum (PROCESS_POST_STOP, type);
 	state_str_to_enum (PROCESS_SECURITY, type);
+	state_str_to_enum (PROCESS_TMPFILES, type);
 
 	return -1;
 }

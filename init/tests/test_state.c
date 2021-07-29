@@ -4024,15 +4024,7 @@ test_upstart_with_apparmor_upgrade (const char *path)
 	json_object      *json_job_logs = NULL;
 	size_t            count;
 
-	/*
-	PROCESS_MAIN,
-	PROCESS_PRE_START,
-	PROCESS_POST_START,
-	PROCESS_PRE_STOP,
-	PROCESS_POST_STOP,
-	PROCESS_SECURITY
-	*/
-	size_t            expected_count = 6;
+	size_t            expected_count = PROCESS_LAST;
 
 	nih_assert (path);
 
@@ -4154,14 +4146,7 @@ test_upstart_full_serialise_without_apparmor_upgrade (const char *path)
 	json_object      *json_job_logs = NULL;
 	size_t            count;
 
-	/*
-	PROCESS_MAIN,
-	PROCESS_PRE_START,
-	PROCESS_POST_START,
-	PROCESS_PRE_STOP,
-	PROCESS_POST_STOP,
-	*/
-	size_t            expected_count = 5;
+	size_t            expected_count = PROCESS_LAST - 1;
 
 	nih_assert (path);
 
@@ -4302,15 +4287,7 @@ test_upstart_full_serialise_with_apparmor_upgrade (const char *path)
 	json_object      *json_job_logs = NULL;
 	size_t            count;
 
-	/*
-	PROCESS_MAIN,
-	PROCESS_PRE_START,
-	PROCESS_POST_START,
-	PROCESS_PRE_STOP,
-	PROCESS_POST_STOP,
-	PROCESS_SECURITY
-	*/
-	size_t            expected_count = 6;
+	size_t            expected_count = PROCESS_LAST;
 
 	nih_assert (path);
 

@@ -962,6 +962,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -1070,12 +1074,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 2,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -1149,6 +1157,10 @@
             {
                "script" : 1,
                "command" : "/lib/init/apparmor-profile-load usr.sbin.avahi-daemon\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -1300,6 +1312,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -1405,12 +1421,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -1455,6 +1475,10 @@
          "description" : null,
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -1585,6 +1609,10 @@
             {
                "script" : 0,
                "command" : "rm -f /etc/gshadow.lock /etc/shadow.lock /etc/passwd.lock /etc/group.lock"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -1744,6 +1772,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -1854,12 +1886,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 1,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -1931,6 +1967,10 @@
             {
                "script" : 1,
                "command" : "/lib/init/apparmor-profile-load usr.sbin.rsyslogd\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -2070,6 +2110,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -2190,12 +2234,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -2265,6 +2313,10 @@
             {
                "script" : 0,
                "command" : "/sbin/getty -8 38400 tty4"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -2422,12 +2474,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 1,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -2495,6 +2551,10 @@
             {
                "script" : 0,
                "command" : "/lib/systemd/systemd-udevd --daemon"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -2616,12 +2676,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 2,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -2697,6 +2761,10 @@
             {
                "script" : 0,
                "command" : "upstart-udev-bridge --daemon"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -2843,6 +2911,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -2955,12 +3027,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 1,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -3034,7 +3110,11 @@
             },
             {
                "script" : 1,
-               "command" : "    [ -x /usr/bin/ubiquity-dm ] && { stop; exit 0; }\n\n    if ! grep report_crashes=true /etc/default/whoopsie -sqi; then\n        stop; exit 0\n    fi\n"
+               "command" : "      [ -x /usr/bin/ubiquity-dm ] && { stop; exit 0; }\n\n      if ! grep report_crashes=true /etc/default/whoopsie -sqi; then\n            stop; exit 0\n      fi\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -3157,12 +3237,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -3236,7 +3320,7 @@
             },
             {
                "script" : 1,
-               "command" : "    . /etc/default/apport\n    [ \"$enabled\" = \"1\" ] || [ \"$force_start\" = \"1\" ] || exit 0\n\n    mkdir -p -m 1777 /var/crash\n\n    # check for kernel crash dump, convert it to apport report\n    if [ -e /var/crash/vmcore ] || [ -n \"`ls /var/crash | egrep ^[0-9]{12}$`\" ]\n    then\n\t/usr/share/apport/kernel_crashdump || true\n    fi\n\n    # check for incomplete suspend/resume or hibernate\n    if [ -e /var/lib/pm-utils/status ]\n    then\n        /usr/share/apport/apportcheckresume || true\n        rm -f /var/lib/pm-utils/status\n        rm -f /var/lib/pm-utils/resume-hang.log\n    fi\n\n    echo \"|/usr/share/apport/apport %p %s %c\" > /proc/sys/kernel/core_pattern\n"
+               "command" : "      . /etc/default/apport\n      [ \"$enabled\" = \"1\" ] || [ \"$force_start\" = \"1\" ] || exit 0\n\n      mkdir -p -m 1777 /var/crash\n\n      # check for kernel crash dump, convert it to apport report\n      if [ -e /var/crash/vmcore ] || [ -n \"`ls /var/crash | egrep ^[0-9]{12}$`\" ]\n      then\n\t/usr/share/apport/kernel_crashdump || true\n      fi\n\n      # check for incomplete suspend/resume or hibernate\n      if [ -e /var/lib/pm-utils/status ]\n      then\n            /usr/share/apport/apportcheckresume || true\n            rm -f /var/lib/pm-utils/status\n            rm -f /var/lib/pm-utils/resume-hang.log\n      fi\n\n      echo \"|/usr/share/apport/apport %p %s %c\" > /proc/sys/kernel/core_pattern\n"
             },
             {
                "script" : 0,
@@ -3244,7 +3328,11 @@
             },
             {
                "script" : 1,
-               "command" : "    # Check for a hung resume.  If we find one try and grab everything\n    # we can to aid in its discovery\n    if [ -e /var/lib/pm-utils/status ]\n    then\n\tps -wwef > /var/lib/pm-utils/resume-hang.log\n    fi\n\n    if [ \"`dd if=/proc/sys/kernel/core_pattern count=1 bs=1 2>/dev/null`\" != \"|\" ]\n    then\n\texit 1\n    else\n\techo \"core\" > /proc/sys/kernel/core_pattern\n    fi\n"
+               "command" : "      # Check for a hung resume.   If we find one try and grab everything\n      # we can to aid in its discovery\n      if [ -e /var/lib/pm-utils/status ]\n      then\n\tps -wwef > /var/lib/pm-utils/resume-hang.log\n      fi\n\n      if [ \"`dd if=/proc/sys/kernel/core_pattern count=1 bs=1 2>/dev/null`\" != \"|\" ]\n      then\n\texit 1\n      else\n\techo \"core\" > /proc/sys/kernel/core_pattern\n      fi\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -3365,6 +3453,10 @@
             {
                "script" : 0,
                "command" : "loadkeys /etc/console-setup/cached.kmap.gz"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -3532,6 +3624,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -3655,7 +3751,11 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "\ttest -f /etc/default/irqbalance && . /etc/default/irqbalance\n\n\ttest \"$ENABLED\" != \"0\" || exit 0\n\n\tif test \"$ONESHOT\" != \"0\"; then\n\t\tDOPTIONS=\"--oneshot\"\n\tfi\n\n\texec /usr/sbin/irqbalance  $DOPTIONS\n\n"
+               "command" : "\ttest -f /etc/default/irqbalance && . /etc/default/irqbalance\n\n\ttest \"$ENABLED\" != \"0\" || exit 0\n\n\tif test \"$ONESHOT\" != \"0\"; then\n\t\tDOPTIONS=\"--oneshot\"\n\tfi\n\n\texec /usr/sbin/irqbalance   $DOPTIONS\n\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -3802,6 +3902,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -3907,6 +4011,7 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
@@ -3921,6 +4026,9 @@
                      "path" : "/var/log/upstart/systemd-logind.log",
                      "io_watch_fd" : 16,
                      "fd" : 15
+                  },
+                  {
+                     "path" : null
                   },
                   {
                      "path" : null
@@ -3992,7 +4100,11 @@
             },
             {
                "script" : 1,
-               "command" : "    # only start if PAM module is actually available, not if libpam-systemd is\n    # removed but not purged\n    [ -e /lib/*/security/pam_systemd.so ] || { stop; exit 0; }\n\n    # this is being done by systemd or mountall usually, but not during\n    # upgrades from earlier distro releases\n    if ! mountpoint -q /sys/fs/cgroup; then\n        mount -t tmpfs -o uid=0,gid=0,mode=0755,size=1024 none /sys/fs/cgroup\n    fi\n    mkdir -p /run/systemd\n    if ! mountpoint -q /sys/fs/cgroup/systemd; then\n        mkdir -p /sys/fs/cgroup/systemd\n        mount -t cgroup -o nosuid,noexec,nodev,none,name=systemd systemd /sys/fs/cgroup/systemd\n    fi\n"
+               "command" : "      # only start if PAM module is actually available, not if libpam-systemd is\n      # removed but not purged\n      [ -e /lib/*/security/pam_systemd.so ] || { stop; exit 0; }\n\n      # this is being done by systemd or mountall usually, but not during\n      # upgrades from earlier distro releases\n      if ! mountpoint -q /sys/fs/cgroup; then\n            mount -t tmpfs -o uid=0,gid=0,mode=0755,size=1024 none /sys/fs/cgroup\n      fi\n      mkdir -p /run/systemd\n      if ! mountpoint -q /sys/fs/cgroup/systemd; then\n            mkdir -p /sys/fs/cgroup/systemd\n            mount -t cgroup -o nosuid,noexec,nodev,none,name=systemd systemd /sys/fs/cgroup/systemd\n      fi\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -4115,12 +4227,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -4190,6 +4306,10 @@
             {
                "script" : 0,
                "command" : "/sbin/getty -8 38400 tty5"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -4349,11 +4469,15 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "\t# Determine if plymouth is available\n\tif [ -x /bin/plymouth ] && /bin/plymouth --ping ; then\n\t\tPLYMOUTH=/bin/plymouth\n\telse\n\t\tPLYMOUTH=\":\"\n\tfi\n\n    # The point here is to wait for 2 minutes before forcibly booting \n    # the system. Anything that is in an \"or\" condition with 'started \n    # failsafe' in rc-sysinit deserves consideration for mentioning in\n    # these messages. currently only static-network-up counts for that.\n\n\tsleep 20\n\n    # Plymouth errors should not stop the script because we *must* reach\n    # the end of this script to avoid letting the system spin forever\n    # waiting on it to start.\n\t$PLYMOUTH message --text=\"Waiting for network configuration...\" || :\n\tsleep 40\n\n\t$PLYMOUTH message --text=\"Waiting up to 60 more seconds for network configuration...\" || :\n\tsleep 59\n\t$PLYMOUTH message --text=\"Booting system without full network configuration...\" || :\n\n    # give user 1 second to see this message since plymouth will go\n    # away as soon as failsafe starts.\n\tsleep 1\n    exec initctl emit --no-wait failsafe-boot\n"
+               "command" : "\t# Determine if plymouth is available\n\tif [ -x /bin/plymouth ] && /bin/plymouth --ping ; then\n\t\tPLYMOUTH=/bin/plymouth\n\telse\n\t\tPLYMOUTH=\":\"\n\tfi\n\n      # The point here is to wait for 2 minutes before forcibly booting \n      # the system. Anything that is in an \"or\" condition with 'started \n      # failsafe' in rc-sysinit deserves consideration for mentioning in\n      # these messages. currently only static-network-up counts for that.\n\n\tsleep 20\n\n      # Plymouth errors should not stop the script because we *must* reach\n      # the end of this script to avoid letting the system spin forever\n      # waiting on it to start.\n\t$PLYMOUTH message --text=\"Waiting for network configuration...\" || :\n\tsleep 40\n\n\t$PLYMOUTH message --text=\"Waiting up to 60 more seconds for network configuration...\" || :\n\tsleep 59\n\t$PLYMOUTH message --text=\"Booting system without full network configuration...\" || :\n\n      # give user 1 second to see this message since plymouth will go\n      # away as soon as failsafe starts.\n\tsleep 1\n      exec initctl emit --no-wait failsafe-boot\n"
             },
             {
                "script" : 1,
                "command" : "logger -t 'failsafe' -p daemon.warning \"Failsafe of 120 seconds reached.\""
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -4489,6 +4613,10 @@
             {
                "script" : 0,
                "command" : "hybrid-detect"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -4649,6 +4777,7 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
@@ -4663,6 +4792,9 @@
                      "path" : "/var/log/upstart/modemmanager.log",
                      "io_watch_fd" : 19,
                      "fd" : 17
+                  },
+                  {
+                     "path" : null
                   },
                   {
                      "path" : null
@@ -4734,6 +4866,10 @@
             {
                "script" : 1,
                "command" : "[ -x /usr/sbin/modem-manager ] || stop\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -4854,12 +4990,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -4904,6 +5044,10 @@
          "description" : "Signal sysvinit that local filesystems are mounted",
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -5033,7 +5177,11 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "    if [ ! -d /sys/class/rfkill ]; then\n        exit 0\n    fi\n\n    mkdir -p /var/lib/rfkill\n    > /var/lib/rfkill/saved-state\n\n    for device in /sys/class/rfkill/*; do\n        [ ! -d $device ] && continue\n\n        entry=\"$(cat $device/name) $(cat $device/soft)\"\n        echo $entry >> /var/lib/rfkill/saved-state\n    done\n"
+               "command" : "      if [ ! -d /sys/class/rfkill ]; then\n            exit 0\n      fi\n\n      mkdir -p /var/lib/rfkill\n      > /var/lib/rfkill/saved-state\n\n      for device in /sys/class/rfkill/*; do\n            [ ! -d $device ] && continue\n\n            entry=\"$(cat $device/name) $(cat $device/soft)\"\n            echo $entry >> /var/lib/rfkill/saved-state\n      done\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -5158,12 +5306,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 1,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -5233,6 +5385,10 @@
             {
                "script" : 0,
                "command" : "atd"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -5357,12 +5513,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -5427,7 +5587,7 @@
             },
             {
                "script" : 1,
-               "command" : "    mkdir -p /var/run/dbus\n    chown messagebus:messagebus /var/run/dbus\n\n    exec dbus-uuidgen --ensure\n"
+               "command" : "      mkdir -p /var/run/dbus\n      chown messagebus:messagebus /var/run/dbus\n\n      exec dbus-uuidgen --ensure\n"
             },
             {
                "script" : 0,
@@ -5436,6 +5596,10 @@
             {
                "script" : 0,
                "command" : "rm -f /var/run/dbus/pid"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -5561,6 +5725,10 @@
             {
                "script" : 0,
                "command" : "/usr/share/xdiagnose/failsafeXServer \"$JOB\""
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -5704,7 +5872,11 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "    # Duplicated from mounted-run to handle the case of a separate /var.\n\n    run_migrate () {\n\tOLD=\"$1\"\n\tRUN=\"$2\"\n\n\tif [ -L \"$OLD\" ]; then\n\t    if [ \"$(readlink \"$OLD\")\" != \"$RUN\" ]; then\n\t\t# Remove any old (relative?) symlinks.\n\t\trm -f \"$OLD\"\n\t    fi\n\telif [ -d \"$OLD\" ]; then\n\t    # Remove old directories.  This is safe because they are\n\t    # explicitly ephemeral, and nothing is allowed to use them yet\n\t    # at this point in the boot.\n\t    rm -rf \"$OLD\" 2>/dev/null || true\n\tfi\n\n\tif [ ! -L \"$OLD\" ]; then\n\t    ln -fs \"$RUN\" \"$OLD\"\n\t    [ -x /sbin/restorecon ] && /sbin/restorecon \"$OLD\"\n\tfi\n\n\treturn 0\n    }\n\n    run_migrate /var/run /run\n    run_migrate /var/lock /run/lock\n"
+               "command" : "      # Duplicated from mounted-run to handle the case of a separate /var.\n\n      run_migrate () {\n\tOLD=\"$1\"\n\tRUN=\"$2\"\n\n\tif [ -L \"$OLD\" ]; then\n\t      if [ \"$(readlink \"$OLD\")\" != \"$RUN\" ]; then\n\t\t# Remove any old (relative?) symlinks.\n\t\trm -f \"$OLD\"\n\t      fi\n\telif [ -d \"$OLD\" ]; then\n\t      # Remove old directories.   This is safe because they are\n\t      # explicitly ephemeral, and nothing is allowed to use them yet\n\t      # at this point in the boot.\n\t      rm -rf \"$OLD\" 2>/dev/null || true\n\tfi\n\n\tif [ ! -L \"$OLD\" ]; then\n\t      ln -fs \"$RUN\" \"$OLD\"\n\t      [ -x /sbin/restorecon ] && /sbin/restorecon \"$OLD\"\n\tfi\n\n\treturn 0\n      }\n\n      run_migrate /var/run /run\n      run_migrate /var/lock /run/lock\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -5834,15 +6006,19 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "if [ \"$RUNLEVEL\" = \"0\" -o \"$RUNLEVEL\" = \"1\" -o \"$RUNLEVEL\" = \"6\" ]; then\n    exec /sbin/plymouthd --mode=shutdown\nelse\n    exec /sbin/plymouthd --mode=boot --attach-to-session\nfi\n"
+               "command" : "if [ \"$RUNLEVEL\" = \"0\" -o \"$RUNLEVEL\" = \"1\" -o \"$RUNLEVEL\" = \"6\" ]; then\n      exec /sbin/plymouthd --mode=shutdown\nelse\n      exec /sbin/plymouthd --mode=boot --attach-to-session\nfi\n"
             },
             {
                "script" : 1,
-               "command" : "    if [ \"$RUNLEVEL\" = \"0\" -o \"$RUNLEVEL\" = \"1\" -o \"$RUNLEVEL\" = \"6\" ]; then\n\texec /bin/plymouth show-splash\n    fi\n"
+               "command" : "      if [ \"$RUNLEVEL\" = \"0\" -o \"$RUNLEVEL\" = \"1\" -o \"$RUNLEVEL\" = \"6\" ]; then\n\texec /bin/plymouth show-splash\n      fi\n"
             },
             {
                "script" : 0,
                "command" : "/bin/plymouth quit"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -6004,12 +6180,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -6093,6 +6273,10 @@
             {
                "script" : 1,
                "command" : "resolvconf --disable-updates\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -6210,7 +6394,11 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "if [ \"$PRIMARY_DEVICE_FOR_DISPLAY\" = \"\" ]; then\n    modprobe -q -b vesafb\nfi\n"
+               "command" : "if [ \"$PRIMARY_DEVICE_FOR_DISPLAY\" = \"\" ]; then\n      modprobe -q -b vesafb\nfi\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -6378,12 +6566,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -6432,6 +6624,10 @@
          "description" : "Signal sysvinit that the rootfs is mounted",
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -6581,6 +6777,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -6692,6 +6892,10 @@
             {
                "script" : 1,
                "command" : ". /etc/default/rcS\n[ \"$UTC\" = \"yes\" ] && tz=\"--utc\" || tz=\"--localtime\"\n[ \"$BADYEAR\" = \"yes\" ] && badyear=\"--badyear\"\nexec hwclock --systz $tz --noadjfile $badyear\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -6838,6 +7042,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -6949,12 +7157,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 1,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -7024,6 +7236,10 @@
             {
                "script" : 1,
                "command" : "\t# set $LANG so that messages appearing on the GUI will be translated. See LP: 875017\n\tif [ -r /etc/default/locale ]; then\n\t\t. /etc/default/locale\n\t\texport LANG LANGUAGE LC_MESSAGES LC_ALL\n\tfi\n\n\texec NetworkManager\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -7188,6 +7404,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -7296,6 +7516,7 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
@@ -7310,6 +7531,9 @@
                      "path" : "/var/log/upstart/cups-browsed.log",
                      "io_watch_fd" : 21,
                      "fd" : -1
+                  },
+                  {
+                     "path" : null
                   },
                   {
                      "path" : null
@@ -7381,6 +7605,10 @@
             {
                "script" : 1,
                "command" : "[ -x /usr/sbin/cups-browsed ]\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -7557,6 +7785,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -7683,6 +7915,10 @@
             {
                "script" : 0,
                "command" : "shutdown -h now \"SIGPWR received\""
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -7826,6 +8062,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -7934,12 +8174,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 1,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -8009,6 +8253,10 @@
             {
                "script" : 0,
                "command" : "cron"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -8155,6 +8403,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -8253,6 +8505,7 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
@@ -8267,6 +8520,9 @@
                      "path" : "/var/log/upstart/lightdm.log",
                      "io_watch_fd" : 44,
                      "fd" : -1
+                  },
+                  {
+                     "path" : null
                   },
                   {
                      "path" : null
@@ -8339,7 +8595,7 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "    if [ -n \"$UPSTART_EVENTS\" ]\n    then\n        # Check kernel command-line for inhibitors, unless we are being called\n        # manually\n        for ARG in $(cat /proc/cmdline); do\n            if [ \"$ARG\" = \"text\" ]; then\n\t\tplymouth quit || : \n                stop\n\t\texit 0\n            fi\n        done\n\n\t[ ! -f /etc/X11/default-display-manager -o \"$(cat /etc/X11/default-display-manager 2>/dev/null)\" = \"/usr/bin/lightdm\" -o \"$(cat /etc/X11/default-display-manager 2>/dev/null)\" = \"/usr/sbin/lightdm\" ] || { stop; exit 0; }\n\n\tif [ \"$RUNLEVEL\" = S -o \"$RUNLEVEL\" = 1 ]\n\tthen\n\t    # Single-user mode\n\t    plymouth quit || :\n\t    exit 0\n\tfi\n    fi\n\n    exec lightdm\n"
+               "command" : "      if [ -n \"$UPSTART_EVENTS\" ]\n      then\n            # Check kernel command-line for inhibitors, unless we are being called\n            # manually\n            for ARG in $(cat /proc/cmdline); do\n                  if [ \"$ARG\" = \"text\" ]; then\n\t\tplymouth quit || : \n                        stop\n\t\texit 0\n                  fi\n            done\n\n\t[ ! -f /etc/X11/default-display-manager -o \"$(cat /etc/X11/default-display-manager 2>/dev/null)\" = \"/usr/bin/lightdm\" -o \"$(cat /etc/X11/default-display-manager 2>/dev/null)\" = \"/usr/sbin/lightdm\" ] || { stop; exit 0; }\n\n\tif [ \"$RUNLEVEL\" = S -o \"$RUNLEVEL\" = 1 ]\n\tthen\n\t      # Single-user mode\n\t      plymouth quit || :\n\t      exit 0\n\tfi\n      fi\n\n      exec lightdm\n"
             },
             {
                "script" : 1,
@@ -8352,6 +8608,10 @@
             {
                "script" : 1,
                "command" : "if [ \"$UPSTART_STOP_EVENTS\" = runlevel ]; then\n\tinitctl emit desktop-shutdown\nfi\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -8529,7 +8789,7 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "    . /etc/default/rcS\n    [ -f /forcefsck ] && force_fsck=\"--force-fsck\"\n    [ \"$FSCKFIX\" = \"yes\" ] && fsck_fix=\"--fsck-fix\"\n\n    # set $LANG so that messages appearing in plymouth are translated\n    if [ -r /etc/default/locale ]; then\n        . /etc/default/locale\n        export LANG LANGUAGE LC_MESSAGES LC_ALL\n    fi\n\n    exec mountall --daemon $force_fsck $fsck_fix\n"
+               "command" : "      . /etc/default/rcS\n      [ -f /forcefsck ] && force_fsck=\"--force-fsck\"\n      [ \"$FSCKFIX\" = \"yes\" ] && fsck_fix=\"--fsck-fix\"\n\n      # set $LANG so that messages appearing in plymouth are translated\n      if [ -r /etc/default/locale ]; then\n            . /etc/default/locale\n            export LANG LANGUAGE LC_MESSAGES LC_ALL\n      fi\n\n      exec mountall --daemon $force_fsck $fsck_fix\n"
             },
             {
                "script" : 0,
@@ -8542,6 +8802,10 @@
             {
                "script" : 1,
                "command" : "rm -f /forcefsck 2>dev/null || true\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -8673,6 +8937,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -8784,12 +9052,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -8834,6 +9106,10 @@
          "description" : "Signal sysvinit that virtual filesystems are mounted",
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -8990,6 +9266,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -9117,7 +9397,11 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "    : > \"/run/utmp\"\n    chmod 664 \"/run/utmp\"\n    chgrp utmp \"/run/utmp\"\n\n    # compatibility; should go away soon\n    [ -d /dev/.initramfs/varrun ] && cp -a /dev/.initramfs/varrun/* /run/ || true\n\n    mkdir -p /run/sendsigs.omit.d\n\n    # Background the initial motd seeding\n    [ -d \"/etc/update-motd.d\" ] && run-parts --lsbsysinit /etc/update-motd.d > /run/motd &\n"
+               "command" : "      : > \"/run/utmp\"\n      chmod 664 \"/run/utmp\"\n      chgrp utmp \"/run/utmp\"\n\n      # compatibility; should go away soon\n      [ -d /dev/.initramfs/varrun ] && cp -a /dev/.initramfs/varrun/* /run/ || true\n\n      mkdir -p /run/sendsigs.omit.d\n\n      # Background the initial motd seeding\n      [ -d \"/etc/update-motd.d\" ] && run-parts --lsbsysinit /etc/update-motd.d > /run/motd &\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -9243,12 +9527,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 1,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -9318,6 +9606,10 @@
             {
                "script" : 0,
                "command" : "acpid -c /etc/acpi/events -s /var/run/acpid.socket"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -9442,12 +9734,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -9522,7 +9818,7 @@
             },
             {
                "script" : 1,
-               "command" : "\t[ \"$VERBOSE\" = no ] && redirect='>/dev/null 2>&1' || redirect=\n\n\t# start_uarts()\n\tif [ -x /usr/sbin/hciattach ] && [ -f $UART_CONF ];\n\tthen\n\t\tgrep -v '^#' $UART_CONF | while read i; do\n\t\t  eval \"/usr/sbin/hciattach $i $redirect\" || :\n\t\tdone\n\tfi\n\n\t# start_rfcomm()\n\tif [ -x /usr/bin/rfcomm ] && [ -f $RFCOMM_CONF ] ;\n\tthen\n\t\t# rfcomm must always succeed for now: users\n\t\t# may not yet have an rfcomm-enabled kernel\n\t\teval \"/usr/bin/rfcomm -f $RFCOMM_CONF bind all $redirect\" || :\n\tfi\n"
+               "command" : "\t[ \"$VERBOSE\" = no ] && redirect='>/dev/null 2>&1' || redirect=\n\n\t# start_uarts()\n\tif [ -x /usr/sbin/hciattach ] && [ -f $UART_CONF ];\n\tthen\n\t\tgrep -v '^#' $UART_CONF | while read i; do\n\t\t   eval \"/usr/sbin/hciattach $i $redirect\" || :\n\t\tdone\n\tfi\n\n\t# start_rfcomm()\n\tif [ -x /usr/bin/rfcomm ] && [ -f $RFCOMM_CONF ] ;\n\tthen\n\t\t# rfcomm must always succeed for now: users\n\t\t# may not yet have an rfcomm-enabled kernel\n\t\teval \"/usr/bin/rfcomm -f $RFCOMM_CONF bind all $redirect\" || :\n\tfi\n"
             },
             {
                "script" : 0,
@@ -9531,6 +9827,10 @@
             {
                "script" : 1,
                "command" : "\t# stop_uarts()\n\tlogger -t bluez \"Stopping uarts\"\n\tkillall hciattach >/dev/null 2>&1 || :\n\n\t# stop_rfcomm()\n\tlogger -t bluez \"Stopping rfcomm\"\n\tif [ -x /usr/bin/rfcomm ];\n\tthen\n\t\teval \"/usr/bin/rfcomm unbind all $redirect\" || :\n\tfi\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -9646,12 +9946,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -9700,6 +10004,10 @@
          "description" : null,
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -9827,12 +10135,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -9881,6 +10193,10 @@
          "description" : null,
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -10013,7 +10329,11 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "    [ -f /etc/modules ] || exit 0\n    hash=\"#\"\n    while read module args; do\n\t[ -n \"$module\" ] && [ \"${module#${hash}}\" = \"${module}\" ] || continue\n\tmodprobe $module $args || :\n    done < /etc/modules\n"
+               "command" : "      [ -f /etc/modules ] || exit 0\n      hash=\"#\"\n      while read module args; do\n\t[ -n \"$module\" ] && [ \"${module#${hash}}\" = \"${module}\" ] || continue\n\tmodprobe $module $args || :\n      done < /etc/modules\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -10147,12 +10467,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -10197,6 +10521,10 @@
          "description" : "Signal sysvinit that remote filesystems are mounted",
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -10336,7 +10664,11 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "    case \"$JOB\" in\n    gdm|kdm|lightdm|ubiquity|oem-config)\n\texit 0\n\t;;\n    *)\n\texec /bin/plymouth quit\n\t;;\n    esac\n"
+               "command" : "      case \"$JOB\" in\n      gdm|kdm|lightdm|ubiquity|oem-config)\n\texit 0\n\t;;\n      *)\n\texec /bin/plymouth quit\n\t;;\n      esac\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -10609,7 +10941,11 @@
             },
             {
                "script" : 1,
-               "command" : "    # Don't switch runlevels if we were stopped by an event, since that\n    # means we're already switching runlevels\n    if [ -n \"${UPSTART_STOP_EVENTS}\" ]\n    then\n\texit 0\n    fi\n\n    # Switch, passing a magic flag\n    start --no-wait rc-sysinit FROM_SINGLE_USER_MODE=y\n"
+               "command" : "      # Don't switch runlevels if we were stopped by an event, since that\n      # means we're already switching runlevels\n      if [ -n \"${UPSTART_STOP_EVENTS}\" ]\n      then\n\texit 0\n      fi\n\n      # Switch, passing a magic flag\n      start --no-wait rc-sysinit FROM_SINGLE_USER_MODE=y\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -10722,12 +11058,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -10810,6 +11150,10 @@
             {
                "script" : 0,
                "command" : "/lib/ufw/ufw-init stop"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -10973,7 +11317,11 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "    test -n \"$WAIT_FOR\" || exit 1\n    test -n \"$WAITER\" || exit 1\n\n    # We don't want to override the manual stanza\n    # XXX: initctl show-config should share manual w/ us too\n    case $MANUAL_OVERRIDE in\n    N|n|0)\n        if grep -q \"^\\s*manual\\s*$\" /etc/init/$WAIT_FOR.conf ; then\n            exit 0\n        fi\n        ;;\n    esac\n\n    if [ \"$WAIT_STATE\" = \"stopped\" ] ; then\n        TARGET_GOAL=\"stop\"\n    fi\n\n    # Already running/stopped?\n    status $WAIT_FOR | grep -q \"$TARGET_GOAL/$WAIT_STATE\" && exit 0\n\n    # Give it a push\n    $TARGET_GOAL $WAIT_FOR || :\n\n    # upstart will kill this shell on started/stopped $WAIT_FOR\n    while sleep $TIMEOUT ; do\n        case $WAIT_FOREVER in\n        N|n|0)\n            exit 100\n            ;;\n        Y|y|1)\n            ;;\n        *)\n            exit 1\n            ;;\n        esac\n    done\n    # Very strange, sleep returned non-zero?\n    exit 1\n"
+               "command" : "      test -n \"$WAIT_FOR\" || exit 1\n      test -n \"$WAITER\" || exit 1\n\n      # We don't want to override the manual stanza\n      # XXX: initctl show-config should share manual w/ us too\n      case $MANUAL_OVERRIDE in\n      N|n|0)\n            if grep -q \"^\\s*manual\\s*$\" /etc/init/$WAIT_FOR.conf ; then\n                  exit 0\n            fi\n            ;;\n      esac\n\n      if [ \"$WAIT_STATE\" = \"stopped\" ] ; then\n            TARGET_GOAL=\"stop\"\n      fi\n\n      # Already running/stopped?\n      status $WAIT_FOR | grep -q \"$TARGET_GOAL/$WAIT_STATE\" && exit 0\n\n      # Give it a push\n      $TARGET_GOAL $WAIT_FOR || :\n\n      # upstart will kill this shell on started/stopped $WAIT_FOR\n      while sleep $TIMEOUT ; do\n            case $WAIT_FOREVER in\n            N|n|0)\n                  exit 100\n                  ;;\n            Y|y|1)\n                  ;;\n            *)\n                  exit 1\n                  ;;\n            esac\n      done\n      # Very strange, sleep returned non-zero?\n      exit 1\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -11096,12 +11444,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -11146,6 +11498,10 @@
          "description" : null,
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -11292,6 +11648,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -11406,11 +11766,11 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "    # Only start friendly-recovery when booting in recovery mode\n    if ! grep -q \"recovery\" /proc/cmdline; then\n        exit 0\n    fi\n\n    if [ -x /lib/recovery-mode/recovery-menu ]; then\n        exec /lib/recovery-mode/recovery-menu\n    else\n        exec /sbin/sulogin\n    fi\n"
+               "command" : "      # Only start friendly-recovery when booting in recovery mode\n      if ! grep -q \"recovery\" /proc/cmdline; then\n            exit 0\n      fi\n\n      if [ -x /lib/recovery-mode/recovery-menu ]; then\n            exec /lib/recovery-mode/recovery-menu\n      else\n            exec /sbin/sulogin\n      fi\n"
             },
             {
                "script" : 1,
-               "command" : "    if plymouth --ping; then\n        plymouth hide-splash || true\n    fi\n\n    # Try to set the hostname and initialize the console\n    start hostname || true\n    start console-setup || true\n    start setvtrgb || true\n\n    # Make sure /run contains the required directories for the\n    # recovery menu options\n    mkdir -p /run/lock /run/shm || true\n\n    # Emit the mounted event to trigger resolvconf and mounted-run\n    initctl emit mounted MOUNTPOINT=/run || true\n\n    # Finally start udev\n    start udev || true\n    udevadm trigger --action=add || true\n    udevadm settle || true\n\n    # And turn off kernel messages (to avoid corrupting the menu)\n    dmesg --console-off || true\n"
+               "command" : "      if plymouth --ping; then\n            plymouth hide-splash || true\n      fi\n\n      # Try to set the hostname and initialize the console\n      start hostname || true\n      start console-setup || true\n      start setvtrgb || true\n\n      # Make sure /run contains the required directories for the\n      # recovery menu options\n      mkdir -p /run/lock /run/shm || true\n\n      # Emit the mounted event to trigger resolvconf and mounted-run\n      initctl emit mounted MOUNTPOINT=/run || true\n\n      # Finally start udev\n      start udev || true\n      udevadm trigger --action=add || true\n      udevadm settle || true\n\n      # And turn off kernel messages (to avoid corrupting the menu)\n      dmesg --console-off || true\n"
             },
             {
                "script" : 0,
@@ -11418,7 +11778,11 @@
             },
             {
                "script" : 1,
-               "command" : "if plymouth --ping; then\n    plymouth show-splash\nfi\ninitctl emit startup\n"
+               "command" : "if plymouth --ping; then\n      plymouth show-splash\nfi\ninitctl emit startup\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -11534,6 +11898,10 @@
             {
                "script" : 1,
                "command" : "echo hello\nifconfig -a\nprocenv\nset\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -11696,7 +12064,11 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "    # Check for default runlevel in /etc/inittab\n    if [ -r /etc/inittab ]\n    then\n\teval \"$(sed -nre 's/^[^#][^:]*:([0-6sS]):initdefault:.*/DEFAULT_RUNLEVEL=\"\\1\";/p' /etc/inittab || true)\"\n    fi\n\n    # Check kernel command-line for typical arguments\n    for ARG in $(cat /proc/cmdline)\n    do\n\tcase \"${ARG}\" in\n\t-b|emergency)\n\t    # Emergency shell\n\t    [ -n \"${FROM_SINGLE_USER_MODE}\" ] || sulogin\n\t    ;;\n\t[0123456sS])\n\t    # Override runlevel\n\t    DEFAULT_RUNLEVEL=\"${ARG}\"\n\t    ;;\n\t-s|single)\n\t    # Single user mode\n\t    [ -n \"${FROM_SINGLE_USER_MODE}\" ] || DEFAULT_RUNLEVEL=S\n\t    ;;\n\tesac\n    done\n\n    # Run the system initialisation scripts\n    [ -n \"${FROM_SINGLE_USER_MODE}\" ] || /etc/init.d/rcS\n\n    # Switch into the default runlevel\n    telinit \"${DEFAULT_RUNLEVEL}\"\n"
+               "command" : "      # Check for default runlevel in /etc/inittab\n      if [ -r /etc/inittab ]\n      then\n\teval \"$(sed -nre 's/^[^#][^:]*:([0-6sS]):initdefault:.*/DEFAULT_RUNLEVEL=\"\\1\";/p' /etc/inittab || true)\"\n      fi\n\n      # Check kernel command-line for typical arguments\n      for ARG in $(cat /proc/cmdline)\n      do\n\tcase \"${ARG}\" in\n\t-b|emergency)\n\t      # Emergency shell\n\t      [ -n \"${FROM_SINGLE_USER_MODE}\" ] || sulogin\n\t      ;;\n\t[0123456sS])\n\t      # Override runlevel\n\t      DEFAULT_RUNLEVEL=\"${ARG}\"\n\t      ;;\n\t-s|single)\n\t      # Single user mode\n\t      [ -n \"${FROM_SINGLE_USER_MODE}\" ] || DEFAULT_RUNLEVEL=S\n\t      ;;\n\tesac\n      done\n\n      # Run the system initialisation scripts\n      [ -n \"${FROM_SINGLE_USER_MODE}\" ] || /etc/init.d/rcS\n\n      # Switch into the default runlevel\n      telinit \"${DEFAULT_RUNLEVEL}\"\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -11841,12 +12213,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -11919,11 +12295,15 @@
             },
             {
                "script" : 1,
-               "command" : "    [ -x /usr/sbin/cupsd ]\n    \n    # load modules for parallel port support\n    if [ -r /etc/default/cups ]; then\n\t. /etc/default/cups\n    fi\n    if [ \"$LOAD_LP_MODULE\" = \"yes\" -a -f /usr/lib/cups/backend/parallel \\\n\t -a -f /proc/modules -a -x /sbin/modprobe ]; then\n\tmodprobe -q -b lp || true\n\tmodprobe -q -b ppdev || true\n\tmodprobe -q -b parport_pc || true\n    fi\n    \n    mkdir -p /var/run/cups/certs\n    if [ -x /lib/init/apparmor-profile-load ]; then\n\t/lib/init/apparmor-profile-load usr.sbin.cupsd\n    fi\n"
+               "command" : "      [ -x /usr/sbin/cupsd ]\n      \n      # load modules for parallel port support\n      if [ -r /etc/default/cups ]; then\n\t. /etc/default/cups\n      fi\n      if [ \"$LOAD_LP_MODULE\" = \"yes\" -a -f /usr/lib/cups/backend/parallel \\\n\t -a -f /proc/modules -a -x /sbin/modprobe ]; then\n\tmodprobe -q -b lp || true\n\tmodprobe -q -b ppdev || true\n\tmodprobe -q -b parport_pc || true\n      fi\n      \n      mkdir -p /var/run/cups/certs\n      if [ -x /lib/init/apparmor-profile-load ]; then\n\t/lib/init/apparmor-profile-load usr.sbin.cupsd\n      fi\n"
             },
             {
                "script" : 1,
-               "command" : "    # wait until daemon is ready\n    timeout=6\n    while [ ! -e /var/run/cups/cups.sock ]; do \n        sleep 0.5\n\ttimeout=$((timeout-1))\n\tif [ \"$timeout\" -eq 0 ]; then\n\t    echo \"cupsd failed to create /var/run/cups/cups.sock, skipping automatic printer configuration\" >&2\n\t    exit 0\n\tfi\n    done\n    \n    # coldplug USB printers\n    if ! /lib/udev/udev-configure-printer enumerate 2>/dev/null; then\n        if type udevadm > /dev/null 2>&1 && [ -x /lib/udev/udev-configure-printer ]; then\n            for printer in `udevadm trigger --verbose --dry-run --subsystem-match=usb \\\n                    --attr-match=bInterfaceClass=07 --attr-match=bInterfaceSubClass=01 2>/dev/null || true; \\\n                            udevadm trigger --verbose --dry-run --subsystem-match=usb \\\n                    --sysname-match='lp[0-9]*' 2>/dev/null || true`; do\n                /lib/udev/udev-configure-printer add \"${printer#/sys}\"\n            done\n        fi\n    fi\n"
+               "command" : "      # wait until daemon is ready\n      timeout=6\n      while [ ! -e /var/run/cups/cups.sock ]; do \n            sleep 0.5\n\ttimeout=$((timeout-1))\n\tif [ \"$timeout\" -eq 0 ]; then\n\t      echo \"cupsd failed to create /var/run/cups/cups.sock, skipping automatic printer configuration\" >&2\n\t      exit 0\n\tfi\n      done\n      \n      # coldplug USB printers\n      if ! /lib/udev/udev-configure-printer enumerate 2>/dev/null; then\n            if type udevadm > /dev/null 2>&1 && [ -x /lib/udev/udev-configure-printer ]; then\n                  for printer in `udevadm trigger --verbose --dry-run --subsystem-match=usb \\\n                              --attr-match=bInterfaceClass=07 --attr-match=bInterfaceSubClass=01 2>/dev/null || true; \\\n                                          udevadm trigger --verbose --dry-run --subsystem-match=usb \\\n                              --sysname-match='lp[0-9]*' 2>/dev/null || true`; do\n                        /lib/udev/udev-configure-printer add \"${printer#/sys}\"\n                  done\n            fi\n      fi\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -12106,6 +12486,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -12207,12 +12591,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 2,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -12286,6 +12674,10 @@
             {
                "script" : 0,
                "command" : "upstart-socket-bridge --daemon"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -12442,6 +12834,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -12552,12 +12948,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -12602,6 +13002,10 @@
          "description" : "Signal sysvinit that virtual filesystems are mounted",
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -12726,12 +13130,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -12801,6 +13209,10 @@
             {
                "script" : 0,
                "command" : "/sbin/getty -8 38400 tty2"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -12980,6 +13392,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -13106,12 +13522,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 2,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -13185,6 +13605,10 @@
             {
                "script" : 0,
                "command" : "upstart-file-bridge --daemon"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -13318,7 +13742,11 @@
             },
             {
                "script" : 1,
-               "command" : "    # The \"standard\" way of telling if we are in a container\n    # is to check for \"container\" in init's environment.\n    # The code below is for cases where it's not set.\n\n    # Detect old-style libvirt\n    if [ -z \"$container\" ]; then\n        [ -n \"$LIBVIRT_LXC_UUID\" ] && container=lxc-libvirt\n    fi\n\n    # Detect OpenVZ containers\n    if [ -z \"$container\" ]; then\n        [ -d /proc/vz ] && [ ! -d /proc/bc ] && container=openvz\n    fi\n\n    # Detect Vserver containers\n    if [ -z \"$container\" ]; then\n        VXID=\"$(cat /proc/self/status | grep ^VxID | cut -f2)\" || true\n        [ \"${VXID:-0}\" -gt 1 ] && container=vserver\n    fi\n\n    if [ -n \"$container\" ]; then\n        echo \"$container\" > /run/container_type || true\n        initctl emit --no-wait container CONTAINER=$container\n        exit 0\n    fi\n\n    # If not a container, stop there\n    rm -f /run/container_type\n    initctl emit --no-wait not-container\n    stop\n"
+               "command" : "      # The \"standard\" way of telling if we are in a container\n      # is to check for \"container\" in init's environment.\n      # The code below is for cases where it's not set.\n\n      # Detect old-style libvirt\n      if [ -z \"$container\" ]; then\n            [ -n \"$LIBVIRT_LXC_UUID\" ] && container=lxc-libvirt\n      fi\n\n      # Detect OpenVZ containers\n      if [ -z \"$container\" ]; then\n            [ -d /proc/vz ] && [ ! -d /proc/bc ] && container=openvz\n      fi\n\n      # Detect Vserver containers\n      if [ -z \"$container\" ]; then\n            VXID=\"$(cat /proc/self/status | grep ^VxID | cut -f2)\" || true\n            [ \"${VXID:-0}\" -gt 1 ] && container=vserver\n      fi\n\n      if [ -n \"$container\" ]; then\n            echo \"$container\" > /run/container_type || true\n            initctl emit --no-wait container CONTAINER=$container\n            exit 0\n      fi\n\n      # If not a container, stop there\n      rm -f /run/container_type\n      initctl emit --no-wait not-container\n      stop\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -13447,7 +13875,11 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "    # With the /run transition, shm lives there now, but eglibc still looks in\n    # /dev/shm. So create a symlink there\n    [ -e /dev/shm ] || ln -s /run/shm /dev/shm\n    \n    if [ \"${TYPE}\" != \"devtmpfs\" ]\n    then\n\tcd \"${MOUNTPOINT}\"\n\t/sbin/MAKEDEV std fd ppp tun\n\t# lxc and libvirt containers have set up their own console and ttys\n\tif [ -z \"$container\" -a -z \"$LIBVIRT_LXC_UUID\" ]; then\n\t\t/sbin/MAKEDEV console\n\tfi\n    fi\n"
+               "command" : "      # With the /run transition, shm lives there now, but eglibc still looks in\n      # /dev/shm. So create a symlink there\n      [ -e /dev/shm ] || ln -s /run/shm /dev/shm\n      \n      if [ \"${TYPE}\" != \"devtmpfs\" ]\n      then\n\tcd \"${MOUNTPOINT}\"\n\t/sbin/MAKEDEV std fd ppp tun\n\t# lxc and libvirt containers have set up their own console and ttys\n\tif [ -z \"$container\" -a -z \"$LIBVIRT_LXC_UUID\" ]; then\n\t\t/sbin/MAKEDEV console\n\tfi\n      fi\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -13576,12 +14008,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -13626,6 +14062,10 @@
          "description" : null,
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -13750,12 +14190,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -13825,6 +14269,10 @@
             {
                "script" : 0,
                "command" : "/sbin/getty -8 38400 tty3"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -13987,7 +14435,11 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "    # Save udev log in /var/log/udev\n    if [ -e /dev/.udev.log ]\n    then\n\tmv -f /dev/.udev.log /var/log/udev || :\n    fi\n\n    # Copy any rules generated while the root filesystem was read-only\n    for file in /run/udev/tmp-rules--*\n    do\n\t[ -e \"$file\" ] || continue\n\tcat \"$file\" >> \"/etc/udev/rules.d/${file##*tmp-rules--}\"\n\trm -f \"$file\"\n    done\n"
+               "command" : "      # Save udev log in /var/log/udev\n      if [ -e /dev/.udev.log ]\n      then\n\tmv -f /dev/.udev.log /var/log/udev || :\n      fi\n\n      # Copy any rules generated while the root filesystem was read-only\n      for file in /run/udev/tmp-rules--*\n      do\n\t[ -e \"$file\" ] || continue\n\tcat \"$file\" >> \"/etc/udev/rules.d/${file##*tmp-rules--}\"\n\trm -f \"$file\"\n      done\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -14176,6 +14628,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -14287,6 +14743,10 @@
             {
                "script" : 0,
                "command" : "reboot -f"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -14427,7 +14887,7 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "    case \"$EXIT_STATUS\" in\n    \"\"|1)\n\techo \"General error mounting filesystems.\"\n\techo \"A maintenance shell will now be started.\"\n\techo \"CONTROL-D will terminate this shell and reboot the system.\"\n\t;;\n    2)\n\techo \"Filesystem check or mount failed.\"\n\techo \"A maintenance shell will now be started.\"\n\techo \"CONTROL-D will terminate this shell and continue booting after re-trying\"\n\techo \"filesystems.  Any further errors will be ignored\"\n\t;;\n    3)\n\techo \"Root filesystem check failed.\"\n\techo \"A maintenance shell will now be started.\"\n\techo \"CONTROL-D will terminate this shell and reboot the system.\"\n\t;;\n    esac\n\n    /sbin/sulogin\n"
+               "command" : "      case \"$EXIT_STATUS\" in\n      \"\"|1)\n\techo \"General error mounting filesystems.\"\n\techo \"A maintenance shell will now be started.\"\n\techo \"CONTROL-D will terminate this shell and reboot the system.\"\n\t;;\n      2)\n\techo \"Filesystem check or mount failed.\"\n\techo \"A maintenance shell will now be started.\"\n\techo \"CONTROL-D will terminate this shell and continue booting after re-trying\"\n\techo \"filesystems.   Any further errors will be ignored\"\n\t;;\n      3)\n\techo \"Root filesystem check failed.\"\n\techo \"A maintenance shell will now be started.\"\n\techo \"CONTROL-D will terminate this shell and reboot the system.\"\n\t;;\n      esac\n\n      /sbin/sulogin\n"
             },
             {
                "script" : 0,
@@ -14439,7 +14899,11 @@
             },
             {
                "script" : 1,
-               "command" : "    if [ -z \"$UPSTART_STOP_EVENTS\" ]\n    then\n\tif [ \"$EXIT_STATUS\" = \"2\" ]\n\tthen\n\t    exec start --no-wait mountall\n\telse\n\t    umount -a || :\n\t    exec reboot -f\n\tfi\n    fi\n"
+               "command" : "      if [ -z \"$UPSTART_STOP_EVENTS\" ]\n      then\n\tif [ \"$EXIT_STATUS\" = \"2\" ]\n\tthen\n\t      exec start --no-wait mountall\n\telse\n\t      umount -a || :\n\t      exec reboot -f\n\tfi\n      fi\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -14571,7 +15035,11 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "    if [ x$MOUNTPOINT = x/tmp ] && [ ! -x /usr/bin/find ] ; then\n        touch /tmp/.delayed_mounted_tmp_clean\n        exit 0\n    elif [ x$MOUNTPOINT = x/usr ] ; then\n        [ -f /tmp/.delayed_mounted_tmp_clean ] || exit 0\n        rm /tmp/.delayed_mounted_tmp_clean\n        MOUNTPOINT=/tmp\n    fi\n\n    . /etc/default/rcS\n\n    cd \"${MOUNTPOINT}\" || exit 1\n    rm -f .X*-lock\n\n    case \"${TMPTIME}\" in\n        -*|infinite|infinity)\n\t    exit 0\n\t    ;;\n    esac\n\n    if [ \"${TMPTIME}\" = \"0\" -o -z \"${TMPTIME}\" ]\n    then\n\tTEXPR=\"\"\n\tDEXPR=\"\"\n    else\n\tTEXPR=\"-mtime +${TMPTIME} -ctime +${TMPTIME} -atime +${TMPTIME}\"\n\tDEXPR=\"-mtime +${TMPTIME} -ctime +${TMPTIME}\"\n    fi\n\n    EXCEPT='! -name .\n            ! ( -path ./lost+found -uid 0 )\n            ! ( -path ./quota.user -uid 0 )\n            ! ( -path ./aquota.user -uid 0 )\n            ! ( -path ./quota.group -uid 0 )\n            ! ( -path ./aquota.group -uid 0 )\n            ! ( -path ./.journal -uid 0 )\n            ! ( -path ./.clean -uid 0 )\n            ! ( -path \"./...security*\" -uid 0 )'\n\n    # Remove all old files, then all empty directories\n    find . -depth -xdev $TEXPR $EXCEPT ! -type d -delete\n    find . -depth -xdev $DEXPR $EXCEPT -type d -empty -delete\n\n    # Check if we have enough space in /tmp, and if not, mount a tmpfs there\n    avail=`df -kP /tmp | awk 'NR==2 { print $4 }'`\n    if [ \"$avail\" -lt 1000 ]; then\n\tmount -t tmpfs -o size=1048576,mode=1777 overflow /tmp\n    fi\n"
+               "command" : "      if [ x$MOUNTPOINT = x/tmp ] && [ ! -x /usr/bin/find ] ; then\n            touch /tmp/.delayed_mounted_tmp_clean\n            exit 0\n      elif [ x$MOUNTPOINT = x/usr ] ; then\n            [ -f /tmp/.delayed_mounted_tmp_clean ] || exit 0\n            rm /tmp/.delayed_mounted_tmp_clean\n            MOUNTPOINT=/tmp\n      fi\n\n      . /etc/default/rcS\n\n      cd \"${MOUNTPOINT}\" || exit 1\n      rm -f .X*-lock\n\n      case \"${TMPTIME}\" in\n            -*|infinite|infinity)\n\t      exit 0\n\t      ;;\n      esac\n\n      if [ \"${TMPTIME}\" = \"0\" -o -z \"${TMPTIME}\" ]\n      then\n\tTEXPR=\"\"\n\tDEXPR=\"\"\n      else\n\tTEXPR=\"-mtime +${TMPTIME} -ctime +${TMPTIME} -atime +${TMPTIME}\"\n\tDEXPR=\"-mtime +${TMPTIME} -ctime +${TMPTIME}\"\n      fi\n\n      EXCEPT='! -name .\n                  ! ( -path ./lost+found -uid 0 )\n                  ! ( -path ./quota.user -uid 0 )\n                  ! ( -path ./aquota.user -uid 0 )\n                  ! ( -path ./quota.group -uid 0 )\n                  ! ( -path ./aquota.group -uid 0 )\n                  ! ( -path ./.journal -uid 0 )\n                  ! ( -path ./.clean -uid 0 )\n                  ! ( -path \"./...security*\" -uid 0 )'\n\n      # Remove all old files, then all empty directories\n      find . -depth -xdev $TEXPR $EXCEPT ! -type d -delete\n      find . -depth -xdev $DEXPR $EXCEPT -type d -empty -delete\n\n      # Check if we have enough space in /tmp, and if not, mount a tmpfs there\n      avail=`df -kP /tmp | awk 'NR==2 { print $4 }'`\n      if [ \"$avail\" -lt 1000 ]; then\n\tmount -t tmpfs -o size=1048576,mode=1777 overflow /tmp\n      fi\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -14710,12 +15178,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -14775,12 +15247,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -14870,7 +15346,7 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "    if [ \"$INTERFACE\" = lo ]; then\n\t# bring this up even if /etc/network/interfaces is broken\n\tifconfig lo 127.0.0.1 up || true\n\tinitctl emit -n net-device-up \\\n\t    IFACE=lo LOGICAL=lo ADDRFAM=inet METHOD=loopback || true\n    fi\n    mkdir -p /run/network\n    exec ifup --allow auto $INTERFACE\n"
+               "command" : "      if [ \"$INTERFACE\" = lo ]; then\n\t# bring this up even if /etc/network/interfaces is broken\n\tifconfig lo 127.0.0.1 up || true\n\tinitctl emit -n net-device-up \\\n\t      IFACE=lo LOGICAL=lo ADDRFAM=inet METHOD=loopback || true\n      fi\n      mkdir -p /run/network\n      exec ifup --allow auto $INTERFACE\n"
             },
             {
                "script" : 0,
@@ -14883,6 +15359,10 @@
             {
                "script" : 0,
                "command" : "ifdown --allow auto $INTERFACE"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -14999,7 +15479,11 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "if [ \"$UPSTART_EVENTS\" = started ] || \\\n   status plymouth-splash | grep -q \"start/started\" || \\\n   plymouth --ping\nthen\n  initctl emit plymouth-ready\nfi\n"
+               "command" : "if [ \"$UPSTART_EVENTS\" = started ] || \\\n    status plymouth-splash | grep -q \"start/started\" || \\\n    plymouth --ping\nthen\n   initctl emit plymouth-ready\nfi\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -15139,6 +15623,10 @@
             {
                "script" : 0,
                "command" : "/bin/plymouth show-splash"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -15332,6 +15820,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -15452,12 +15944,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -15530,6 +16026,10 @@
             {
                "script" : 0,
                "command" : "/sbin/getty -8 38400 tty1"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -15720,6 +16220,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -15843,6 +16347,10 @@
             {
                "script" : 1,
                "command" : "savelog -q -p -c 5 /var/log/dmesg\ndmesg -s 524288 > /var/log/dmesg\nchgrp adm /var/log/dmesg\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -15989,6 +16497,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -16087,12 +16599,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -16137,6 +16653,10 @@
          "description" : null,
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -16261,12 +16781,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -16347,12 +16871,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -16434,12 +16962,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -16521,12 +17053,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -16651,7 +17187,11 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "[ -f /run/network-interface-security ] && exit 0 # already ran\n[ -d /rofs/etc/apparmor.d ]  && exit 0 # do not load on liveCD\n[ -d /sys/module/apparmor ]  || exit 0 # do not load without AppArmor\n[ -x /sbin/apparmor_parser ] || exit 0 # do not load without parser\nfor link in /etc/apparmor/init/network-interface-security/* ; do\n    [ -L $link ] && /sbin/apparmor_parser -r -W $link || true\ndone\n> /run/network-interface-security\n"
+               "command" : "[ -f /run/network-interface-security ] && exit 0 # already ran\n[ -d /rofs/etc/apparmor.d ]   && exit 0 # do not load on liveCD\n[ -d /sys/module/apparmor ]   || exit 0 # do not load without AppArmor\n[ -x /sbin/apparmor_parser ] || exit 0 # do not load without parser\nfor link in /etc/apparmor/init/network-interface-security/* ; do\n      [ -L $link ] && /sbin/apparmor_parser -r -W $link || true\ndone\n> /run/network-interface-security\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -16800,12 +17340,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -16885,7 +17429,11 @@
             },
             {
                "script" : 1,
-               "command" : "    log_warning_msg() {\n        echo $*\n    }\n\n    # These checks were taken from the Debian ifupdown.networking.init script\n    check_network_file_systems() {\n        [ -e /proc/mounts ] || return 0\n\n        if [ -e /etc/iscsi/iscsi.initramfs ]; then\n            log_warning_msg \"not deconfiguring network interfaces: iSCSI root is mounted.\"\n            exit 0\n        fi\n\n        while read DEV MTPT FSTYPE REST; do\n            case $DEV in\n            /dev/nbd*|/dev/nd[a-z]*|/dev/etherd/e*)\n                log_warning_msg \"not deconfiguring network interfaces: network devices still mounted.\"\n                exit 0\n                ;;\n            esac\n            case $FSTYPE in\n            nfs|nfs4|smbfs|ncp|ncpfs|cifs|coda|ocfs2|gfs|pvfs|pvfs2|fuse.httpfs|fuse.curlftpfs)\n                log_warning_msg \"not deconfiguring network interfaces: network file systems still mounted.\"\n                exit 0\n                ;;\n            esac\n        done < /proc/mounts\n    }\n\n    check_network_swap() {\n        [ -e /proc/swaps ] || return 0\n\n        while read DEV MTPT FSTYPE REST; do\n            case $DEV in\n            /dev/nbd*|/dev/nd[a-z]*|/dev/etherd/e*)\n                log_warning_msg \"not deconfiguring network interfaces: network swap still mounted.\"\n                exit 0\n                ;;\n            esac\n        done < /proc/swaps\n    }\n\n    check_network_file_systems\n    check_network_swap\n\n    # Anything that manages network interfaces *MUST* wait for this event\n    initctl emit deconfiguring-networking\n    ifdown -a --exclude=lo\n"
+               "command" : "      log_warning_msg() {\n            echo $*\n      }\n\n      # These checks were taken from the Debian ifupdown.networking.init script\n      check_network_file_systems() {\n            [ -e /proc/mounts ] || return 0\n\n            if [ -e /etc/iscsi/iscsi.initramfs ]; then\n                  log_warning_msg \"not deconfiguring network interfaces: iSCSI root is mounted.\"\n                  exit 0\n            fi\n\n            while read DEV MTPT FSTYPE REST; do\n                  case $DEV in\n                  /dev/nbd*|/dev/nd[a-z]*|/dev/etherd/e*)\n                        log_warning_msg \"not deconfiguring network interfaces: network devices still mounted.\"\n                        exit 0\n                        ;;\n                  esac\n                  case $FSTYPE in\n                  nfs|nfs4|smbfs|ncp|ncpfs|cifs|coda|ocfs2|gfs|pvfs|pvfs2|fuse.httpfs|fuse.curlftpfs)\n                        log_warning_msg \"not deconfiguring network interfaces: network file systems still mounted.\"\n                        exit 0\n                        ;;\n                  esac\n            done < /proc/mounts\n      }\n\n      check_network_swap() {\n            [ -e /proc/swaps ] || return 0\n\n            while read DEV MTPT FSTYPE REST; do\n                  case $DEV in\n                  /dev/nbd*|/dev/nd[a-z]*|/dev/etherd/e*)\n                        log_warning_msg \"not deconfiguring network interfaces: network swap still mounted.\"\n                        exit 0\n                        ;;\n                  esac\n            done < /proc/swaps\n      }\n\n      check_network_file_systems\n      check_network_swap\n\n      # Anything that manages network interfaces *MUST* wait for this event\n      initctl emit deconfiguring-networking\n      ifdown -a --exclude=lo\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -17050,6 +17598,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -17171,7 +17723,11 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "    if [ ! -f /var/lib/rfkill/saved-state ] ||\n       [ ! -d /sys/class/rfkill ]; then\n        exit 0\n    fi\n\n    while read line; do\n        set -- $line\n\n        for device in /sys/class/rfkill/*; do\n            [ ! -d $device ] && continue\n\n            if [ -f $device/soft ] &&\n               [ \"$(cat $device/name)\" = \"$1\" ]; then\n                echo $2 > $device/soft\n            fi\n        done\n    done < /var/lib/rfkill/saved-state\n"
+               "command" : "      if [ ! -f /var/lib/rfkill/saved-state ] ||\n          [ ! -d /sys/class/rfkill ]; then\n            exit 0\n      fi\n\n      while read line; do\n            set -- $line\n\n            for device in /sys/class/rfkill/*; do\n                  [ ! -d $device ] && continue\n\n                  if [ -f $device/soft ] &&\n                      [ \"$(cat $device/name)\" = \"$1\" ]; then\n                        echo $2 > $device/soft\n                  fi\n            done\n      done < /var/lib/rfkill/saved-state\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -17293,12 +17849,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -17368,6 +17928,10 @@
             {
                "script" : 0,
                "command" : "/sbin/getty -8 38400 tty6"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -17523,6 +18087,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -17637,6 +18205,10 @@
             {
                "script" : 0,
                "command" : "/bin/false"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -17773,6 +18345,10 @@
             {
                "script" : 0,
                "command" : null
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -17878,7 +18454,11 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "case \"$CONTAINER\" in\n    lxc|lxc-libvirt)\n        initctl emit --no-wait net-device-added INTERFACE=lo || true\n    ;;\nesac\n"
+               "command" : "case \"$CONTAINER\" in\n      lxc|lxc-libvirt)\n            initctl emit --no-wait net-device-added INTERFACE=lo || true\n      ;;\nesac\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -18024,6 +18604,10 @@
             {
                "script" : 0,
                "command" : "sleep 45"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,

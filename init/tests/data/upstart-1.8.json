@@ -14,12 +14,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 2,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -75,6 +79,10 @@
             {
                "script" : 1,
                "command" : "/lib/init/apparmor-profile-load usr.sbin.avahi-daemon\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -186,12 +194,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -236,6 +248,10 @@
          "description" : null,
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -354,12 +370,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -411,6 +431,10 @@
             {
                "script" : 0,
                "command" : "/sbin/getty -8 38400 tty4"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -526,12 +550,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 1,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -587,7 +615,11 @@
             },
             {
                "script" : 1,
-               "command" : "    [ -x /usr/bin/ubiquity-dm ] && { stop; exit 0; }\n\n    if ! grep report_crashes=true /etc/default/whoopsie -sqi; then\n        stop; exit 0\n    fi\n"
+               "command" : "      [ -x /usr/bin/ubiquity-dm ] && { stop; exit 0; }\n\n      if ! grep report_crashes=true /etc/default/whoopsie -sqi; then\n            stop; exit 0\n      fi\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -701,12 +733,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 1,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -755,6 +791,10 @@
             {
                "script" : 0,
                "command" : "/sbin/udevd --daemon"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -870,12 +910,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 2,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -933,6 +977,10 @@
             {
                "script" : 0,
                "command" : "upstart-udev-bridge --daemon"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -1048,12 +1096,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 1,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -1106,6 +1158,10 @@
             {
                "script" : 1,
                "command" : "/lib/init/apparmor-profile-load usr.sbin.rsyslogd\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -1217,12 +1273,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -1274,6 +1334,10 @@
             {
                "script" : 0,
                "command" : "/sbin/getty -8 38400 tty5"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -1389,12 +1453,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -1447,7 +1515,7 @@
             },
             {
                "script" : 1,
-               "command" : "    . /etc/default/apport\n    [ \"$enabled\" = \"1\" ] || [ \"$force_start\" = \"1\" ] || exit 0\n\n    mkdir -p -m 1777 /var/crash\n\n    # check for kernel crash dump, convert it to apport report\n    if [ -e /var/crash/vmcore ] || [ -n \"`ls /var/crash | egrep ^[0-9]{12}$`\" ]\n    then\n\t/usr/share/apport/kernel_crashdump || true\n    fi\n\n    # check for incomplete suspend/resume or hibernate\n    if [ -e /var/lib/pm-utils/status ]\n    then\n        /usr/share/apport/apportcheckresume || true\n        rm -f /var/lib/pm-utils/status\n        rm -f /var/lib/pm-utils/resume-hang.log\n    fi\n\n    echo \"|/usr/share/apport/apport %p %s %c\" > /proc/sys/kernel/core_pattern\n"
+               "command" : "      . /etc/default/apport\n      [ \"$enabled\" = \"1\" ] || [ \"$force_start\" = \"1\" ] || exit 0\n\n      mkdir -p -m 1777 /var/crash\n\n      # check for kernel crash dump, convert it to apport report\n      if [ -e /var/crash/vmcore ] || [ -n \"`ls /var/crash | egrep ^[0-9]{12}$`\" ]\n      then\n\t/usr/share/apport/kernel_crashdump || true\n      fi\n\n      # check for incomplete suspend/resume or hibernate\n      if [ -e /var/lib/pm-utils/status ]\n      then\n            /usr/share/apport/apportcheckresume || true\n            rm -f /var/lib/pm-utils/status\n            rm -f /var/lib/pm-utils/resume-hang.log\n      fi\n\n      echo \"|/usr/share/apport/apport %p %s %c\" > /proc/sys/kernel/core_pattern\n"
             },
             {
                "script" : 0,
@@ -1459,7 +1527,11 @@
             },
             {
                "script" : 1,
-               "command" : "    # Check for a hung resume.  If we find one try and grab everything\n    # we can to aid in its discovery\n    if [ -e /var/lib/pm-utils/status ]\n    then\n\tps -wwef > /var/lib/pm-utils/resume-hang.log\n    fi\n\n    if [ \"`dd if=/proc/sys/kernel/core_pattern count=1 bs=1 2>/dev/null`\" != \"|\" ]\n    then\n\texit 1\n    else\n\techo \"core\" > /proc/sys/kernel/core_pattern\n    fi\n"
+               "command" : "      # Check for a hung resume.   If we find one try and grab everything\n      # we can to aid in its discovery\n      if [ -e /var/lib/pm-utils/status ]\n      then\n\tps -wwef > /var/lib/pm-utils/resume-hang.log\n      fi\n\n      if [ \"`dd if=/proc/sys/kernel/core_pattern count=1 bs=1 2>/dev/null`\" != \"|\" ]\n      then\n\texit 1\n      else\n\techo \"core\" > /proc/sys/kernel/core_pattern\n      fi\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -1561,12 +1633,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -1611,6 +1687,10 @@
          "description" : "Signal sysvinit that local filesystems are mounted",
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -1729,12 +1809,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 1,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -1787,11 +1871,15 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "\tif [ -f \"$DEFAULTFILE\" ]; then\n\t    . \"$DEFAULTFILE\"\n\tfi\n\n\tif [ \"x$NEED_STATD\" != xno ]; then\n\t\texec rpc.statd -L $STATDOPTS\n\tfi\n"
+               "command" : "\tif [ -f \"$DEFAULTFILE\" ]; then\n\t      . \"$DEFAULTFILE\"\n\tfi\n\n\tif [ \"x$NEED_STATD\" != xno ]; then\n\t\texec rpc.statd -L $STATDOPTS\n\tfi\n"
             },
             {
                "script" : 1,
-               "command" : "\tif [ -f \"$DEFAULTFILE\" ]; then\n\t    . \"$DEFAULTFILE\"\n\tfi\n\n\t[ \"x$NEED_STATD\" != xno ] || { stop; exit 0; }\n\tlogger -t statd-pre-start \"$UPSTART_EVENTS\" || true\n\techo UPSTART_EVENTS = \"$UPSTART_EVENTS\"\n\n    exec sm-notify\n"
+               "command" : "\tif [ -f \"$DEFAULTFILE\" ]; then\n\t      . \"$DEFAULTFILE\"\n\tfi\n\n\t[ \"x$NEED_STATD\" != xno ] || { stop; exit 0; }\n\tlogger -t statd-pre-start \"$UPSTART_EVENTS\" || true\n\techo UPSTART_EVENTS = \"$UPSTART_EVENTS\"\n\n      exec sm-notify\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -1905,12 +1993,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -1963,7 +2055,7 @@
             },
             {
                "script" : 1,
-               "command" : "    mkdir -p /var/run/dbus\n    chown messagebus:messagebus /var/run/dbus\n\n    exec dbus-uuidgen --ensure\n"
+               "command" : "      mkdir -p /var/run/dbus\n      chown messagebus:messagebus /var/run/dbus\n\n      exec dbus-uuidgen --ensure\n"
             },
             {
                "script" : 0,
@@ -1976,6 +2068,10 @@
             {
                "script" : 0,
                "command" : "rm -f /var/run/dbus/pid"
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -2075,12 +2171,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 1,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -2135,6 +2235,10 @@
             {
                "script" : 0,
                "command" : "mkdir -p /run/rpcbind"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -2248,12 +2352,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -2323,6 +2431,10 @@
             {
                "script" : 1,
                "command" : "resolvconf --disable-updates\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -2422,12 +2534,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 1,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -2476,6 +2592,10 @@
             {
                "script" : 0,
                "command" : "atd"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -2591,12 +2711,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 1,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -2647,11 +2771,15 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "if [ -f /etc/default/autofs ] ; then\n    . /etc/default/autofs\nfi\nexec /usr/sbin/automount $OPTIONS\n"
+               "command" : "if [ -f /etc/default/autofs ] ; then\n      . /etc/default/autofs\nfi\nexec /usr/sbin/automount $OPTIONS\n"
             },
             {
                "script" : 1,
                "command" : "modprobe -q autofs4 || true\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -2763,12 +2891,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -2817,6 +2949,10 @@
          "description" : "Signal sysvinit that the rootfs is mounted",
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -2935,12 +3071,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -2997,6 +3137,10 @@
             {
                "script" : 1,
                "command" : "\t[ -f /etc/default/lxc ] && . /etc/default/lxc\n\n\t[ \"x$LXC_AUTO\" = \"xtrue\" ] || { stop; exit 0; }\n\n\t# don't load profiles if mount mediation is not supported\n\tSYSF=/sys/kernel/security/apparmor/features/mount/mask\n\tif [ -f $SYSF ]; then\n\t\tif [ -x /lib/init/apparmor-profile-load ]; then\n\t\t\t/lib/init/apparmor-profile-load usr.bin.lxc-start\n\t\t\t/lib/init/apparmor-profile-load lxc-containers\n\t\tfi\n\tfi\n\n\tls /etc/lxc/auto/* > /dev/null 2>&1 || exit 0;\n\tfor f in /etc/lxc/auto/*; do\n\t\tc=\"$(basename $f .conf)\"\n\t\tstart lxc-instance NAME=$c CONFIG=$f\n\tdone\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -3110,12 +3254,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 1,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -3167,6 +3315,10 @@
             {
                "script" : 1,
                "command" : "\t# set $LANG so that messages appearing on the GUI will be translated. See LP: 875017\n\tif [ -r /etc/default/locale ]; then\n\t\t. /etc/default/locale\n\t\texport LANG LANGUAGE LC_MESSAGES LC_ALL\n\tfi\n\n\texec NetworkManager\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -3282,6 +3434,7 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
@@ -3296,6 +3449,9 @@
                      "path" : "/var/log/upstart/cups-browsed.log",
                      "io_watch_fd" : 16,
                      "fd" : -1
+                  },
+                  {
+                     "path" : null
                   },
                   {
                      "path" : null
@@ -3346,6 +3502,10 @@
             {
                "script" : 1,
                "command" : "[ -x /usr/sbin/cups-browsed ]\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -3457,12 +3617,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 1,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -3514,6 +3678,10 @@
             {
                "script" : 0,
                "command" : "cron"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -3629,6 +3797,7 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
@@ -3643,6 +3812,9 @@
                      "path" : "/var/log/upstart/lightdm.log",
                      "io_watch_fd" : 21,
                      "fd" : -1
+                  },
+                  {
+                     "path" : null
                   },
                   {
                      "path" : null
@@ -3698,7 +3870,7 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "    if [ -n \"$UPSTART_EVENTS\" ]\n    then\n        # Check kernel command-line for inhibitors, unless we are being called\n        # manually\n        for ARG in $(cat /proc/cmdline); do\n            if [ \"$ARG\" = \"text\" ]; then\n\t\tplymouth quit || : \n                stop\n\t\texit 0\n            fi\n        done\n\n\t[ ! -f /etc/X11/default-display-manager -o \"$(cat /etc/X11/default-display-manager 2>/dev/null)\" = \"/usr/bin/lightdm\" -o \"$(cat /etc/X11/default-display-manager 2>/dev/null)\" = \"/usr/sbin/lightdm\" ] || { stop; exit 0; }\n\n\tif [ \"$RUNLEVEL\" = S -o \"$RUNLEVEL\" = 1 ]\n\tthen\n\t    # Single-user mode\n\t    plymouth quit || :\n\t    exit 0\n\tfi\n    fi\n\n    exec lightdm\n"
+               "command" : "      if [ -n \"$UPSTART_EVENTS\" ]\n      then\n            # Check kernel command-line for inhibitors, unless we are being called\n            # manually\n            for ARG in $(cat /proc/cmdline); do\n                  if [ \"$ARG\" = \"text\" ]; then\n\t\tplymouth quit || : \n                        stop\n\t\texit 0\n                  fi\n            done\n\n\t[ ! -f /etc/X11/default-display-manager -o \"$(cat /etc/X11/default-display-manager 2>/dev/null)\" = \"/usr/bin/lightdm\" -o \"$(cat /etc/X11/default-display-manager 2>/dev/null)\" = \"/usr/sbin/lightdm\" ] || { stop; exit 0; }\n\n\tif [ \"$RUNLEVEL\" = S -o \"$RUNLEVEL\" = 1 ]\n\tthen\n\t      # Single-user mode\n\t      plymouth quit || :\n\t      exit 0\n\tfi\n      fi\n\n      exec lightdm\n"
             },
             {
                "script" : 0,
@@ -3715,6 +3887,10 @@
             {
                "script" : 1,
                "command" : "if [ \"$UPSTART_STOP_EVENTS\" = runlevel ]; then\n\tinitctl emit desktop-shutdown\nfi\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -3814,12 +3990,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -3864,6 +4044,10 @@
          "description" : "Signal sysvinit that virtual filesystems are mounted",
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -3982,12 +4166,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 1,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -4039,6 +4227,10 @@
             {
                "script" : 0,
                "command" : "acpid -c /etc/acpi/events -s /var/run/acpid.socket"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -4154,12 +4346,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -4220,7 +4416,7 @@
             },
             {
                "script" : 1,
-               "command" : "\t[ \"$VERBOSE\" = no ] && redirect='>/dev/null 2>&1' || redirect=\n\n\t# start_uarts()\n\tif [ -x /usr/sbin/hciattach ] && [ -f $UART_CONF ];\n\tthen\n\t\tgrep -v '^#' $UART_CONF | while read i; do\n\t\t  eval \"/usr/sbin/hciattach $i $redirect\" || :\n\t\tdone\n\tfi\n\n\t# start_rfcomm()\n\tif [ -x /usr/bin/rfcomm ] && [ -f $RFCOMM_CONF ] ;\n\tthen\n\t\t# rfcomm must always succeed for now: users\n\t\t# may not yet have an rfcomm-enabled kernel\n\t\teval \"/usr/bin/rfcomm -f $RFCOMM_CONF bind all $redirect\" || :\n\tfi\n"
+               "command" : "\t[ \"$VERBOSE\" = no ] && redirect='>/dev/null 2>&1' || redirect=\n\n\t# start_uarts()\n\tif [ -x /usr/sbin/hciattach ] && [ -f $UART_CONF ];\n\tthen\n\t\tgrep -v '^#' $UART_CONF | while read i; do\n\t\t   eval \"/usr/sbin/hciattach $i $redirect\" || :\n\t\tdone\n\tfi\n\n\t# start_rfcomm()\n\tif [ -x /usr/bin/rfcomm ] && [ -f $RFCOMM_CONF ] ;\n\tthen\n\t\t# rfcomm must always succeed for now: users\n\t\t# may not yet have an rfcomm-enabled kernel\n\t\teval \"/usr/bin/rfcomm -f $RFCOMM_CONF bind all $redirect\" || :\n\tfi\n"
             },
             {
                "script" : 0,
@@ -4229,6 +4425,10 @@
             {
                "script" : 1,
                "command" : "\t# stop_uarts()\n\tlogger -t bluez \"Stopping uarts\"\n\tkillall hciattach >/dev/null 2>&1 || :\n\n\t# stop_rfcomm()\n\tlogger -t bluez \"Stopping rfcomm\"\n\tif [ -x /usr/bin/rfcomm ];\n\tthen\n\t\teval \"/usr/bin/rfcomm unbind all $redirect\" || :\n\tfi\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -4331,12 +4531,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -4385,6 +4589,10 @@
          "description" : null,
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -4503,12 +4711,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -4557,6 +4769,10 @@
          "description" : null,
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -4675,12 +4891,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -4725,6 +4945,10 @@
          "description" : "Signal sysvinit that remote filesystems are mounted",
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -4843,12 +5067,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -4917,6 +5145,10 @@
             {
                "script" : 0,
                "command" : "/lib/ufw/ufw-init stop"
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -5016,12 +5248,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -5066,6 +5302,10 @@
          "description" : null,
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -5184,12 +5424,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 2,
                "respawn_time" : 535,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -5245,6 +5489,10 @@
             {
                "script" : 0,
                "command" : "upstart-socket-bridge --daemon"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -5360,12 +5608,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -5417,11 +5669,15 @@
             },
             {
                "script" : 1,
-               "command" : "    [ -x /usr/sbin/cupsd ]\n    \n    # load modules for parallel port support\n    if [ -r /etc/default/cups ]; then\n\t. /etc/default/cups\n    fi\n    if [ \"$LOAD_LP_MODULE\" = \"yes\" -a -f /usr/lib/cups/backend/parallel \\\n\t -a -f /proc/modules -a -x /sbin/modprobe ]; then\n\tmodprobe -q -b lp || true\n\tmodprobe -q -b ppdev || true\n\tmodprobe -q -b parport_pc || true\n    fi\n    \n    mkdir -p /var/run/cups/certs\n    if [ -x /lib/init/apparmor-profile-load ]; then\n\t/lib/init/apparmor-profile-load usr.sbin.cupsd\n    fi\n"
+               "command" : "      [ -x /usr/sbin/cupsd ]\n      \n      # load modules for parallel port support\n      if [ -r /etc/default/cups ]; then\n\t. /etc/default/cups\n      fi\n      if [ \"$LOAD_LP_MODULE\" = \"yes\" -a -f /usr/lib/cups/backend/parallel \\\n\t -a -f /proc/modules -a -x /sbin/modprobe ]; then\n\tmodprobe -q -b lp || true\n\tmodprobe -q -b ppdev || true\n\tmodprobe -q -b parport_pc || true\n      fi\n      \n      mkdir -p /var/run/cups/certs\n      if [ -x /lib/init/apparmor-profile-load ]; then\n\t/lib/init/apparmor-profile-load usr.sbin.cupsd\n      fi\n"
             },
             {
                "script" : 1,
-               "command" : "    # wait until daemon is ready\n    timeout=6\n    while [ ! -e /var/run/cups/cups.sock ]; do \n        sleep 0.5\n\ttimeout=$((timeout-1))\n\tif [ \"$timeout\" -eq 0 ]; then\n\t    echo \"cupsd failed to create /var/run/cups/cups.sock, skipping automatic printer configuration\" >&2\n\t    exit 0\n\tfi\n    done\n    \n    # coldplug USB printers\n    if ! /lib/udev/udev-configure-printer enumerate 2>/dev/null; then\n        if type udevadm > /dev/null 2>&1 && [ -x /lib/udev/udev-configure-printer ]; then\n            for printer in `udevadm trigger --verbose --dry-run --subsystem-match=usb \\\n                    --attr-match=bInterfaceClass=07 --attr-match=bInterfaceSubClass=01 2>/dev/null || true; \\\n                            udevadm trigger --verbose --dry-run --subsystem-match=usb \\\n                    --sysname-match='lp[0-9]*' 2>/dev/null || true`; do\n                /lib/udev/udev-configure-printer add \"${printer#/sys}\"\n            done\n        fi\n    fi\n    echo \"CUPS POST-START DONE\"\n"
+               "command" : "      # wait until daemon is ready\n      timeout=6\n      while [ ! -e /var/run/cups/cups.sock ]; do \n            sleep 0.5\n\ttimeout=$((timeout-1))\n\tif [ \"$timeout\" -eq 0 ]; then\n\t      echo \"cupsd failed to create /var/run/cups/cups.sock, skipping automatic printer configuration\" >&2\n\t      exit 0\n\tfi\n      done\n      \n      # coldplug USB printers\n      if ! /lib/udev/udev-configure-printer enumerate 2>/dev/null; then\n            if type udevadm > /dev/null 2>&1 && [ -x /lib/udev/udev-configure-printer ]; then\n                  for printer in `udevadm trigger --verbose --dry-run --subsystem-match=usb \\\n                              --attr-match=bInterfaceClass=07 --attr-match=bInterfaceSubClass=01 2>/dev/null || true; \\\n                                          udevadm trigger --verbose --dry-run --subsystem-match=usb \\\n                              --sysname-match='lp[0-9]*' 2>/dev/null || true`; do\n                        /lib/udev/udev-configure-printer add \"${printer#/sys}\"\n                  done\n            fi\n      fi\n      echo \"CUPS POST-START DONE\"\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -5529,12 +5785,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -5579,6 +5839,10 @@
          "description" : "Signal sysvinit that virtual filesystems are mounted",
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -5697,12 +5961,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -5754,6 +6022,10 @@
             {
                "script" : 0,
                "command" : "/sbin/getty -8 38400 tty2"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -5869,12 +6141,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 2,
                "respawn_time" : 535,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -5930,6 +6206,10 @@
             {
                "script" : 0,
                "command" : "upstart-file-bridge --daemon"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -6045,12 +6325,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -6095,6 +6379,10 @@
          "description" : null,
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -6213,12 +6501,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -6270,6 +6562,10 @@
             {
                "script" : 0,
                "command" : "/sbin/getty -8 38400 tty3"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -6385,12 +6681,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -6466,6 +6766,10 @@
             {
                "script" : 1,
                "command" : "\t[ -f /etc/default/lxc ] && . /etc/default/lxc\n\t[ -f \"${varrun}/network_up\" ] || exit 0;\n\t# if $LXC_BRIDGE has attached interfaces, don't shut it down\n\tls /sys/class/net/${LXC_BRIDGE}/brif/* > /dev/null 2>&1 && exit 0;\n\n\tif [ -d /sys/class/net/${LXC_BRIDGE} ]; then\n\t\tifconfig ${LXC_BRIDGE} down\n\t\tiptables -t nat -D POSTROUTING -s ${LXC_NETWORK} ! -d ${LXC_NETWORK} -j MASQUERADE || true\n\t\tpid=`cat ${varrun}/dnsmasq.pid 2>/dev/null` && kill -9 $pid || true\n\t\trm -f ${varrun}/dnsmasq.pid\n\t\tbrctl delbr ${LXC_BRIDGE}\n\tfi\n\trm -f ${varrun}/network_up\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -6574,12 +6878,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 2,
                "respawn_time" : 535,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -6629,6 +6937,10 @@
             {
                "script" : 0,
                "command" : "/sbin/upstart-test-bridge --daemon"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -6744,12 +7056,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -6802,12 +7118,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -6859,12 +7179,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -6938,7 +7262,7 @@
             },
             {
                "script" : 1,
-               "command" : "    if [ \"$INTERFACE\" = lo ]; then\n\t# bring this up even if /etc/network/interfaces is broken\n\tifconfig lo 127.0.0.1 up || true\n\tinitctl emit -n net-device-up \\\n\t    IFACE=lo LOGICAL=lo ADDRFAM=inet METHOD=loopback || true\n    fi\n    mkdir -p /run/network\n    exec ifup --allow auto $INTERFACE\n"
+               "command" : "      if [ \"$INTERFACE\" = lo ]; then\n\t# bring this up even if /etc/network/interfaces is broken\n\tifconfig lo 127.0.0.1 up || true\n\tinitctl emit -n net-device-up \\\n\t      IFACE=lo LOGICAL=lo ADDRFAM=inet METHOD=loopback || true\n      fi\n      mkdir -p /run/network\n      exec ifup --allow auto $INTERFACE\n"
             },
             {
                "script" : 0,
@@ -6951,6 +7275,10 @@
             {
                "script" : 0,
                "command" : "ifdown --allow auto $INTERFACE"
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -7050,6 +7378,7 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
@@ -7064,6 +7393,9 @@
                      "path" : "/var/log/upstart/respawn-test.log",
                      "io_watch_fd" : 14,
                      "fd" : -1
+                  },
+                  {
+                     "path" : null
                   },
                   {
                      "path" : null
@@ -7111,6 +7443,10 @@
             {
                "script" : 0,
                "command" : "sleep 999"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -7226,12 +7562,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -7286,6 +7626,10 @@
             {
                "script" : 0,
                "command" : "/sbin/getty -8 38400 tty1"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -7401,12 +7745,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -7451,6 +7799,10 @@
          "description" : null,
          "respawn_interval" : 5,
          "process" : [
+            {
+               "script" : 0,
+               "command" : null
+            },
             {
                "script" : 0,
                "command" : null
@@ -7569,12 +7921,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -7618,12 +7974,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -7668,12 +8028,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -7718,12 +8082,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -7768,12 +8136,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -7828,7 +8200,11 @@
             },
             {
                "script" : 1,
-               "command" : "[ -f /run/network-interface-security ] && exit 0 # already ran\n[ -d /rofs/etc/apparmor.d ]  && exit 0 # do not load on liveCD\n[ -d /sys/module/apparmor ]  || exit 0 # do not load without AppArmor\n[ -x /sbin/apparmor_parser ] || exit 0 # do not load without parser\nfor link in /etc/apparmor/init/network-interface-security/* ; do\n    [ -L $link ] && /sbin/apparmor_parser -r -W $link || true\ndone\n> /run/network-interface-security\n"
+               "command" : "[ -f /run/network-interface-security ] && exit 0 # already ran\n[ -d /rofs/etc/apparmor.d ]   && exit 0 # do not load on liveCD\n[ -d /sys/module/apparmor ]   || exit 0 # do not load without AppArmor\n[ -x /sbin/apparmor_parser ] || exit 0 # do not load without parser\nfor link in /etc/apparmor/init/network-interface-security/* ; do\n      [ -L $link ] && /sbin/apparmor_parser -r -W $link || true\ndone\n> /run/network-interface-security\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -7940,12 +8316,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -8017,7 +8397,11 @@
             },
             {
                "script" : 1,
-               "command" : "    log_warning_msg() {\n        echo $*\n    }\n\n    # These checks were taken from the Debian ifupdown.networking.init script\n    check_network_file_systems() {\n        [ -e /proc/mounts ] || return 0\n\n        if [ -e /etc/iscsi/iscsi.initramfs ]; then\n            log_warning_msg \"not deconfiguring network interfaces: iSCSI root is mounted.\"\n            exit 0\n        fi\n\n        while read DEV MTPT FSTYPE REST; do\n            case $DEV in\n            /dev/nbd*|/dev/nd[a-z]*|/dev/etherd/e*)\n                log_warning_msg \"not deconfiguring network interfaces: network devices still mounted.\"\n                exit 0\n                ;;\n            esac\n            case $FSTYPE in\n            nfs|nfs4|smbfs|ncp|ncpfs|cifs|coda|ocfs2|gfs|pvfs|pvfs2|fuse.httpfs|fuse.curlftpfs)\n                log_warning_msg \"not deconfiguring network interfaces: network file systems still mounted.\"\n                exit 0\n                ;;\n            esac\n        done < /proc/mounts\n    }\n\n    check_network_swap() {\n        [ -e /proc/swaps ] || return 0\n\n        while read DEV MTPT FSTYPE REST; do\n            case $DEV in\n            /dev/nbd*|/dev/nd[a-z]*|/dev/etherd/e*)\n                log_warning_msg \"not deconfiguring network interfaces: network swap still mounted.\"\n                exit 0\n                ;;\n            esac\n        done < /proc/swaps\n    }\n\n    check_network_file_systems\n    check_network_swap\n\n    # Anything that manages network interfaces *MUST* wait for this event\n    initctl emit deconfiguring-networking\n    ifdown -a --exclude=lo\n"
+               "command" : "      log_warning_msg() {\n            echo $*\n      }\n\n      # These checks were taken from the Debian ifupdown.networking.init script\n      check_network_file_systems() {\n            [ -e /proc/mounts ] || return 0\n\n            if [ -e /etc/iscsi/iscsi.initramfs ]; then\n                  log_warning_msg \"not deconfiguring network interfaces: iSCSI root is mounted.\"\n                  exit 0\n            fi\n\n            while read DEV MTPT FSTYPE REST; do\n                  case $DEV in\n                  /dev/nbd*|/dev/nd[a-z]*|/dev/etherd/e*)\n                        log_warning_msg \"not deconfiguring network interfaces: network devices still mounted.\"\n                        exit 0\n                        ;;\n                  esac\n                  case $FSTYPE in\n                  nfs|nfs4|smbfs|ncp|ncpfs|cifs|coda|ocfs2|gfs|pvfs|pvfs2|fuse.httpfs|fuse.curlftpfs)\n                        log_warning_msg \"not deconfiguring network interfaces: network file systems still mounted.\"\n                        exit 0\n                        ;;\n                  esac\n            done < /proc/mounts\n      }\n\n      check_network_swap() {\n            [ -e /proc/swaps ] || return 0\n\n            while read DEV MTPT FSTYPE REST; do\n                  case $DEV in\n                  /dev/nbd*|/dev/nd[a-z]*|/dev/etherd/e*)\n                        log_warning_msg \"not deconfiguring network interfaces: network swap still mounted.\"\n                        exit 0\n                        ;;\n                  esac\n            done < /proc/swaps\n      }\n\n      check_network_file_systems\n      check_network_swap\n\n      # Anything that manages network interfaces *MUST* wait for this event\n      initctl emit deconfiguring-networking\n      ifdown -a --exclude=lo\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,
@@ -8117,12 +8501,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -8173,7 +8561,11 @@
          "process" : [
             {
                "script" : 1,
-               "command" : "  # check for console entry\n  [ -z \"`grep console= /proc/cmdline`\" ] && exit 0\n  OLD_IFS=$IFS\n\n  for arg in $(cat /proc/cmdline)\n  do\n    case \"$arg\" in\n      console=*)\n        IFS=','\n        set -- ${arg#console=}\n\n        # no device specified\n        [ -z \"$1\" ] && continue\n      \n        # handle braille devices\n        [ \"$1\" = brl ] && shift\n      \n        # Extract device name, also handling scenario where user\n        # specifies full path to device. Specifying a full path is oddly\n        # not valid, but since it's a potentially common scenario, we\n        # handle it.\n        PORT=${1#/dev/}\n        DEVICE=\"/dev/$PORT\"\n      \n        # device doesn't exist\n        [ ! -e \"${DEVICE}\" ] && continue\n        \n        # only allow authorized terminals\n        grep -q \"^${PORT}$\" /etc/securetty || continue\n        \n        # device already has an associated job\n        [ -f /etc/init/$PORT.conf ] && continue\n      \n        # invalid options specified\n        options=\"$2\"\n        if [ -n \"$options\" ]; then\n          echo \"$options\" | egrep \"[0-9]{4,}(n|o|e)[0-9]r*\" || continue\n        fi\n      \n        # delimit options with commas for easier parsing\n        options=$(echo \"$options\" | sed -r \\\n          -e 's/^([0-9]{4,})/\\1,/g' \\\n          -e 's/(n|o|e)/\\1,/g' \\\n          -e 's/(7|8)/\\1,/g')\n        IFS=','\n        set -- $options\n      \n        SPEED=\"$1\"\n        PARITY=\"$2\"\n        BITS=\"$3\"\n        FLOW=\"$4\"\n      \n        GETTY_ARGS=\"\"\n        \n        [ -z \"$SPEED\" ] && SPEED='115200,57600,38400,19200,9600'\n        [ -z \"$BITS\" ] && BITS=8\n        [ -n \"$BITS\" -a \"$BITS\" -eq 8 ] && GETTY_ARGS=\"$GETTY_ARGS -8 \"\n        [ -n \"$FLOW\" ] && GETTY_ARGS=\"$GETTY_ARGS --flow-control\"\n\texport TERM=linux\n  \texport IFS=$OLD_IFS\n\tset > /tmp/james\n        GETTY_ARGS=\"$GETTY_ARGS $SPEED $PORT\"\n        exec /sbin/getty $GETTY_ARGS\n\tbreak\n      ;;\n    esac\n  done\n  ## XXX: WORKS!!\n  #export TERM=linux\n  #export IFS=$OLD_IFS\n  #exec /sbin/getty $GETTY_ARGS\n"
+               "command" : "   # check for console entry\n   [ -z \"`grep console= /proc/cmdline`\" ] && exit 0\n   OLD_IFS=$IFS\n\n   for arg in $(cat /proc/cmdline)\n   do\n      case \"$arg\" in\n         console=*)\n            IFS=','\n            set -- ${arg#console=}\n\n            # no device specified\n            [ -z \"$1\" ] && continue\n         \n            # handle braille devices\n            [ \"$1\" = brl ] && shift\n         \n            # Extract device name, also handling scenario where user\n            # specifies full path to device. Specifying a full path is oddly\n            # not valid, but since it's a potentially common scenario, we\n            # handle it.\n            PORT=${1#/dev/}\n            DEVICE=\"/dev/$PORT\"\n         \n            # device doesn't exist\n            [ ! -e \"${DEVICE}\" ] && continue\n            \n            # only allow authorized terminals\n            grep -q \"^${PORT}$\" /etc/securetty || continue\n            \n            # device already has an associated job\n            [ -f /etc/init/$PORT.conf ] && continue\n         \n            # invalid options specified\n            options=\"$2\"\n            if [ -n \"$options\" ]; then\n               echo \"$options\" | egrep \"[0-9]{4,}(n|o|e)[0-9]r*\" || continue\n            fi\n         \n            # delimit options with commas for easier parsing\n            options=$(echo \"$options\" | sed -r \\\n               -e 's/^([0-9]{4,})/\\1,/g' \\\n               -e 's/(n|o|e)/\\1,/g' \\\n               -e 's/(7|8)/\\1,/g')\n            IFS=','\n            set -- $options\n         \n            SPEED=\"$1\"\n            PARITY=\"$2\"\n            BITS=\"$3\"\n            FLOW=\"$4\"\n         \n            GETTY_ARGS=\"\"\n            \n            [ -z \"$SPEED\" ] && SPEED='115200,57600,38400,19200,9600'\n            [ -z \"$BITS\" ] && BITS=8\n            [ -n \"$BITS\" -a \"$BITS\" -eq 8 ] && GETTY_ARGS=\"$GETTY_ARGS -8 \"\n            [ -n \"$FLOW\" ] && GETTY_ARGS=\"$GETTY_ARGS --flow-control\"\n\texport TERM=linux\n   \texport IFS=$OLD_IFS\n\tset > /tmp/james\n            GETTY_ARGS=\"$GETTY_ARGS $SPEED $PORT\"\n            exec /sbin/getty $GETTY_ARGS\n\tbreak\n         ;;\n      esac\n   done\n   ## XXX: WORKS!!\n   #export TERM=linux\n   #export IFS=$OLD_IFS\n   #exec /sbin/getty $GETTY_ARGS\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -8289,12 +8681,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 0,
                "respawn_time" : 0,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -8346,6 +8742,10 @@
             {
                "script" : 0,
                "command" : "/sbin/getty -8 38400 tty6"
+            },
+            {
+               "script" : 0,
+               "command" : null
             },
             {
                "script" : 0,
@@ -8461,12 +8861,16 @@
                   0,
                   0,
                   0,
+                  0,
                   0
                ],
                "start_env" : [],
                "trace_forks" : 1,
                "respawn_time" : 343,
                "log" : [
+                  {
+                     "path" : null
+                  },
                   {
                      "path" : null
                   },
@@ -8533,6 +8937,10 @@
             {
                "script" : 1,
                "command" : "if mountpoint -q \"$PIPEFS_MOUNTPOINT\"\nthen\n\t# ignore any failures caused by the filesystem still\n\t# being in use\n\tumount \"$PIPEFS_MOUNTPOINT\" || true\nfi\n"
+            },
+            {
+               "script" : 0,
+               "command" : null
             }
          ],
          "respawn_limit" : 10,

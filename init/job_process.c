@@ -1771,6 +1771,18 @@ job_process_terminated (Job         *job,
 			stop = TRUE;
 		}
 		break;
+	case PROCESS_TMPFILES:
+		nih_assert (job->state == JOB_TMPFILES);
+
+		/* If the tmpfiles process is killed or exits with a status
+		 * other than zero, it's always considered a failure since
+		 * we don't know what state the job might be in.
+		 */
+		if (status) {
+			failed = TRUE;
+			stop = TRUE;
+		}
+		break;
 	case PROCESS_PRE_START:
 		nih_assert (job->state == JOB_PRE_START);
 

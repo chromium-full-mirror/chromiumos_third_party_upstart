@@ -475,9 +475,27 @@ job_change_state (Job      *job,
 				state = job_next_state (job);
 			}
 			break;
-		case JOB_PRE_STARTING:
+		case JOB_TMPFILES_SPAWNING:
 			nih_assert (job->goal == JOB_START);
 			nih_assert (old_state == JOB_SECURITY);
+
+			/* Apply any registered tmpfiles.d configurations. */
+			if (job->class->process[PROCESS_TMPFILES]) {
+				job_process_start (job, PROCESS_TMPFILES);
+			}
+			state = job_next_state (job);
+			break;
+		case JOB_TMPFILES:
+			nih_assert (job->goal == JOB_START);
+			nih_assert (old_state == JOB_TMPFILES_SPAWNING);
+
+			if (! (job->class->process[PROCESS_TMPFILES])) {
+				state = job_next_state (job);
+			}
+			break;
+		case JOB_PRE_STARTING:
+			nih_assert (job->goal == JOB_START);
+			nih_assert (old_state == JOB_TMPFILES);
 
 			/* spawn pre-start asynchronously, child
 			 * watcher asynchronously will change goal to
@@ -485,7 +503,7 @@ job_change_state (Job      *job,
 			 */
 			if (job->class->process[PROCESS_PRE_START]) {
 				job_process_start (job, PROCESS_PRE_START);
-			}	
+			}
 			state = job_next_state (job);
 			break;
 		case JOB_PRE_START:
@@ -580,6 +598,7 @@ job_change_state (Job      *job,
 				    || (old_state == JOB_PRE_STARTING)
 				    || (old_state == JOB_PRE_START)
 				    || (old_state == JOB_SECURITY)
+				    || (old_state == JOB_TMPFILES)
 				    || (old_state == JOB_SPAWNED)
 				    || (old_state == JOB_POST_START)
 				    || (old_state == JOB_RUNNING)
@@ -714,6 +733,24 @@ job_next_state (Job *job)
 			nih_assert_not_reached ();
 		}
 	case JOB_SECURITY:
+		switch (job->goal) {
+		case JOB_STOP:
+			return JOB_STOPPING;
+		case JOB_START:
+			return JOB_TMPFILES_SPAWNING;
+		default:
+			nih_assert_not_reached ();
+		}
+	case JOB_TMPFILES_SPAWNING:
+		switch (job->goal) {
+		case JOB_STOP:
+			return JOB_STOPPING;
+		case JOB_START:
+			return JOB_TMPFILES;
+		default:
+			nih_assert_not_reached ();
+		}
+	case JOB_TMPFILES:
 		switch (job->goal) {
 		case JOB_STOP:
 			return JOB_STOPPING;
@@ -1241,6 +1278,10 @@ job_state_name (JobState state)
 		return N_("security-spawning");
 	case JOB_SECURITY:
 		return N_("security");
+	case JOB_TMPFILES_SPAWNING:
+		return N_("tmpfiles-spawning");
+	case JOB_TMPFILES:
+		return N_("tmpfiles");
 	case JOB_PRE_STARTING:
 		return N_("pre-starting");
 	case JOB_PRE_START:
@@ -1293,6 +1334,10 @@ job_state_from_name (const char *state)
 		return JOB_SECURITY_SPAWNING;
 	} else if (! strcmp (state, "security")) {
 		return JOB_SECURITY;
+	} else if (! strcmp (state, "tmpfiles-spawning")) {
+		return JOB_TMPFILES_SPAWNING;
+	} else if (! strcmp (state, "tmpfiles")) {
+		return JOB_TMPFILES;
 	} else if (! strcmp (state, "pre-starting")) {
 		return JOB_PRE_STARTING;
 	} else if (! strcmp (state, "pre-start")) {

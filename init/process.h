@@ -46,7 +46,8 @@ typedef enum process_type {
 	PROCESS_PRE_STOP,
 	PROCESS_POST_STOP,
 	PROCESS_SECURITY,
-	PROCESS_LAST,
+	PROCESS_TMPFILES,
+	PROCESS_LAST
 } ProcessType;
 
 

@@ -955,6 +955,7 @@ value, both of which are integers.  The special value
 may be specified for either.
 .\"
 .TP
+<<<<<<< HEAD
 .B setuid \fIUSERNAME
 Changes to the user
 .I USERNAME
@@ -1193,6 +1194,17 @@ system has less than 50MB of RAM or less than 2 CPUs.
 
 .RE
 
+=======
+.B tmpfiles <path1 ...>
+This stanza should be listed at most once.  It accepts a list of paths that
+point to tmpfiles.d configurations to be executed after the job's
+.BR starting (7)
+event has finished, but before the pre-start is run.  It is typically used to
+create file system objects like directories that are required by the job
+environment.  This is preferred over manually creating directories and files in
+pre-start because tmpfiles.d is hardened against symlink and time-of-check to
+time-of-use attacks.
+>>>>>>> 200c13d8 (Add tmpfiles stanza for defining tmpfiles.d configurations.)
 .\"
 .SS Override File Handling
 Override files allow a jobs environment to be changed without modifying
