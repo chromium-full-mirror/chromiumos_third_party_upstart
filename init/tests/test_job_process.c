@@ -547,38 +547,12 @@ test_run (void)
 
 		TEST_NE (job->pid[PROCESS_MAIN], 0);
 
-		/* Loop until we've fed all of the data. */
-		first = TRUE;
-		for (;;) {
-			fd_set readfds, writefds, exceptfds;
-			int    nfds;
-
-			nfds = 0;
-			FD_ZERO (&readfds);
-			FD_ZERO (&writefds);
-			FD_ZERO (&exceptfds);
-
-			nih_io_select_fds (&nfds, &readfds,
-					   &writefds, &exceptfds);
-			if (! nfds) {
-				if (first)
-					TEST_FAILED ("expected to have "
-						     "data to feed.");
-				break;
-			}
-			first = FALSE;
-
-			select (nfds, &readfds, &writefds, &exceptfds, NULL);
-
-			nih_io_handle_fds (&readfds, &writefds, &exceptfds);
-		}
-
 		waitpid (job->pid[PROCESS_MAIN], &status, 0);
 		TEST_TRUE (WIFEXITED (status));
 		TEST_EQ (WEXITSTATUS (status), 0);
 
 		output = fopen (filename, "r");
-		TEST_FILE_EQ_N (output, "/proc/self/fd/");
+		TEST_FILE_EQ_N (output, "/bin/sh");
 		TEST_FILE_EQ (output, "\n");
 		TEST_FILE_END (output);
 		fclose (output);
