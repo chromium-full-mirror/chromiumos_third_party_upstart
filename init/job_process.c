@@ -27,9 +27,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <sys/mman.h>
 #include <sys/ptrace.h>
 #include <sys/resource.h>
 
+#include <fcntl.h>
 #include <time.h>
 #include <errno.h>
 #include <stdio.h>
@@ -177,10 +179,9 @@ job_process_run (Job         *job,
 							proc->command));
 		}
 
-		/* Don't pipe single-line scripts into the shell using
-		 * /proc/self/fd/NNN, instead just pass them over the
-		 * command-line (taking care to strip off the trailing
-		 * newlines).
+		/* Don't write single-line scripts to memfds to pass to the shell,
+		 * instead just pass them over the command-line (taking care to
+		 * strip off the trailing newlines).
 		 */
 		p = nl = strchr (script, '\n');
 		while (p && (*p == '\n'))
@@ -200,19 +201,17 @@ job_process_run (Job         *job,
 			NIH_MUST (nih_str_array_add (&argv, NULL,
 						     &argc, SHELL));
 		} else {
-			nih_local char *cmd = NULL;
-
-			/* Close the writing end when the child is exec'd */
-			NIH_ZERO (pipe (fds));
-			nih_io_set_cloexec (fds[1]);
+			/* Emulate a pipe with an memfd. */
+			NIH_MUST (
+				(fds[1] = memfd_create (
+					"", MFD_ALLOW_SEALING | MFD_CLOEXEC)
+						) >= 0
+			);
+			NIH_MUST (
+				(fds[0] = dup (fds[1])) >= 0
+			);
 
 			shell = TRUE;
-
-			cmd = NIH_MUST (nih_sprintf (argv, "%s/%d",
-						     "/proc/self/fd",
-						     JOB_PROCESS_SCRIPT_FD));
-			NIH_MUST (nih_str_array_addp (&argv, NULL,
-						      &argc, cmd));
 		}
 	} else {
 		/* Split the command on whitespace to produce a list of
@@ -254,6 +253,41 @@ job_process_run (Job         *job,
 		|| (job->class->expect == EXPECT_FORK)))
 		trace = TRUE;
 
+	/* Feed the script to the child process. */
+	if (shell) {
+		FILE *io;
+		size_t write_len = strlen (script);
+
+		/* A blocking write is used here because the memfd needs to be written
+		 * before it can be sealed and handed off to the shell interpreter.
+		 */
+		io = NIH_MUST (fdopen (fds[1], "w"));
+		if (fwrite (script, sizeof (script[0]), write_len, io) != write_len) {
+			/* Non-temporary error condition, we're not going
+			 * to be able to spawn this process.  Clean up after
+			 * ourselves before returning.
+			 */
+			fclose (io);
+			close (fds[0]);
+
+			job->pid[process] = 0;
+
+			/* Return non-temporary error condition */
+			nih_warn (_("Failed to spawn %s %s process: %s"),
+				  job_name (job), process_name (process),
+				  strerror (errno));
+			return -1;
+		}
+		fclose (io);
+
+		NIH_ZERO (lseek (fds[0], 0, SEEK_SET));
+
+		/* Seal the file descriptor so it cannot be modified. */
+		NIH_ZERO (fcntl (fds[0], F_ADD_SEALS,
+				 F_SEAL_WRITE | F_SEAL_GROW | F_SEAL_SHRINK |
+				 F_SEAL_SEAL));
+	}
+
 	/* Spawn the process, repeat until fork() works */
 	while ((job->pid[process] = job_process_spawn (job->class, argv,
 						       env, trace, fds[0])) < 0) {
@@ -267,7 +301,6 @@ job_process_run (Job         *job,
 			 */
 			if (shell) {
 				close (fds[0]);
-				close (fds[1]);
 			}
 
 			job->pid[process] = 0;
@@ -292,37 +325,8 @@ job_process_run (Job         *job,
 	job->trace_forks = 0;
 	job->trace_state = trace ? TRACE_NEW : TRACE_NONE;
 
-	/* Feed the script to the child process */
 	if (shell) {
-		NihIo *io;
-
-		/* Clean up and close the reading end (we don't need it) */
 		close (fds[0]);
-
-		/* Put the entire script into an NihIo send buffer and
-		 * then mark it for closure so that the shell gets EOF
-		 * and the structure gets cleaned up automatically.
-		 */
-		while (! (io = nih_io_reopen (job, fds[1], NIH_IO_STREAM,
-					      NULL, NULL, NULL, NULL))) {
-			NihError *err;
-
-			err = nih_error_get ();
-			if (err->number != ENOMEM)
-				nih_assert_not_reached ();
-			nih_free (err);
-		}
-
-		/* We're feeding using a pipe, which has a file descriptor
-		 * on the child end even though it open()s it again using
-		 * a path. Instruct the shell to close this extra fd and
-		 * not to leak it.
-		 */
-		NIH_ZERO (nih_io_printf (io, "exec %d<&-\n",
-					 JOB_PROCESS_SCRIPT_FD));
-
-		NIH_ZERO (nih_io_write (io, script, strlen (script)));
-		nih_io_shutdown (io);
 	}
 
 	return 0;
@@ -351,8 +355,7 @@ job_process_run (Job         *job,
  * wait for this and then may use it to set options before continuing the
  * process.
  *
- * If @script_fd is not -1, this file descriptor is dup()d to the special fd 9
- * (moving any other out of the way if necessary).
+ * If @script_fd is not -1, this file descriptor is dup()d to stdin.
  *
  * This function only spawns the process, it is up to the caller to ensure
  * that the information is saved into the job and that the process is watched,
@@ -436,7 +439,7 @@ job_process_spawn (JobClass     *class,
 	 * far because read() returned zero.
 	 */
 	close (fds[0]);
-	if (fds[1] == JOB_PROCESS_SCRIPT_FD) {
+	if (fds[1] == STDIN_FILENO) {
 		int tmp = dup2 (fds[1], fds[0]);
 		if (tmp < 0)
 			job_process_error_abort (fds[1], JOB_PROCESS_ERROR_DUP, 0);
@@ -444,17 +447,6 @@ job_process_spawn (JobClass     *class,
 		fds[1] = tmp;
 	}
 	nih_io_set_cloexec (fds[1]);
-
-	/* Move the script fd to special fd 9; the only gotcha is if that
-	 * would be our error descriptor, but that's handled above.
-	 */
-	if ((script_fd != -1) && (script_fd != JOB_PROCESS_SCRIPT_FD)) {
-		int tmp = dup2 (script_fd, JOB_PROCESS_SCRIPT_FD);
-		if (tmp < 0)
-			job_process_error_abort (fds[1], JOB_PROCESS_ERROR_DUP, 0);
-		close (script_fd);
-		script_fd = tmp;
-	}
 
 	/* Become the leader of a new session and process group, shedding
 	 * any controlling tty (which we shouldn't have had anyway).
@@ -479,6 +471,18 @@ job_process_spawn (JobClass     *class,
 				job_process_error_abort (fds[1], JOB_PROCESS_ERROR_CONSOLE, 0);
 		} else
 			job_process_error_abort (fds[1], JOB_PROCESS_ERROR_CONSOLE, 0);
+	}
+
+	/* Move the script fd to stdin; the only gotcha is if that would be our
+	 * error descriptor, but that's handled above. Note that this follows
+	 * the console setup so that script_fd is not replaced with /dev/null.
+	 */
+	if ((script_fd != -1) && (script_fd != STDIN_FILENO)) {
+		int tmp = dup2 (script_fd, STDIN_FILENO);
+		if (tmp < 0)
+			job_process_error_abort (fds[1], JOB_PROCESS_ERROR_DUP, 0);
+		close (script_fd);
+		script_fd = tmp;
 	}
 
 	/* Set resource limits for the process, skipping over any that
