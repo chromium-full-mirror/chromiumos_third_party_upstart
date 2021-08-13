@@ -1570,9 +1570,6 @@ job_process_trace_fork (Job         *job,
  * This function is called whenever a traced @process attached to @job calls
  * the exec() system call after we've set options on it to distinguish them
  * from ordinary SIGTRAPs.
- *
- * We assume that if the job calls exec that it's finished forking so we can
- * drop the trace entirely; we have no interest in tracing the new child.
  **/
 static void
 job_process_trace_exec (Job         *job,
@@ -1590,21 +1587,10 @@ job_process_trace_exec (Job         *job,
 	nih_info (_("%s %s process (%d) executable changed"),
 		  job_name (job), process_name (process), job->pid[process]);
 
-	if (job->trace_forks) {
-		if (ptrace (PTRACE_DETACH, job->pid[process], NULL, 0) < 0)
-			nih_warn (_("Failed to detach traced "
-				    "%s %s process (%d): %s"),
-				  job_name (job), process_name (process),
-				  job->pid[process], strerror (errno));
-
-		job->trace_state = TRACE_NONE;
-		job_change_state (job, job_next_state (job));
-	} else {
-		if (ptrace (PTRACE_CONT, job->pid[process], NULL, 0) < 0)
-			nih_warn (_("Failed to continue traced %s %s process (%d): %s"),
-				  job_name (job), process_name (process),
-				  job->pid[process], strerror (errno));
-	}
+        if (ptrace (PTRACE_CONT, job->pid[process], NULL, 0) < 0)
+                nih_warn (_("Failed to continue traced %s %s process (%d): %s"),
+                          job_name (job), process_name (process),
+                          job->pid[process], strerror (errno));
 }
 
 
