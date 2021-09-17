@@ -78,6 +78,15 @@ if test "x$enable_selinux" = "xyes" ; then
 	AC_DEFINE(RESTORE_PATHS, [{"/dev", "/run"}], [Define restorecon paths])
 fi
 
+# Define a preprocessor value if building for a manatee guest.
+AC_ARG_ENABLE(manatee,
+	AS_HELP_STRING([--enable-manatee], [enable ManaTEE guest support]),
+	[], [enable_manatee=no])
+
+if test "x$enable_manatee" = "xyes" ; then
+	AC_DEFINE(ENABLE_MANATEE, 1, [Define if we support ManaTEE])
+fi
+
 # If this argument is set, it means that we want to generate and include the
 # global seccomp policy in Upstart.
 AC_ARG_WITH([seccomp-constants],

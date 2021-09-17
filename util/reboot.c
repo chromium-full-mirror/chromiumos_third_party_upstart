@@ -66,6 +66,10 @@
 #define SHUTDOWN SBINDIR "/shutdown"
 #endif
 
+#ifdef ENABLE_MANATEE
+const char MANATEE_CLIENT[] = "/usr/bin/manatee";
+#endif
+
 
 /* Operation modes */
 enum {
@@ -227,6 +231,32 @@ main (int   argc,
 
 	/* Re-enable Control-Alt-Delete in case it breaks */
 	reboot (RB_ENABLE_CAD);
+
+#ifdef ENABLE_MANATEE
+	int val = fork ();
+	if (val == 0) {
+		const char *flag;
+		/* Do the syscall */
+		switch (mode) {
+		case REBOOT:
+			nih_info (_("Rebooting"));
+			flag = "--reboot";
+			break;
+		case HALT:
+			nih_info (_("Halting"));
+			flag = "--halt";
+			break;
+		case POWEROFF:
+			nih_info (_("Powering off"));
+			flag = "--poweroff";
+			break;
+		}
+		const char *manatee_args[] = { MANATEE_CLIENT, flag };
+		execv (manatee_args[0], manatee_args);
+	} else {
+		waitpid (val, NULL, 0);
+	}
+#endif
 
 	/* Do the syscall */
 	switch (mode) {
