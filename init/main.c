@@ -561,6 +561,9 @@ main (int   argc,
 	 * to access a directory protected by ext4 crypto can access the key.
 	 *
 	 * Only set a session keyring if the kernel supports ext4 encryption.
+	 *
+	 * TODO(chromium:1299635, dlunev): remove this once the new hierarchical
+	 * structure is used.
 	 */
 	if (!access("/sys/fs/ext4/features/encryption", F_OK)) {
 		key_serial_t keyring_id;
@@ -582,6 +585,72 @@ main (int   argc,
 				       KEY_USR_ALL);
 		}
 	}
+
+	/*
+	 * Create hierarchy of keyrings. Default upstart session-keyring is the
+	 * root, but we need more granularity to be able selective clean keys
+	 * when user logs out without blasting reboot vault's keys. We put the
+	 * code in do-while(0) loop for the ease of breaking out.
+	 *
+	 * "global" keyring - keyring root for "crash-reporter" to join.
+	 * "session" keyring - holds user's vault keys.
+	 * "reboot_vault" keyring - holds the key to the reboot vault.
+	 * "encstateful" keyring - holds the keys for the encstateful.
+	 */
+	do {
+		key_serial_t global_keyring;
+		key_serial_t session_keyring;
+		key_serial_t reboot_vault_keyring;
+		key_serial_t encstateful_keyring;
+
+		global_keyring =
+			add_key("keyring", "global", 0, 0, KEY_SPEC_SESSION_KEYRING);
+		if (global_keyring == -1) {
+			nih_warn("%s: %s", _("Unable to create global keyring: %s"),
+				 strerror(errno));
+			break;
+		}
+
+		session_keyring = add_key("keyring", "session", 0, 0, global_keyring);
+		if (session_keyring == -1) {
+			nih_warn("%s: %s", _("Unable to create session keyring: %s"),
+				 strerror(errno));
+			break;
+		}
+
+		reboot_vault_keyring =
+			add_key("keyring", "reboot_vault", 0, 0, global_keyring);
+		if (reboot_vault_keyring == -1) {
+			nih_warn("%s: %s", _("Unable to create reboot_vault keyring: %s"),
+				 strerror(errno));
+			break;
+		}
+
+		encstateful_keyring =
+			add_key("keyring", "encstateful", 0, 0, global_keyring);
+		if (reboot_vault_keyring == -1) {
+			nih_warn("%s: %s", _("Unable to create encstateful keyring: %s"),
+				 strerror(errno));
+			break;
+		}
+
+		// If all keyrings are set allright, then set permissions on them.
+		keyctl_setperm(encstateful_keyring, KEY_POS_VIEW | KEY_POS_SEARCH |
+						    KEY_POS_LINK | KEY_POS_READ |
+						    KEY_USR_ALL);
+		keyctl_setperm(reboot_vault_keyring, KEY_POS_VIEW | KEY_POS_SEARCH |
+						     KEY_POS_LINK | KEY_POS_READ |
+						     KEY_USR_ALL);
+		keyctl_setperm(session_keyring, KEY_POS_VIEW | KEY_POS_SEARCH |
+						KEY_POS_LINK | KEY_POS_READ |
+						KEY_USR_ALL);
+		keyctl_setperm(global_keyring, KEY_POS_VIEW | KEY_POS_SEARCH |
+					       KEY_POS_LINK | KEY_POS_READ |
+					       KEY_USR_ALL);
+		keyctl_setperm(KEY_SPEC_SESSION_KEYRING,
+			       KEY_POS_VIEW | KEY_POS_SEARCH |
+			       KEY_POS_LINK | KEY_POS_READ | KEY_USR_ALL);
+	} while (0);
 #endif
 	if (user_mode) {
 		/* Save initial value */
