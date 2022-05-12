@@ -62,7 +62,7 @@ typedef struct process {
 NIH_BEGIN_EXTERN
 
 Process *   process_new       (const void *parent)
-	__attribute__ ((warn_unused_result, malloc));
+	__attribute__ ((warn_unused_result));
 
 const char *process_name      (ProcessType process)
 	__attribute__ ((const));

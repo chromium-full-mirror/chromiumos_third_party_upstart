@@ -78,10 +78,10 @@ NIH_BEGIN_EXTERN
 EventOperator *event_operator_new         (const void *parent,
 					   EventOperatorType type,
 					   const char *name, char **env)
-	__attribute__ ((warn_unused_result, malloc));
+	__attribute__ ((warn_unused_result));
 EventOperator *event_operator_copy        (const void *parent,
 					   const EventOperator *old_oper)
-	__attribute__ ((warn_unused_result, malloc));
+	__attribute__ ((warn_unused_result));
 
 int            event_operator_destroy     (EventOperator *oper);
 

@@ -81,8 +81,7 @@ extern NihList *events;
 
 void   event_init    (void);
 
-Event *event_new     (const void *parent, const char *name, char **env)
-	__attribute__ ((malloc));
+Event *event_new     (const void *parent, const char *name, char **env);
 
 void   event_block   (Event *event);
 void   event_unblock (Event *event);

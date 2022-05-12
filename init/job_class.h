@@ -220,7 +220,7 @@ void        job_class_init                 (void);
 
 JobClass  * job_class_new                  (const void *parent,
 					    const char *name)
-	__attribute__ ((warn_unused_result, malloc));
+	__attribute__ ((warn_unused_result));
 
 int         job_class_consider             (JobClass *class);
 int         job_class_reconsider           (JobClass *class);
@@ -232,7 +232,7 @@ void        job_class_unregister           (JobClass *class,
 
 char      **job_class_environment          (const void *parent,
 					    JobClass *class, size_t *len)
-	__attribute__ ((warn_unused_result, malloc));
+	__attribute__ ((warn_unused_result));
 char**      job_class_import_environment   (JobClass     *class,
 					    char       ***env,
 					    void         *parent,

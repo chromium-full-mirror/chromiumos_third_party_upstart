@@ -120,10 +120,8 @@ Function Attributes
 -------------------
 
 Functions that allocate a structure and return it should use the
-"warn_unused_result" and "malloc" attributes, even if the structure is
-placed in a linked list.  The former ensures a failure to allocate
-memory is checked by the caller, and the latter allows some
-optimisation.
+"warn_unused_result" attribute.  This ensures a failure to allocate
+memory is checked by the caller.
 
 Functions that raise errors, or call other functions that raise
 errors, must indicate that an error has been raised in their return
@@ -149,6 +147,5 @@ the macros defined in the nih/test.h header.  See the existing test
 examples to see how.
 
 Any functions that allocate memory, or call any functions that
-allocate memory (those marked with the "malloc" attribute) should be
-tested using the TEST_ALLOC_FAIL macro to ensure that the case of
-insufficient memory is handled properly.
+allocate memory should be tested using the TEST_ALLOC_FAIL macro to
+ensure that the case of insufficient memory is handled properly.
