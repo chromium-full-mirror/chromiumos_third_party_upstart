@@ -266,6 +266,8 @@ my_connect_handler (DBusServer *    server,
 	return TRUE;
 }
 
+static void hup_handler_empty (int signum) { _exit (0); }
+
 void
 test_upstart_open (void)
 {
@@ -3513,8 +3515,7 @@ test_start_action (void)
 			 * of memory cases.
 			 */
 			for (;;) {
-				void hup_handler (int signum) { _exit (0); }
-				signal (SIGHUP, hup_handler);
+				signal (SIGHUP, hup_handler_empty);
 
 				/* Expect the Get call for the job name, reply with
 				 * the name.
@@ -3843,8 +3844,7 @@ test_start_action (void)
 			 * of memory cases.
 			 */
 			for (;;) {
-				void hup_handler (int signum) { _exit (0); }
-				signal (SIGHUP, hup_handler);
+				signal (SIGHUP, hup_handler_empty);
 
 				/* Expect the Get call for the job name, reply with
 				 * the name.
@@ -4175,8 +4175,7 @@ test_start_action (void)
 			 * of memory cases.
 			 */
 			for (;;) {
-				void hup_handler (int signum) { _exit (0); }
-				signal (SIGHUP, hup_handler);
+				signal (SIGHUP, hup_handler_empty);
 
 				/* Expect the Get call for the job name, reply with
 				 * the name.
@@ -4535,8 +4534,7 @@ test_start_action (void)
 			 * of memory cases.
 			 */
 			for (;;) {
-				void hup_handler (int signum) { _exit (0); }
-				signal (SIGHUP, hup_handler);
+				signal (SIGHUP, hup_handler_empty);
 
 				/* Expect the Get call for the job name, reply with
 				 * the name.
@@ -5314,8 +5312,7 @@ test_stop_action (void)
 			 * of memory cases.
 			 */
 			for (;;) {
-				void hup_handler (int signum) { _exit (0); }
-				signal (SIGHUP, hup_handler);
+				signal (SIGHUP, hup_handler_empty);
 
 				/* Expect the Get call for the job name, reply with
 				 * the name.
@@ -5560,8 +5557,7 @@ test_stop_action (void)
 			 * of memory cases.
 			 */
 			for (;;) {
-				void hup_handler (int signum) { _exit (0); }
-				signal (SIGHUP, hup_handler);
+				signal (SIGHUP, hup_handler_empty);
 
 				/* Expect the Get call for the job name, reply with
 				 * the name.
@@ -5806,8 +5802,7 @@ test_stop_action (void)
 			 * of memory cases.
 			 */
 			for (;;) {
-				void hup_handler (int signum) { _exit (0); }
-				signal (SIGHUP, hup_handler);
+				signal (SIGHUP, hup_handler_empty);
 
 				/* Expect the Get call for the job name, reply with
 				 * the name.
@@ -6051,8 +6046,7 @@ test_stop_action (void)
 			 * of memory cases.
 			 */
 			for (;;) {
-				void hup_handler (int signum) { _exit (0); }
-				signal (SIGHUP, hup_handler);
+				signal (SIGHUP, hup_handler_empty);
 
 				/* Expect the Get call for the job name, reply with
 				 * the name.
@@ -6870,8 +6864,7 @@ test_restart_action (void)
 			 * of memory cases.
 			 */
 			for (;;) {
-				void hup_handler (int signum) { _exit (0); }
-				signal (SIGHUP, hup_handler);
+				signal (SIGHUP, hup_handler_empty);
 
 				/* Expect the Get call for the job name, reply with
 				 * the name.
@@ -7200,8 +7193,7 @@ test_restart_action (void)
 			 * of memory cases.
 			 */
 			for (;;) {
-				void hup_handler (int signum) { _exit (0); }
-				signal (SIGHUP, hup_handler);
+				signal (SIGHUP, hup_handler_empty);
 
 				/* Expect the Get call for the job name, reply with
 				 * the name.
@@ -7532,8 +7524,7 @@ test_restart_action (void)
 			 * of memory cases.
 			 */
 			for (;;) {
-				void hup_handler (int signum) { _exit (0); }
-				signal (SIGHUP, hup_handler);
+				signal (SIGHUP, hup_handler_empty);
 
 				/* Expect the Get call for the job name, reply with
 				 * the name.
@@ -7892,8 +7883,7 @@ test_restart_action (void)
 			 * of memory cases.
 			 */
 			for (;;) {
-				void hup_handler (int signum) { _exit (0); }
-				signal (SIGHUP, hup_handler);
+				signal (SIGHUP, hup_handler_empty);
 
 				/* Expect the Get call for the job name, reply with
 				 * the name.
