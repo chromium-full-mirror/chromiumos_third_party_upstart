@@ -4351,9 +4351,8 @@ test_handler (void)
 	class->expect = EXPECT_NONE;
 
 
-	/* Check that should the process call exec() after fork() it ends
-	 * the tracing even if we haven't had enough forks yet and moves
-	 * the job into the running state.
+	/* Check that should the process call exec() after fork() we continue
+	 * tracing if we haven't had enough forks yet.
 	 */
 	TEST_FEATURE ("with exec call by process after fork");
 	class->expect = EXPECT_DAEMON;
@@ -4390,11 +4389,11 @@ test_handler (void)
 		rewind (output);
 
 		TEST_EQ (job->goal, JOB_START);
-		TEST_EQ (job->state, JOB_RUNNING);
+		TEST_EQ (job->state, JOB_SPAWNED);
 		TEST_EQ (job->pid[PROCESS_MAIN], pid);
 
 		TEST_EQ (job->trace_forks, 1);
-		TEST_EQ (job->trace_state, TRACE_NONE);
+		TEST_EQ (job->trace_state, TRACE_NORMAL);
 
 		waitpid (job->pid[PROCESS_MAIN], &status, 0);
 		TEST_TRUE (WIFEXITED (status));
