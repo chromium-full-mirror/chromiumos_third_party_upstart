@@ -9501,10 +9501,6 @@ test_utmp (void)
 		job->exit_status = 0;
 
 		output = fopen (utmpname, "w");
-		fclose (output);
-
-		/* set utmp file */
-		utmpxname(utmpname);
 
 		/* set up utmp entries */
 		memset (&utmp, 0, sizeof utmp);
@@ -9516,17 +9512,20 @@ test_utmp (void)
 		gettimeofday(&tv, NULL);
 		utmp.ut_time = 0;
 
-		setutxent();
-		pututxline(&utmp);
+		fwrite(&utmp, sizeof(utmp), 1, output);
 
 		strcpy(utmp.ut_id, "2");
 		utmp.ut_type = USER_PROCESS;
 		utmp.ut_pid = 2;
 		utmp.ut_tv.tv_sec = tv.tv_sec;
 		utmp.ut_tv.tv_usec = tv.tv_usec;
-		pututxline(&utmp);
 
-		endutxent();
+		fwrite(&utmp, sizeof(utmp), 1, output);
+
+                fclose(output);
+
+		/* set utmp file */
+		utmpxname(utmpname);
 
 		job_process_handler (NULL, 2, NIH_CHILD_EXITED, 0);
 
