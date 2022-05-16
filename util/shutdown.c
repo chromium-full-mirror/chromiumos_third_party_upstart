@@ -61,8 +61,11 @@
  * ETC_NOLOGIN:
  *
  * File we write to to prevent logins.
+ *
+ * ChromeOS: /run is used instead of /etc because /etc is read only.
+ *   Also, systemd uses /run/nologin anyway.
  **/
-#define ETC_NOLOGIN "/etc/nologin"
+#define ETC_NOLOGIN "/run/nologin"
 
 /**
  * DEV:
