@@ -27,6 +27,7 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/mount.h>
+#include <sys/sysmacros.h>
 
 #include <fcntl.h>
 #include <signal.h>

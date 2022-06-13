@@ -29,6 +29,7 @@
 #include <sys/reboot.h>
 #include <sys/resource.h>
 #include <sys/mount.h>
+#include <sys/sysmacros.h>
 
 #ifdef HAVE_SYS_PRCTL_H
 #include <sys/prctl.h>
