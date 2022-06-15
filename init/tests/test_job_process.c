@@ -107,10 +107,20 @@ child (enum child_tests  test,
 		assert (getcwd (path, sizeof (path)));
 		fprintf (out, "wd: %s\n", path);
 		break;
-	case TEST_ENVIRONMENT:
-		for (char **env = environ; *env; env++)
-			fprintf (out, "%s\n", *env);
+	case TEST_ENVIRONMENT: {
+		char *ignore_env[] = { "LD_PRELOAD", "SANDBOX_", NULL };
+		char **s;
+
+		for (char **env = environ; *env; env++) {
+			/* Skip sandbox variable */
+			for (s = ignore_env; *s; s++)
+				if (!strncmp(*env, *s, strlen(*s)))
+					break;
+			if (!*s)
+				fprintf (out, "%s\n", *env);
+		}
 		break;
+	}
 	}
 
 	fsync (fileno (out));
