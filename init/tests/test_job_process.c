@@ -289,14 +289,24 @@ child (enum child_tests  test,
 		assert (getcwd (path, sizeof (path)));
 		fprintf (out, "wd: %s\n", path);
 		break;
-	case TEST_ENVIRONMENT:
+	case TEST_ENVIRONMENT: {
+		char *ignore_env[] = { "LD_PRELOAD", "SANDBOX_", NULL };
+		char **s;
+
 		/* guarantee output ordering */
 		for (i = 0; environ[i]; i++);
 		qsort (environ, i, sizeof (environ[0]), strcmp_compar);
 
-		for (char **env = environ; *env; env++)
-			fprintf (out, "%s\n", *env);
+		for (char **env = environ; *env; env++) {
+			/* Skip sandbox variable */
+			for (s = ignore_env; *s; s++)
+				if (!strncmp(*env, *s, strlen(*s)))
+					break;
+			if (!*s)
+				fprintf (out, "%s\n", *env);
+		}
 		break;
+	}
 	case TEST_OUTPUT:
 		/* Write to stdout and stderr.
 		 *
