@@ -1892,7 +1892,7 @@ test_start (void)
 	 */
 	ok = FALSE;
 	while (fgets (filebuf, sizeof(filebuf), output) != NULL) {
-		if (! strcmp (filebuf, "y\r\n"))
+		if (! strncmp (filebuf, "y\r\n", 3))
 			ok = TRUE;
 		else
 			ok = FALSE;
