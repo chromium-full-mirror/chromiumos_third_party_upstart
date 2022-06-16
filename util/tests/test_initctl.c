@@ -16590,15 +16590,14 @@ test_clear_job_env (const char *confdir, const char *logdir,
 	TEST_NE_P (fi, NULL);
 
 	/* Ensure it looks like our PATH */
-	TEST_FILE_MATCH (fi, "PATH=*/wibble*");
+	TEST_FILE_CONTAINS (fi, "PATH=*/wibble*");
 
 	/* Although the environment is empty (except for PATH now), we
 	 * still expect the special variables to be set.
 	 */
-	TEST_FILE_MATCH (fi, "UPSTART_JOB=empty-env*");
-	TEST_FILE_MATCH (fi, "UPSTART_INSTANCE=*");
-	TEST_FILE_MATCH (fi, "UPSTART_SESSION=*");
-	TEST_FILE_END (fi);
+	TEST_FILE_CONTAINS (fi, "UPSTART_JOB=empty-env*");
+	TEST_FILE_CONTAINS (fi, "UPSTART_INSTANCE=*");
+	TEST_FILE_CONTAINS (fi, "UPSTART_SESSION=*");
 	fclose (fi);
 
 	DELETE_FILE (confdir, "empty-env.conf");
@@ -17708,20 +17707,19 @@ test_modified_job_env (const char *confdir, const char *logdir,
 	TEST_NE_P (fi, NULL);
 
 	/* defaults */
-	TEST_FILE_MATCH (fi, "PATH=*");
-	TEST_FILE_MATCH (fi, "TERM=*");
+	TEST_FILE_CONTAINS (fi, "PATH=*");
+	TEST_FILE_CONTAINS (fi, "TERM=*");
 
 	/* variables we added */
-	TEST_FILE_MATCH (fi, "aardvark=mammal*");
-	TEST_FILE_MATCH (fi, "FOO=BAR*");
-	TEST_FILE_MATCH (fi, "_________=_________*");
+	TEST_FILE_CONTAINS (fi, "aardvark=mammal*");
+	TEST_FILE_CONTAINS (fi, "FOO=BAR*");
+	TEST_FILE_CONTAINS (fi, "_________=_________*");
 
 	/* special vars */
-	TEST_FILE_MATCH (fi, "UPSTART_JOB=modified-env*");
-	TEST_FILE_MATCH (fi, "UPSTART_INSTANCE=*");
-	TEST_FILE_MATCH (fi, "UPSTART_SESSION=*");
+	TEST_FILE_CONTAINS (fi, "UPSTART_JOB=modified-env*");
+	TEST_FILE_CONTAINS (fi, "UPSTART_INSTANCE=*");
+	TEST_FILE_CONTAINS (fi, "UPSTART_SESSION=*");
 
-	TEST_FILE_END (fi);
 	fclose (fi);
 
 	DELETE_FILE (confdir, "modified-env.conf");
