@@ -240,7 +240,7 @@ main (int   argc,
 	if ((mkdir ("/dev/pts", 0755) < 0 && errno != EEXIST) ||
 	    system_mount ("devpts", "/dev/pts",
 			  MS_NOEXEC | MS_NOSUID | MS_RELATIME,
-			  "gid=5,mode=0620,ptmxmode=000") < 0) {
+			  "gid=5,mode=0620,ptmxmode=0666") < 0) {
 		NihError *err;
 
 		err = nih_error_get ();
