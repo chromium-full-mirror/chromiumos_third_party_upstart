@@ -974,13 +974,17 @@ test_common_cleanup (void)
 			abort ();
 		}
 
-		assert0 (rmdir (test_xdg_config_home));
-
 		assert0 (setenv ("XDG_CONFIG_HOME", saved_xdg_config_home, 1));
 		nih_info ("Restoring XDG_RUNTIME_DIR='%s'", saved_xdg_config_home);
 		nih_free (saved_xdg_config_home);
 		saved_xdg_config_home = NULL;
 	}
+	path = NIH_MUST (nih_sprintf (NULL, "%s/upstart", xdg_config_home));
+	if (! stat (path, &statbuf))
+		assert0 (rmdir (path));
+
+	assert0 (rmdir (test_xdg_config_home));
+
 
 	if (saved_xdg_runtime_dir) {
 		nih_assert (test_xdg_runtime_dir[0]);
@@ -995,30 +999,44 @@ test_common_cleanup (void)
 			nih_error ("XDG_RUNTIME_DIR '%s' no longer a directory", test_xdg_runtime_dir);
 			abort ();
 		}
-
-		path = NIH_MUST (nih_sprintf (NULL, "%s/upstart/sessions", xdg_runtime_dir));
-
-		if (! stat (path, &statbuf)) {
-			nih_local char *cmd = NULL;
-
-			/* Clean up if tests forgot to */
-			cmd = NIH_MUST (nih_sprintf (NULL, "rm -f %s/*.session 2>/dev/null", path));
-			assert0 (system (cmd));
-
-			/* Remove the directory tree the first Session Init created */
-			assert0 (rmdir (path));
-			path = NIH_MUST (nih_sprintf (NULL, "%s/upstart", xdg_runtime_dir));
-			assert0 (rmdir (path));
-		}
-
-		assert0 (rmdir (test_xdg_runtime_dir));
-
 		assert0 (setenv ("XDG_RUNTIME_DIR", saved_xdg_runtime_dir, 1));
 		nih_info ("Restoring XDG_RUNTIME_DIR='%s'", saved_xdg_config_home);
 		nih_free (saved_xdg_runtime_dir);
 		saved_xdg_runtime_dir = NULL;
 
 	}
+
+	path = NIH_MUST (nih_sprintf (NULL, "%s/upstart/sessions", xdg_runtime_dir));
+
+	if (! stat (path, &statbuf)) {
+		nih_local char *cmd = NULL;
+
+		/* Clean up if tests forgot to */
+		cmd = NIH_MUST (nih_sprintf (NULL, "rm -f %s/*.session 2>/dev/null", path));
+		assert0 (system (cmd));
+
+		/* Remove the directory tree the first Session Init created */
+		assert0 (rmdir (path));
+		path = NIH_MUST (nih_sprintf (NULL, "%s/upstart", xdg_runtime_dir));
+		assert0 (rmdir (path));
+	}
+
+	path = NIH_MUST (nih_sprintf (NULL, "%s/dbus-1/services", xdg_runtime_dir));
+
+	if (! stat (path, &statbuf)) {
+		nih_local char *cmd = NULL;
+
+		/* Clean up if tests forgot to */
+		cmd = NIH_MUST (nih_sprintf (NULL, "rm -f %s/*.session 2>/dev/null", path));
+		assert0 (system (cmd));
+
+		/* Remove the directory tree the first Session Init created */
+		assert0 (rmdir (path));
+		path = NIH_MUST (nih_sprintf (NULL, "%s/dbus-1", xdg_runtime_dir));
+		assert0 (rmdir (path));
+	}
+
+	assert0 (rmdir (test_xdg_runtime_dir));
 }
 
 /**
