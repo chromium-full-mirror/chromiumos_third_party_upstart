@@ -116,6 +116,9 @@ if ENABLE_CGROUPS
 test_libupstart_LDADD += $(CGMANAGER_LIBS)
 endif
 
+test_libupstart_LDFLAGS = \
+	-rpath $(abs_top_builddir)/lib/.libs
+
 com_ubuntu_Upstart_OUTPUTS = \
 	upstart/com.ubuntu.Upstart.c \
 	upstart/com.ubuntu.Upstart.h
