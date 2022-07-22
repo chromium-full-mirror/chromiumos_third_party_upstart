@@ -91,6 +91,13 @@ static void hup_handler     (void *data, NihSignal *signal);
 static void usr1_handler    (void *data, NihSignal *signal);
 #endif /* DEBUG */
 
+// TODO(b/235960683): Drop this after CrOS upgrades to glibc >= 2.34
+// because MS_NOSYMFOLLOW will be defined in sys/mount.h
+#ifndef MS_NOSYMFOLLOW
+// Added locally in kernels 4.x+.
+#define MS_NOSYMFOLLOW 256
+#endif
+
 #ifdef HAVE_SELINUX
 static int initialize_selinux (void);
 #endif
@@ -273,7 +280,8 @@ main (int   argc,
 		nih_free (err);
 	}
 
-	if (system_mount ("tmpfs", "/tmp", MS_NOSUID | MS_NODEV | MS_NOEXEC,
+	if (system_mount ("tmpfs", "/tmp",
+			  MS_NOSUID | MS_NODEV | MS_NOEXEC | MS_NOSYMFOLLOW,
 			  NULL) < 0) {
 		NihError *err;
 
