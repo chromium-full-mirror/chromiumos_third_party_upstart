@@ -4614,6 +4614,7 @@ test_cgroup_and_process_data_state (const char *path)
 
 	json_string = nih_file_read (NULL, path, &len);
 	TEST_NE_P (json_string, NULL);
+	json_string[len - 1] = '\0';
 
 	/* The JSON contains a "process_data" object that represents a
 	 * JobProcessData object denoting a job process whose child
