@@ -150,6 +150,13 @@ AS_IF(
 
 AC_SUBST(KEYUTILS_LIBS)
 
+AC_ARG_ENABLE([scripts],
+	AS_HELP_STRING([--disable_scripts],
+		[Disable building script - including upstart-monitor]),
+		[], [enable_scripts=yes])
+
+AM_CONDITIONAL([ENABLE_SCRIPTS], [test "$enable_scripts" = "yes"])
+
 # Checks for header files.
 AC_CHECK_HEADERS([valgrind/valgrind.h, sys/prctl.h])
 
@@ -222,7 +229,9 @@ NIH_LINKER_OPTIMISATIONS
 AC_CONFIG_FILES([ Makefile
 		  dbus/Makefile init/Makefile util/Makefile conf/Makefile
 		  extra/Makefile doc/Makefile contrib/Makefile po/Makefile.in
-		  scripts/Makefile scripts/data/Makefile
 		  test/Makefile lib/Makefile lib/libupstart.pc.in ])
+
+AM_COND_IF([ENABLE_SCRIPTS], [AC_CONFIG_FILES([ scripts/Makefile scripts/data/Makefile ])])
+
 AC_CONFIG_HEADERS([config.h])
 AC_OUTPUT

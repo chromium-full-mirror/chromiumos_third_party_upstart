@@ -1,6 +1,11 @@
 ## Process this file with automake to produce Makefile.in
 
-SUBDIRS = test dbus init util extra lib conf doc contrib po scripts
+SUBDIRS = test dbus init util extra lib conf doc contrib po
+
+if ENABLE_SCRIPTS
+SUBDIRS += scripts
+endif
+
 
 EXTRA_DIST = HACKING README.tests
 
