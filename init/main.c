@@ -378,7 +378,7 @@ main (int   argc,
 		}
 
 		if (system_mount ("devpts", "/dev/pts", MS_NOEXEC | MS_NOSUID,
-				  "gid=5,mode=0666") < 0) {
+				  "gid=5,mode=0620,ptmxmode=0666") < 0) {
 			NihError *err;
 
 			err = nih_error_get ();
