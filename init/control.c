@@ -662,12 +662,19 @@ control_emit_event_with_file (void            *data,
 	nih_assert (name != NULL);
 	nih_assert (env != NULL);
 
+#if 0
+	/*
+	 * TODO(b/257962606)
+	 * Partial revert of commit abdbf1defcf46a1ea4723a9b526dbd7828f4697d
+	 * to allow non root device to emit message.
+	 */
 	if (! control_check_permission (message)) {
 		nih_dbus_error_raise_printf (
 			DBUS_INTERFACE_UPSTART ".Error.PermissionDenied",
 			_("You do not have permission to emit an event"));
 		return -1;
 	}
+#endif
 
 	/* Verify that the name is valid */
 	if (! strlen (name)) {
