@@ -1059,7 +1059,7 @@ test_change_state (void)
 	class->process[PROCESS_TMPFILES] = process_new (class);
 	class->process[PROCESS_TMPFILES]->script = FALSE;
 	class->process[PROCESS_TMPFILES]->command =
-	    "/bin/systemd-tmpfiles --create --clean --remove "
+	    "/usr/bin/systemd-tmpfiles --create --clean --remove "
 	    "/tmp/upstart-tmpfiles-test.conf";
 
 	/* Write a test configuration. */
@@ -8047,4 +8047,3 @@ main (int   argc,
 
 	return 0;
 }
-

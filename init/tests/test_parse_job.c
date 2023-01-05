@@ -780,7 +780,7 @@ test_stanza_tmpfiles (void)
 		TEST_EQ (process->script, FALSE);
 		TEST_ALLOC_PARENT (process->command, process);
 		TEST_EQ_STR (process->command,
-			     "/bin/systemd-tmpfiles --create --clean --remove "
+			     "/usr/bin/systemd-tmpfiles --create --clean --remove "
 			     "/usr/lib/tmpfiles.d/chromeos.conf");
 
 		nih_free (job);
@@ -821,7 +821,7 @@ test_stanza_tmpfiles (void)
 		TEST_EQ (process->script, FALSE);
 		TEST_ALLOC_PARENT (process->command, process);
 		TEST_EQ_STR (process->command,
-			     "/bin/systemd-tmpfiles --create --clean --remove "
+			     "/usr/bin/systemd-tmpfiles --create --clean --remove "
 			     "/usr/lib/tmpfiles.d/chromeos.conf "
 			     "/usr/lib/tmpfiles.d/dbus.conf");
 
@@ -863,7 +863,7 @@ test_stanza_tmpfiles (void)
 		TEST_EQ (process->script, FALSE);
 		TEST_ALLOC_PARENT (process->command, process);
 		TEST_EQ_STR (process->command,
-			     "/bin/systemd-tmpfiles --create --clean --remove "
+			     "/usr/bin/systemd-tmpfiles --create --clean --remove "
 			     "/usr/lib/tmpfiles.d/dbus.conf");
 
 		nih_free (job);

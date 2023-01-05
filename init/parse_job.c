@@ -3136,7 +3136,7 @@ stanza_tmpfiles (JobClass        *class,
 	       size_t          *lineno)
 {
 	static const char prefix[] =
-	    "/bin/systemd-tmpfiles --create --clean --remove ";
+	    "/usr/bin/systemd-tmpfiles --create --clean --remove ";
 	static const size_t prefix_strlen =
 	    sizeof(prefix) / sizeof(prefix[0]) - sizeof(prefix[0]);
 	char   *cmd = NULL;
