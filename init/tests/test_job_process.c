@@ -4930,6 +4930,7 @@ test_spawn (void)
 		TEST_ALLOC_SAFE {
 			class = job_class_new (NULL, "simple-test", NULL);
 			TEST_NE_P (class, NULL);
+			class->console = CONSOLE_LOG;
 
 			job = job_new (class, "");
 			TEST_NE_P (job, NULL);
@@ -4997,6 +4998,7 @@ test_spawn (void)
 
 	class = job_class_new (NULL, "with-single-line-script-and-console-log", NULL);
 	TEST_NE_P (class, NULL);
+	class->console = CONSOLE_LOG;
 
 	TEST_GT (sprintf (filename, "%s/with-single-line-script-and-console-log.log", dirname), 0);
 	job = job_new (class, "");
@@ -5053,6 +5055,7 @@ test_spawn (void)
 
 	class = job_class_new (NULL, "with-multi-line-script-and-console-log", NULL);
 	TEST_NE_P (class, NULL);
+	class->console = CONSOLE_LOG;
 
 	TEST_GT (sprintf (filename, "%s/with-multi-line-script-and-console-log.log", dirname), 0);
 	job = job_new (class, "");
@@ -5112,6 +5115,7 @@ test_spawn (void)
 
 	class = job_class_new (NULL, "read-single-null-bytes-with-console-log", NULL);
 	TEST_NE_P (class, NULL);
+	class->console = CONSOLE_LOG;
 
 	TEST_GT (sprintf (filename, "%s/read-single-null-bytes-with-console-log.log", dirname), 0);
 	job = job_new (class, "");
@@ -5162,6 +5166,7 @@ test_spawn (void)
 
 	class = job_class_new (NULL, "read-data-from-forked-process", NULL);
 	TEST_NE_P (class, NULL);
+	class->console = CONSOLE_LOG;
 
 	TEST_GT (sprintf (filename, "%s/read-data-from-forked-process.log", dirname), 0);
 	job = job_new (class, "");
@@ -5225,6 +5230,7 @@ test_spawn (void)
 
 	class = job_class_new (NULL, "test", NULL);
 	TEST_NE_P (class, NULL);
+	class->console = CONSOLE_LOG;
 
 	TEST_GT (sprintf (filename, "%s/test.log", dirname), 0);
 	job = job_new (class, "");
@@ -5370,6 +5376,7 @@ test_log_path (void)
 
 	class = job_class_new (NULL, "system", NULL);
 	TEST_NE_P (class, NULL);
+	class->console = CONSOLE_LOG;
 	job = job_new (class, "");
 	TEST_NE_P (job, NULL);
 
@@ -5421,6 +5428,7 @@ test_log_path (void)
 
 	class = job_class_new (NULL, "a/b", NULL);
 	TEST_NE_P (class, NULL);
+	class->console = CONSOLE_LOG;
 	job = job_new (class, "c/d_?/");
 	TEST_NE_P (job, NULL);
 
@@ -5440,6 +5448,7 @@ test_log_path (void)
 
 	class = job_class_new (NULL, "a/b", NULL);
 	TEST_NE_P (class, NULL);
+	class->console = CONSOLE_LOG;
 	job = job_new (class, "c/d_?/");
 	TEST_NE_P (job, NULL);
 
@@ -5638,6 +5647,7 @@ test_handler (void)
 	file = conf_file_new (source, "/tmp/test");
 	file->job = class = job_class_new (NULL, "test", NULL);
 	TEST_NE_P (file->job, NULL);
+	class->console = CONSOLE_LOG;
 	class->process[PROCESS_MAIN] = process_new (class);
 	class->process[PROCESS_MAIN]->command = "echo";
 

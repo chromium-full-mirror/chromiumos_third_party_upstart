@@ -132,7 +132,7 @@ test_new (void)
 		TEST_EQ_P (class->normalexit, NULL);
 		TEST_EQ (class->normalexit_len, 0);
 
-		TEST_EQ (class->console, CONSOLE_LOG);
+		TEST_EQ (class->console, CONSOLE_NONE);
 
 		TEST_EQ (class->umask, 022);
 		TEST_EQ (class->nice, JOB_NICE_INVALID);

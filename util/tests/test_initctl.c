@@ -11066,7 +11066,8 @@ test_reexec (void)
 
 	start_upstart_common (&upstart_pid, FALSE, FALSE, confdir, logdir, NULL);
 
-	contents = nih_sprintf (NULL, 
+	contents = nih_sprintf (NULL,
+			"console log\n"
 			"pre-start exec echo pre-start\n"
 			"script\n"
 			"\n"
@@ -11224,7 +11225,8 @@ test_reexec (void)
 
 	TEST_TRUE (getenv ("XDG_RUNTIME_DIR"));
 
-	contents = nih_sprintf (NULL, 
+	contents = nih_sprintf (NULL,
+			"console log\n"
 			"start on startup\n"
 			"\n"
 			"pre-start script\n"
@@ -11317,7 +11319,7 @@ test_reexec (void)
 	/*******************************************************************/
 	TEST_FEATURE ("ensure re-exec does not disrupt umask");
 
-	contents = nih_sprintf (NULL, "exec sh -c umask");
+	contents = nih_sprintf (NULL, "console log\nexec sh -c umask");
 	TEST_NE_P (contents, NULL);
 
 	CREATE_FILE (confdir, "umask.conf", contents);
@@ -11770,7 +11772,9 @@ test_quiesce (void)
 
 	TEST_FILENAME (pid_file);
 
-	job = NIH_MUST (nih_sprintf (NULL, "start on session-end\n"
+	job = NIH_MUST (nih_sprintf (NULL,
+				"console log\n"
+				"start on session-end\n"
 				"\n"
 				"script\n"
 				"  echo hello\n"
@@ -11832,7 +11836,9 @@ test_quiesce (void)
 
 	TEST_FILENAME (pid_file);
 
-	job = NIH_MUST (nih_sprintf (NULL, "start on session-end\n"
+	job = NIH_MUST (nih_sprintf (NULL,
+				"console log\n"
+				"start on session-end\n"
 				"\n"
 				"script\n"
 				"  trap '' TERM\n"
@@ -11894,6 +11900,7 @@ test_quiesce (void)
 			"1 which starts on session-end and ignores SIGTERM)");
 
 	CREATE_FILE (confdir, "long-running-term.conf",
+			"console log\n"
 			"script\n"
 			"  trap '' TERM\n"
 		        "  exec sleep 999\n"
@@ -11901,7 +11908,9 @@ test_quiesce (void)
 
 	TEST_FILENAME (pid_file);
 
-	job = NIH_MUST (nih_sprintf (NULL, "start on session-end\n"
+	job = NIH_MUST (nih_sprintf (NULL,
+				"console log\n"
+				"start on session-end\n"
 				"\n"
 				"script\n"
 				"  trap '' TERM\n"
@@ -12138,7 +12147,9 @@ test_quiesce (void)
 
 	TEST_FILENAME (pid_file);
 
-	job = NIH_MUST (nih_sprintf (NULL, "start on session-end\n"
+	job = NIH_MUST (nih_sprintf (NULL,
+				"console log\n"
+				"start on session-end\n"
 				"\n"
 				"script\n"
 				"  echo hello\n"
@@ -12200,7 +12211,9 @@ test_quiesce (void)
 
 	TEST_FILENAME (pid_file);
 
-	job = NIH_MUST (nih_sprintf (NULL, "start on session-end\n"
+	job = NIH_MUST (nih_sprintf (NULL,
+				"console log\n"
+				"start on session-end\n"
 				"\n"
 				"script\n"
 				"  trap '' TERM\n"
@@ -12271,7 +12284,9 @@ test_quiesce (void)
 
 	TEST_FILENAME (pid_file);
 
-	job = NIH_MUST (nih_sprintf (NULL, "start on session-end\n"
+	job = NIH_MUST (nih_sprintf (NULL,
+				"console log\n"
+				"start on session-end\n"
 				"\n"
 				"script\n"
 				"  trap '' TERM\n"
@@ -12388,6 +12403,7 @@ test_umask (void)
 
 	/* Has to be a script since umask is a shell built-in */
 	CREATE_FILE (confdir, "umask.conf",
+      "console log\n"
 			"start on startup\n"
 			"script\n"
 			"umask\n"
@@ -12417,6 +12433,7 @@ test_umask (void)
 
 	/* Has to be a script since umask is a shell built-in */
 	CREATE_FILE (confdir, "umask.conf",
+			"console log\n"
 			"start on startup\n"
 			"script\n"
 			"umask\n"
@@ -16414,7 +16431,9 @@ test_default_job_env (const char *confdir, const char *logdir,
 	/*******************************************************************/
 	TEST_FEATURE ("ensure job gets given default environment");
 
-	CREATE_FILE (confdir, "foo.conf", "exec env");
+	CREATE_FILE (confdir, "foo.conf",
+			"console log\n"
+			"exec env");
 
 	cmd = nih_sprintf (NULL, "%s reload-configuration 2>&1", get_initctl ());
 	TEST_NE_P (cmd, NULL);
@@ -16465,7 +16484,6 @@ clear_job_env (void)
 {
 	nih_local char  *cmd = NULL;
 	char           **output;
-	nih_local char  *logfile = NULL;
 	size_t           line_count;
 	size_t           i;
 
@@ -16564,6 +16582,7 @@ test_clear_job_env (const char *confdir, const char *logdir,
 	 */
 	contents = nih_sprintf (NULL,
 			"env PATH=%s\n"
+			"console log\n"
 			"exec env", TEST_INITCTL_DEFAULT_PATH);
 	TEST_NE_P (contents, NULL);
 
@@ -17683,7 +17702,7 @@ test_modified_job_env (const char *confdir, const char *logdir,
 	RUN_COMMAND (NULL, cmd, &output, &line_count);
 	TEST_EQ (line_count, 0);
 
-	CREATE_FILE (confdir, "modified-env.conf", "exec env");
+	CREATE_FILE (confdir, "modified-env.conf", "console log\nexec env");
 
 	cmd = nih_sprintf (NULL, "%s reload-configuration 2>&1", get_initctl ());
 	TEST_NE_P (cmd, NULL);
@@ -17806,7 +17825,8 @@ test_global_and_local_job_env (const char *confdir, const char *logdir,
 	/*******************************************************************/
 	TEST_FEATURE ("ensure pre-start can inject variable into main process");
 
-	contents = nih_sprintf (NULL, 
+	contents = nih_sprintf (NULL,
+			"console log\n"
 			"pre-start exec %s set-env hello=world\n"
 			"exec %s list-env\n",
 			get_initctl (), get_initctl ());
@@ -17856,7 +17876,8 @@ test_global_and_local_job_env (const char *confdir, const char *logdir,
 	TEST_STR_MATCH (output[1], "TERM=*");
 	nih_free (output);
 
-	contents = nih_sprintf (NULL, 
+	contents = nih_sprintf (NULL,
+			"console log\n"
 			"script\n"
 			"  %s set-env --global hello=world\n"
 			"  %s get-env hello\n"
@@ -17898,7 +17919,7 @@ test_global_and_local_job_env (const char *confdir, const char *logdir,
 	DELETE_FILE (confdir, "foo.conf");
 
 	/* Create a new job */
-	contents = nih_sprintf (NULL, "exec %s list-env", get_initctl ());
+	contents = nih_sprintf (NULL, "console log\nexec %s list-env", get_initctl ());
 	TEST_NE_P (contents, NULL);
 
 	CREATE_FILE (confdir, "bar.conf", contents);
@@ -17990,7 +18011,7 @@ test_no_inherit_job_env (const char *runtimedir, const char *confdir, const char
 	/*******************************************************************/
 	TEST_FEATURE ("ensure '--user --no-inherit-env' provides expected job environment");
 
-	CREATE_FILE (confdir, "foo.conf", "exec env");
+	CREATE_FILE (confdir, "foo.conf", "console log\nexec env");
 
 	cmd = nih_sprintf (NULL, "%s reload-configuration 2>&1", get_initctl ());
 	TEST_NE_P (cmd, NULL);

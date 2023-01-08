@@ -373,7 +373,7 @@ job_class_new (const void *parent,
 	class->normalexit = NULL;
 	class->normalexit_len = 0;
 
-	class->console = default_console >= 0 ? default_console : CONSOLE_LOG;
+	class->console = default_console >= 0 ? default_console : CONSOLE_NONE;
 
 	class->umask = (user_mode && ! no_inherit_env) ? initial_umask : JOB_DEFAULT_UMASK;
 	class->nice = JOB_NICE_INVALID;
