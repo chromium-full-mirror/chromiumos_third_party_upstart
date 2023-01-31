@@ -770,9 +770,24 @@ main (int   argc,
 	 * 1, or to exit when running as a Session Init; this signal should
 	 * be the last in the list to ensure that all other signals are
 	 * handled before a SIGTERM.
+	 *
+	 * CHROMIUM: we hack this feature out because in certain situations
+	 * (see b/261373856) upstart crashes when it tries to re-exec. Even
+	 * if we could fix the crash, it seems better to avoid accidentally
+	 * tripping any future bugs in this complex feature that we don't need.
+	 * NOTE that this means that anyone deploying a new version of upstart
+	 * needs to reboot for it to take effect vs trying to get the new
+	 * version to load by `kill -TERM 1`. This is probably a better test
+	 * anyway (you're not testing in a special re-exec mode) and luckily
+	 * reboot is very fast on Chromebooks.
+	 *
+	 * We still catch SIGTERM when in user_mode (AKA when using a Session
+	 * Init) since it doesn't trigger the same re-exec logic.
 	 */
-	nih_signal_set_handler (SIGTERM, nih_signal_handler);
-	NIH_MUST (nih_signal_add_handler (NULL, SIGTERM, term_handler, NULL));
+	if (user_mode) {
+		nih_signal_set_handler (SIGTERM, nih_signal_handler);
+		NIH_MUST (nih_signal_add_handler (NULL, SIGTERM, term_handler, NULL));
+	}
 
 #endif /* DEBUG */
 
