@@ -399,6 +399,12 @@ main (int   argc,
 		system_mknod ("/dev/console", (S_IFCHR | 0600), makedev (5, 1));
 		system_mknod ("/dev/kmsg", (S_IFCHR | 0600), makedev (1, 11));
 
+		system_symlink ("/proc/kcore", "/dev/core");
+		system_symlink ("/proc/self/fd", "/dev/fd");
+		system_symlink ("/proc/self/fd/0", "/dev/stdin");
+		system_symlink ("/proc/self/fd/1", "/dev/stdout");
+		system_symlink ("/proc/self/fd/2", "/dev/stderr");
+
 		/* Set the standard file descriptors to the ordinary console device,
 		 * resetting it to sane defaults unless we're inheriting from another
 		 * init process which we know left it in a sane state.

@@ -41,6 +41,8 @@ int system_mount         (const char *type, const char *dir,
 
 void system_mknod        (const char *path, mode_t mode, dev_t dev);
 
+void system_symlink      (const char *target, const char *linkpath);
+
 int  system_check_file   (const char *path, mode_t type, dev_t dev)
 	__attribute__ ((warn_unused_result));
 

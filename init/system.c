@@ -241,6 +241,24 @@ system_mknod (const char *path, mode_t mode, dev_t dev)
 }
 
 /**
+ * system_symlink:
+ *
+ * @target: target of the symlink,
+ * @linkpath: path of symlink.
+ *
+ * Create specified symlink.
+ **/
+void
+system_symlink (const char *target, const char *linkpath)
+{
+	nih_assert (target);
+	nih_assert (linkpath);
+
+	if (symlink (target, linkpath) < 0 && errno != EEXIST)
+		nih_error ("%s: %s -> %s", _("Unable to create symlink"), target, linkpath);
+}
+
+/**
  * system_check_file:
  *
  * @path: full path,
