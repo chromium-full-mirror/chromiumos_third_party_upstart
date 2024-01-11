@@ -258,6 +258,157 @@ static NihOption options[] = {
 	NIH_OPTION_LAST
 };
 
+static const char kSysfs[] = "/sys/fs";
+static const char kCgroup[] = "/sys/fs/cgroup";
+static const char kBlkio[] = "/sys/fs/cgroup/blkio";
+
+static void
+chromeos_set_storage_limit(const char *dev, const char *limit,
+			   const char *value)
+{
+	FILE *ptr;
+	nih_local char *limit_fname;
+
+	if (!value)
+		return;
+
+	limit_fname = nih_sprintf (NULL, "%s/%s", kBlkio, limit);
+	nih_debug ("Setting %s for %s to %s", limit_fname, dev, value);
+
+	ptr = fopen(limit_fname, "w");
+	if (ptr) {
+		if (fprintf (ptr, "%s %s", dev, value) < 0) {
+			NihError *err;
+
+			err = nih_error_get ();
+			nih_warn ("%s: %s: %s", limit_fname,
+					_("Unable to write to"), err->message);
+			nih_free (err);
+		}
+		fclose(ptr);
+	} else {
+		NihError *err;
+
+		err = nih_error_get ();
+		nih_warn ("%s: %s: %s", limit_fname, _("Unable to open"),
+				err->message);
+		nih_free (err);
+	}
+}
+
+static void
+chromeos_setup_storage_limits (void)
+{
+	char *dev_node;
+	nih_local char *dev;
+	struct stat dev_stat;
+
+	dev_node = getenv ("storage_limit_device");
+	nih_debug ("Limit device %s", dev_node);
+	if (!dev_node)
+		return;
+
+	if (lstat (dev_node, &dev_stat) < 0) {
+		NihError *err;
+
+		err = nih_error_get ();
+		nih_warn ("%s: %s: %s", dev_node, _("Failed to stat"),
+				err->message);
+		nih_free (err);
+
+		return;
+	}
+
+	dev = nih_sprintf(NULL, "%d:%d",
+			  major(dev_stat.st_rdev), minor(dev_stat.st_rdev));
+
+	chromeos_set_storage_limit(dev, "blkio.throttle.read_iops_device",
+				   getenv("storage_limit_read_iops"));
+	chromeos_set_storage_limit(dev, "blkio.throttle.write_iops_device",
+				   getenv("storage_limit_write_iops"));
+	chromeos_set_storage_limit(dev, "blkio.throttle.read_bps_device",
+				   getenv("storage_limit_read_bps"));
+	chromeos_set_storage_limit(dev, "blkio.throttle.write_bps_device",
+				   getenv("storage_limit_write_bps"));
+}
+
+static int
+chromeos_setup_cgroups (void)
+{
+	/* We don't use system_mount for it doesn't allow for source being different
+	 * from type. Because of that we need to duplicate the code for the check if
+	 * something is already mounted.
+	 */
+	struct stat     sysfs_stat;
+	struct stat     cgroup_stat;
+
+	if (stat (kSysfs, &sysfs_stat) < 0) {
+		NihError *err;
+
+		err = nih_error_get ();
+		nih_warn ("%s: %s", _("Unable to stat sysfs node"),
+				err->message);
+		nih_free (err);
+
+		return FALSE;
+	}
+
+	if (stat (kCgroup, &cgroup_stat) < 0) {
+		NihError *err;
+
+		err = nih_error_get ();
+		nih_warn ("%s: %s", _("Unable to stat cgroup node"),
+				err->message);
+		nih_free (err);
+
+		return FALSE;
+	}
+
+	/* If the two dev_ts do not match, then there is already a filesystem
+	 * mounted and we needn't do anything.
+	 */
+	if (sysfs_stat.st_dev != cgroup_stat.st_dev)
+		return TRUE;
+
+	if (mount ("none", kCgroup, "tmpfs",
+			MS_NOSUID | MS_NODEV | MS_NOEXEC, "mode=755") < 0) {
+		NihError *err;
+
+		err = nih_error_get ();
+		nih_warn ("%s: %s", _("Unable to mount cgroups filesystem"),
+				err->message);
+		nih_free (err);
+
+		return FALSE;
+	}
+
+	if (mkdir (kBlkio, 0755) < 0) {
+		NihError *err;
+
+		err = nih_error_get ();
+		nih_warn ("%s: %s", _("Unable to create blkio cgroup node"),
+				err->message);
+		nih_free (err);
+
+		return FALSE;
+	}
+
+	if (mount ("cgroup", kBlkio, "cgroup",
+			MS_NOSUID | MS_NODEV | MS_NOEXEC, "blkio") < 0) {
+		NihError *err;
+
+		err = nih_error_get ();
+		nih_warn ("%s: %s", _("Unable to mount blkio cgroup"),
+				err->message);
+		nih_free (err);
+
+		return FALSE;
+	}
+
+	chromeos_setup_storage_limits ();
+
+	return TRUE;
+}
 
 int
 main (int   argc,
@@ -496,6 +647,10 @@ main (int   argc,
 			nih_warn ("%s: %s", _("Unable to mount /run filesystem"),
 					err->message);
 			nih_free (err);
+		}
+
+		if (!chromeos_setup_cgroups ()) {
+			nih_warn ("%s", _("Failed to setup chromeos cgroups"));
 		}
 
 		if ((mkdir ("/run/lock", 01777) < 0 && errno != EEXIST) ||
