@@ -350,8 +350,13 @@ job_change_goal (Job     *job,
 	 * will finish naturally, so all we need do is change the goal and
 	 * we'll change direction through the state machine at that point.
 	 *
-	 * The exceptions are the natural rest states of waiting and a
-	 * running process; these need induction to get them moving.
+	 * The exceptions are:
+	 *  - the natural rest states of waiting and a running process; these
+	 *    need induction to get them moving.
+	 *  - applying 'kill timeout' for pre- and post-start with a JOB_STOP
+	 *    goal; normally we let these run as long as they need, but in
+	 *    the event of a hung process, we still want to complete the
+	 *    teardown (e.g., shutdown?) process eventually.
 	 */
 	switch (goal) {
 	case JOB_START:
@@ -362,6 +367,22 @@ job_change_goal (Job     *job,
 	case JOB_STOP:
 		if (job->state == JOB_RUNNING)
 			job_change_state (job, job_next_state (job));
+		else if (job->state == JOB_PRE_START ||
+			 job->state == JOB_POST_START) {
+			ProcessType process;
+
+			if (job->state == JOB_PRE_START) {
+				process = PROCESS_PRE_START;
+			} else {
+				process = PROCESS_POST_START;
+			}
+
+			/* Put a SIGTERM+SIGKILL timeout on a (pre|post)-start
+			 * process.
+			 */
+			job_process_set_term_timer (job, process,
+						    job->class->kill_timeout);
+		}
 
 		break;
 	case JOB_RESPAWN:
@@ -2757,4 +2778,3 @@ job_last_process (const Job *job, ProcessType process)
 	return last == process ? TRUE : FALSE;
 }
 #endif /* ENABLE_CGROUPS */
-

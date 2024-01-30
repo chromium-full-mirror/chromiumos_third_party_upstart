@@ -1284,8 +1284,8 @@ running job. The signal should be specified as a full name (for example
 that it is possible to specify the signal as a number (for example
 "\fI15\fP") although this should be avoided if at all possible since
 signal numbers may differ between systems. Also note that this signal
-does not apply to pre\-stop or post\-stop processes, where we always use
-the
+does not apply to pre\-start, post\-start, pre\-stop or post\-stop
+processes, where we always use the
 .I SIGTERM
 default.
 
@@ -1316,7 +1316,9 @@ Specifies the interval between sending a process the
 above) and
 .I SIGKILL
 signals when stopping the running job. Default is 5 seconds. Applies to
-main, pre\-stop, and post\-stop processes.
+main, pre\-stop, and post\-stop processes. For pre\-start and
+post\-stasrt processes, we apply this timeout only when the job's goal
+changes to 'stop.'
 .\"
 .TP
 .B expect stop
