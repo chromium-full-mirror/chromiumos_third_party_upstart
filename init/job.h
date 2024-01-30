@@ -121,6 +121,7 @@ typedef struct job_process_data JobProcessData;
  * @blocking: list of events we're blocking from finishing,
  * @kill_timer: timer to kill process,
  * @kill_process: process @kill_timer will kill,
+ * @kill_sigterm: whether to kill with SIGTERM (vs SIGKILL),
  * @failed: whether the last process ran failed,
  * @failed_process: the last process that failed,
  * @exit_status: exit status of the last failed process,
@@ -159,6 +160,7 @@ typedef struct job {
 
 	NihTimer        *kill_timer;
 	ProcessType      kill_process;
+	int              kill_sigterm;
 
 	int              failed;
 	ProcessType      failed_process;

@@ -1276,14 +1276,18 @@ apparmor switch /usr/sbin/cupsd
 .SS Miscellaneous
 .TP
 .B kill signal \fISIGNAL
-Specifies the stopping signal, 
+Specifies the stopping signal,
 .I SIGTERM
 by default, a job's main process will receive when stopping the
 running job. The signal should be specified as a full name (for example
 "\fISIGTERM\fP") or a partial name (for example "\fITERM\fP"). Note
 that it is possible to specify the signal as a number (for example
 "\fI15\fP") although this should be avoided if at all possible since
-signal numbers may differ between systems.
+signal numbers may differ between systems. Also note that this signal
+does not apply to pre\-stop or post\-stop processes, where we always use
+the
+.I SIGTERM
+default.
 
 .nf
 kill signal INT
@@ -1306,10 +1310,13 @@ reload signal USR1
 .\"
 .TP
 .B kill timeout \fIINTERVAL
-Specifies the interval between sending the job's main process the
-"stopping" (see above) and
+Specifies the interval between sending a process the
+"stopping" signal (see
+.B kill signal
+above) and
 .I SIGKILL
-signals when stopping the running job. Default is 5 seconds.
+signals when stopping the running job. Default is 5 seconds. Applies to
+main, pre\-stop, and post\-stop processes.
 .\"
 .TP
 .B expect stop

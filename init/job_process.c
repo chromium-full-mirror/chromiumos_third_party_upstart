@@ -359,6 +359,14 @@ job_process_start (Job                    *job,
 	/* Set up a handler to monitor the child fd asynchronously */
 	job_register_child_handler (job->process_data[process],
 			job_process_fd, process_data);
+
+	/* Apply 'kill timeout' to (pre|post)-stop processes -- first with
+	 * TERM, and then re-armed with KILL if necessary.
+	 */
+	if (process == PROCESS_PRE_STOP || process == PROCESS_POST_STOP) {
+		job_process_set_term_timer (job, process,
+				job->class->kill_timeout);
+	}
 }
 
 /**
@@ -1368,6 +1376,30 @@ job_process_stop_all (void)
 }
 
 /**
+ * job_process_set_term_timer:
+ * @job: job to set SIGTERM timer for,
+ * @process: process to be killed,
+ * @timeout: timeout to apply for timer.
+ *
+ * Set SIGTERM kill timer for specified @job @process with timeout @timeout.
+ **/
+void
+job_process_set_term_timer (Job          *job,
+			    ProcessType   process,
+			    time_t        timeout)
+{
+	nih_assert (job);
+	nih_assert (timeout);
+	nih_assert (job->kill_timer == NULL);
+
+	job->kill_sigterm = TRUE;
+	job->kill_process = process;
+	job->kill_timer = NIH_MUST (nih_timer_add_timeout (
+			  job, timeout,
+			  (NihTimerCb)job_process_kill_timer, job));
+}
+
+/**
  * job_process_set_kill_timer:
  * @job: job to set kill timer for,
  * @process: process to be killed,
@@ -1377,13 +1409,14 @@ job_process_stop_all (void)
  **/
 void
 job_process_set_kill_timer (Job          *job,
-		  	    ProcessType   process,
+			    ProcessType   process,
 			    time_t        timeout)
 {
 	nih_assert (job);
 	nih_assert (timeout);
 	nih_assert (job->kill_timer == NULL);
 
+	job->kill_sigterm = FALSE;
 	job->kill_process = process;
 	job->kill_timer = NIH_MUST (nih_timer_add_timeout (
 			  job, timeout,
@@ -1413,9 +1446,9 @@ job_process_adj_kill_timer (Job *job, time_t due)
  * @job: job to kill process of,
  * @timer: timer that caused us to be called.
  *
- * This callback is called if the process failed to terminate within
- * a particular time of being sent the TERM signal.  The process is killed
- * more forcibly by sending the KILL signal.
+ * This callback is called to terminate with either TERM or KILL signal. KILL
+ * is used for cases where the job already failed to terminate within the
+ * allowed timeout.
  **/
 static void
 job_process_kill_timer (Job      *job,
@@ -1435,19 +1468,26 @@ job_process_kill_timer (Job      *job,
 	job->kill_process = PROCESS_INVALID;
 
 	nih_info (_("Sending %s signal to %s %s process (%d)"),
-		  "KILL",
+		  (job->kill_sigterm ? "TERM" : "KILL"),
 		  job_name (job), process_name (process), job->pid[process]);
 
-	if (system_kill (job->pid[process], SIGKILL) < 0) {
+	if (system_kill (job->pid[process],
+			 job->kill_sigterm ? SIGTERM : SIGKILL) < 0) {
 		NihError *err;
 
 		err = nih_error_get ();
 		if (err->number != ESRCH)
 			nih_warn (_("Failed to send %s signal to %s %s process (%d): %s"),
-				  "KILL",
+				  (job->kill_sigterm ? "TERM" : "KILL"),
 				  job_name (job), process_name (process),
 				  job->pid[process], err->message);
 		nih_free (err);
+	}
+
+	if (job->kill_sigterm) {
+		/* Arm for KILL, in case TERM didn't work. */
+		job_process_set_kill_timer (job, process,
+					    job->class->kill_timeout);
 	}
 }
 
@@ -1834,9 +1874,7 @@ job_process_terminated (Job         *job,
 	}
 
 	/* Cancel any timer trying to kill the job, since it's just
-	 * died.  We could do this inside the main process block above, but
-	 * leaving it here for now means we can use the timer for any
-	 * additional process later.
+	 * died.
 	 */
 	if (job->kill_timer) {
 		nih_unref (job->kill_timer, job);
