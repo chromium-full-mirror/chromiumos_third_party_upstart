@@ -278,21 +278,15 @@ chromeos_set_storage_limit(const char *dev, const char *limit,
 	ptr = fopen(limit_fname, "w");
 	if (ptr) {
 		if (fprintf (ptr, "%s %s", dev, value) < 0) {
-			NihError *err;
-
-			err = nih_error_get ();
 			nih_warn ("%s: %s: %s", limit_fname,
-					_("Unable to write to"), err->message);
-			nih_free (err);
+					_("Unable to write storage limits"),
+					strerror(errno));
 		}
 		fclose(ptr);
 	} else {
-		NihError *err;
-
-		err = nih_error_get ();
-		nih_warn ("%s: %s: %s", limit_fname, _("Unable to open"),
-				err->message);
-		nih_free (err);
+		nih_warn ("%s: %s: %s", limit_fname,
+				_("Unable to open storage limits"),
+				strerror(errno));
 	}
 }
 
@@ -309,12 +303,9 @@ chromeos_setup_storage_limits (void)
 		return;
 
 	if (lstat (dev_node, &dev_stat) < 0) {
-		NihError *err;
-
-		err = nih_error_get ();
-		nih_warn ("%s: %s: %s", dev_node, _("Failed to stat"),
-				err->message);
-		nih_free (err);
+		nih_warn ("%s: %s: %s", dev_node,
+				_("Failed to stat storage limits"),
+				strerror(errno));
 
 		return;
 	}
@@ -343,24 +334,14 @@ chromeos_setup_cgroups (void)
 	struct stat     cgroup_stat;
 
 	if (stat (kSysfs, &sysfs_stat) < 0) {
-		NihError *err;
-
-		err = nih_error_get ();
 		nih_warn ("%s: %s", _("Unable to stat sysfs node"),
-				err->message);
-		nih_free (err);
-
+				strerror(errno));
 		return FALSE;
 	}
 
 	if (stat (kCgroup, &cgroup_stat) < 0) {
-		NihError *err;
-
-		err = nih_error_get ();
 		nih_warn ("%s: %s", _("Unable to stat cgroup node"),
-				err->message);
-		nih_free (err);
-
+				strerror(errno));
 		return FALSE;
 	}
 
@@ -372,29 +353,19 @@ chromeos_setup_cgroups (void)
 
 	if (mount ("none", kCgroup, "tmpfs",
 			MS_NOSUID | MS_NODEV | MS_NOEXEC, "mode=755") < 0) {
-		NihError *err;
-
-		err = nih_error_get ();
 		nih_warn ("%s: %s", _("Unable to mount cgroups filesystem"),
-				err->message);
-		nih_free (err);
-
+				strerror(errno));
 		return FALSE;
 	}
 
 	if (mkdir (kBlkio, 0755) < 0) {
-		NihError *err;
-
-		err = nih_error_get ();
 		nih_warn ("%s: %s", _("Unable to create blkio cgroup node"),
-				err->message);
-		nih_free (err);
-
+				strerror(errno));
 		return FALSE;
 	}
 
-	if (mount ("cgroup", kBlkio, "cgroup",
-			MS_NOSUID | MS_NODEV | MS_NOEXEC, "blkio") < 0) {
+	if (system_mount ("cgroup", kBlkio,
+			  MS_NOSUID | MS_NODEV | MS_NOEXEC, "blkio") < 0) {
 		NihError *err;
 
 		err = nih_error_get ();
