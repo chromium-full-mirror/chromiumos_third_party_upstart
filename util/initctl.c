@@ -141,6 +141,7 @@ int list_env_action                      (NihCommand *command, char * const *arg
 int unset_env_action                     (NihCommand *command, char * const *args);
 int reset_env_action                     (NihCommand *command, char * const *args);
 int list_sessions_action                 (NihCommand *command, char * const *args);
+static int disable_respawn_action        (NihCommand *command, char * const *args);
 
 /**
  * use_dbus:
@@ -2206,6 +2207,41 @@ error:
 
 }
 
+/**
+ * disable_respawn_action:
+ * @command: NihCommand invoked,
+ * @args: command-line arguments.
+ *
+ * This function is called for the "disable-respawn" command.
+ *
+ * Returns: command exit status.
+ */
+static int
+disable_respawn_action (NihCommand *command, char * const *args)
+{
+	nih_local NihDBusProxy *upstart = NULL;
+	NihError *              err;
+
+	nih_assert (command != NULL);
+	nih_assert (args != NULL);
+
+	upstart = upstart_open (NULL);
+	if (! upstart)
+		return 1;
+
+	if (upstart_disable_respawn_sync (NULL, upstart) < 0)
+		goto error;
+
+	return 0;
+
+error:
+	err = nih_error_get ();
+	nih_error ("%s", err->message);
+	nih_free (err);
+
+	return 1;
+
+}
 
 static void
 start_reply_handler (char **         job_path,
@@ -3322,6 +3358,11 @@ static NihCommand commands[] = {
 	  N_("List all sessions."),
 	  N_("Displays list of running Session Init sessions"),
 	  NULL, NULL, list_sessions_action },
+
+	{ "disable-respawn", NULL,
+	  N_("Disable respawning of jobs."),
+	  N_("Disable respawning of jobs."),
+	  NULL, NULL, disable_respawn_action },
 
 	NIH_COMMAND_LAST
 };

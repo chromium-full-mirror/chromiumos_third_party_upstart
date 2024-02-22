@@ -126,6 +126,8 @@
 
     <method name="EndSession"/>
 
+    <method name="DisableRespawn"/>
+
     <!-- Basic information about Upstart -->
     <property name="version" type="s" access="read" />
     <property name="log_priority" type="s" access="readwrite" />

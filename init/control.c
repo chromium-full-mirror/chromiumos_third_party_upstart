@@ -2125,6 +2125,28 @@ control_end_session (void             *data,
 }
 
 /**
+ * control_disable_respawn:
+ *
+ * @data: not used,
+ * @message: D-Bus connection and message received.
+ *
+ * Implements the DisableRespawn method of the com.ubuntu.Upstart
+ * interface.
+ *
+ * Disables job respawns.
+ *
+ * Returns: zero on success.
+ **/
+int
+control_disable_respawn(void             *data,
+			NihDBusMessage   *message)
+{
+	nih_info (_("Disabling job respawn"));
+	disable_respawn = TRUE;
+	return 0;
+}
+
+/**
  * control_serialise_bus_address:
  *
  * Convert control_bus_address into JSON representation.
