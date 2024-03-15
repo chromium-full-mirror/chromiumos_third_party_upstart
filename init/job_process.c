@@ -1467,9 +1467,23 @@ job_process_kill_timer (Job      *job,
 	job->kill_timer = NULL;
 	job->kill_process = PROCESS_INVALID;
 
-	nih_info (_("Sending %s signal to %s %s process (%d)"),
-		  (job->kill_sigterm ? "TERM" : "KILL"),
-		  job_name (job), process_name (process), job->pid[process]);
+	/* Log unexpected termination signals with a bit higher log level:
+	 *  - pre- or post-stop: These are likely because of missing or
+	 *    incorrect timeout configurations.
+	 *  - KILL signal: This means the job didn't handle the first
+	 *    termination signal in time, and is likely a sign of a misbehaving
+	 *    service.
+	 */
+	if (process == PROCESS_PRE_STOP || process == PROCESS_POST_STOP ||
+			!job->kill_sigterm) {
+		nih_warn (_("Sending %s signal to %s %s process (%d)"),
+			  (job->kill_sigterm ? "TERM" : "KILL"),
+			  job_name (job), process_name (process), job->pid[process]);
+	} else {
+		nih_info (_("Sending %s signal to %s %s process (%d)"),
+			  (job->kill_sigterm ? "TERM" : "KILL"),
+			  job_name (job), process_name (process), job->pid[process]);
+	}
 
 	if (system_kill (job->pid[process],
 			 job->kill_sigterm ? SIGTERM : SIGKILL) < 0) {
