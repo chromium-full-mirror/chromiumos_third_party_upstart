@@ -3191,8 +3191,12 @@ test_change_state (void)
 		TEST_EQ (job->failed_process, PROCESS_INVALID);
 		TEST_EQ (job->exit_status, 0);
 
-		TEST_EQ_P (job->kill_timer, NULL);
-		TEST_EQ (job->kill_process, PROCESS_INVALID);
+		TEST_NE_P (job->kill_timer, NULL);
+		TEST_EQ (job->kill_process, PROCESS_POST_STOP);
+
+		nih_free (job->kill_timer);
+		job->kill_timer = NULL;
+		job->kill_process = PROCESS_INVALID;
 
 		nih_free (job);
 	}
