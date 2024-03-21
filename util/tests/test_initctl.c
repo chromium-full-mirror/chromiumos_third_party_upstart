@@ -18429,7 +18429,10 @@ main (int   argc,
 	test_usage ();
 
 	test_job_env ();
-	test_reexec ();
+
+	// re-exec was disabled in b/261373856. Drop its tests too.
+	// test_reexec ();
+	printf ("SKIP: re-exec feature (and tests) are disabled\n");
 
 	test_list_sessions ();
 	if (have_timed_waitpid ()) {
