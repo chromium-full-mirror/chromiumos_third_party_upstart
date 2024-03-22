@@ -1300,6 +1300,8 @@ test_log_destroy (void)
 	nih_free (log);
 	TEST_FREE (log->unflushed);
 
+	TEST_EQ (unlink (filename), 0);
+
 	/************************************************************/
 	TEST_FEATURE ("ensure unflushed data moved to unflushed list with uid 0");
 

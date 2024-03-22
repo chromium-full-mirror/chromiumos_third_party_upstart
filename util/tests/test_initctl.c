@@ -12371,6 +12371,8 @@ test_umask (void)
 	char             confdir[PATH_MAX];
 	char             dirname[PATH_MAX];
 	char             logdir[PATH_MAX];
+	nih_local char  *path = NULL;
+	nih_local char  *cmd = NULL;
 	pid_t            upstart_pid = 0;
 	nih_local char  *logfile = NULL;
 	nih_local char  *original_runtime = NULL;
@@ -12468,6 +12470,14 @@ test_umask (void)
 
 	assert0 (rmdir (confdir));
 	assert0 (rmdir (logdir));
+
+	path = NIH_MUST (nih_sprintf (NULL, "%s/upstart/sessions", dirname));
+	cmd = NIH_MUST (nih_sprintf (NULL, "rm -f %s/*.session 2>/dev/null", path));
+	assert0 (system (cmd));
+	assert0 (rmdir (path));
+	path = NIH_MUST (nih_sprintf (NULL, "%s/upstart", dirname));
+	assert0 (rmdir (path));
+	assert0 (rmdir (dirname));
 }
 
 void
@@ -18171,6 +18181,7 @@ test_dbus_connection (void)
 	nih_local char  *upstart_session = NULL;
 	nih_local char  *original_runtime = NULL;
 	char             dirname[PATH_MAX];
+	nih_local char  *path = NULL;
 	char            *address;
 
 	original_runtime = nih_strdup (NULL, getenv("XDG_RUNTIME_DIR"));
@@ -18400,6 +18411,22 @@ test_dbus_connection (void)
 	TEST_DBUS_END (dbus_pid2);
 
 	TEST_EQ (setenv ("XDG_RUNTIME_DIR", original_runtime, 1), 0);
+
+	path = NIH_MUST (nih_sprintf (NULL, "%s/dbus-1/services", dirname));
+	cmd = NIH_MUST (nih_sprintf (NULL, "rm -f %s/*.session 2>/dev/null", path));
+	assert0 (system (cmd));
+	assert0 (rmdir (path));
+	path = NIH_MUST (nih_sprintf (NULL, "%s/dbus-1", dirname));
+	assert0 (rmdir (path));
+
+	path = NIH_MUST (nih_sprintf (NULL, "%s/upstart/sessions", dirname));
+	cmd = NIH_MUST (nih_sprintf (NULL, "rm -f %s/*.session 2>/dev/null", path));
+	assert0 (system (cmd));
+	assert0 (rmdir (path));
+	path = NIH_MUST (nih_sprintf (NULL, "%s/upstart", dirname));
+	assert0 (rmdir (path));
+
+	assert0 (rmdir (dirname));
 }
 
 int

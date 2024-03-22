@@ -4940,6 +4940,9 @@ test_source_reload (void)
 	TEST_ENSURE_CLEAN_ENV ();
 
 	/************************************************************/
+
+	TEST_EQ (unlink (filename), 0);
+	TEST_EQ (rmdir (dirname), 0);
 }
 
 
