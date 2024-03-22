@@ -11608,7 +11608,9 @@ test_quiesce (void)
 	sessiondir = nih_strdup (NULL, getenv ("XDG_RUNTIME_DIR"));
 	TEST_NE_P (sessiondir, NULL);
 	
-	cmd = nih_sprintf (NULL, "rm %s/upstart/sessions/*.session 2>/dev/null", sessiondir);
+	cmd = nih_sprintf (NULL,
+			   "rm -f %s/upstart/sessions/*.session 2>/dev/null",
+			   sessiondir);
 	assert0 (system (cmd));
 
 	/* Use the "secret" interface */
