@@ -1524,6 +1524,77 @@ test_change_state (void)
 	class->export = NULL;
 
 
+	/* Check that a job whose pre-start fails can move from pre-start to
+	 * stopping without leaking a kill_timer.
+	 */
+	TEST_FEATURE ("pre-start to post-stop for failed pre-start");
+	tmp = class->process[PROCESS_PRE_START];
+	class->process[PROCESS_PRE_START] = fail;
+
+	TEST_ALLOC_FAIL {
+		TEST_ALLOC_SAFE {
+			job = job_new (class, "");
+
+			blocked = blocked_new (job, BLOCKED_EVENT, cause);
+			event_block (cause);
+			nih_list_add (&job->blocking, &blocked->entry);
+			TEST_NE_P (nih_main_loop_add_func (job, job_quit_with_state, job), NULL);
+		}
+
+		job->goal = JOB_START;
+		job->state = JOB_TMPFILES;
+		job->pid[PROCESS_PRE_START] = 0;
+
+		job->blocker = NULL;
+		cause->failed = FALSE;
+
+		TEST_FREE_TAG (blocked);
+
+		job->failed = FALSE;
+		job->failed_process = PROCESS_INVALID;
+		job->exit_status = 0;
+
+		job_change_state (job, JOB_PRE_STARTING);
+		while (nih_main_loop() < JOB_STOPPING) {}
+
+		TEST_FREE (blocked);
+		TEST_LIST_EMPTY (&job->blocking);
+
+		event = (Event *)events->next;
+		TEST_ALLOC_SIZE (event, sizeof (Event));
+		TEST_EQ_STR (event->name, "stopping");
+		TEST_EQ_STR (event->env[0], "JOB=test");
+		TEST_EQ_STR (event->env[1], "INSTANCE=");
+		TEST_EQ_STR (event->env[2], "RESULT=failed");
+		TEST_EQ_STR (event->env[3], "PROCESS=pre-start");
+		TEST_EQ_P (event->env[4], NULL);
+
+		TEST_LIST_NOT_EMPTY (&event->blocking);
+
+		blocked = (Blocked *)event->blocking.next;
+		TEST_ALLOC_SIZE (blocked, sizeof (Blocked));
+		TEST_ALLOC_PARENT (blocked, event);
+		TEST_EQ (blocked->type, BLOCKED_JOB);
+		TEST_EQ_P (blocked->job, job);
+		nih_free (blocked);
+
+		TEST_LIST_EMPTY (&event->blocking);
+
+		nih_free (event);
+
+		TEST_LIST_EMPTY (events);
+
+		TEST_EQ (job->goal, JOB_STOP);
+		TEST_EQ (job->state, JOB_STOPPING);
+		TEST_EQ_P (job->kill_timer, NULL);
+		TEST_EQ (job->kill_process, PROCESS_INVALID);
+
+		nih_free (job);
+	}
+
+	class->process[PROCESS_PRE_START] = tmp;
+
+
 	/* Check that a job without a main process can move from pre-start
 	 * straight to running skipping the interim steps, and has the
 	 * started event emitted.

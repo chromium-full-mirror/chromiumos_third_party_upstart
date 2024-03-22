@@ -380,8 +380,10 @@ job_change_goal (Job     *job,
 			/* Put a SIGTERM+SIGKILL timeout on a (pre|post)-start
 			 * process.
 			 */
-			job_process_set_term_timer (job, process,
-						    job->class->kill_timeout);
+			if (job->pid[process]) {
+				job_process_set_term_timer (job, process,
+							    job->class->kill_timeout);
+			}
 		}
 
 		break;
