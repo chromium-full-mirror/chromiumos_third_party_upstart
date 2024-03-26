@@ -12377,6 +12377,7 @@ test_umask (void)
 	nih_local char  *logfile = NULL;
 	nih_local char  *original_runtime = NULL;
 	mode_t           job_umask;
+	nih_local char  *_job_umask_str = NULL;
 	nih_local char  *job_umask_str = NULL;
 	size_t           length;
 	int              ret;
@@ -12421,7 +12422,11 @@ test_umask (void)
 
 	WAIT_FOR_FILE (logfile);
 
-	job_umask_str = nih_file_read (NULL, logfile, &length);
+	_job_umask_str = nih_file_read (NULL, logfile, &length);
+	TEST_NE_P (_job_umask_str, NULL);
+
+	job_umask_str = nih_strndup (NULL, _job_umask_str, length);
+	TEST_NE_P (job_umask_str, NULL);
 
 	ret = sscanf (job_umask_str, "%o", (unsigned int *)&job_umask);
 	TEST_EQ (ret, 1);
@@ -12431,6 +12436,11 @@ test_umask (void)
 	assert0 (unlink (logfile));
 
 	STOP_UPSTART (upstart_pid);
+
+	nih_free(_job_umask_str);
+	_job_umask_str = NULL;
+	nih_free(job_umask_str);
+	job_umask_str = NULL;
 
 	/**********************************************************************/
 	TEST_FEATURE ("ensure Session Init defaults umask with '--no-inherit-env'");
@@ -12451,7 +12461,11 @@ test_umask (void)
 
 	WAIT_FOR_FILE (logfile);
 
-	job_umask_str = nih_file_read (NULL, logfile, &length);
+	_job_umask_str = nih_file_read (NULL, logfile, &length);
+	TEST_NE_P (_job_umask_str, NULL);
+
+	job_umask_str = nih_strndup (NULL, _job_umask_str, length);
+	TEST_NE_P (job_umask_str, NULL);
 
 	ret = sscanf (job_umask_str, "%o", (unsigned int *)&job_umask);
 	TEST_EQ (ret, 1);

@@ -3331,6 +3331,7 @@ test_upgrade (void)
 void
 test_upstart1_6_upgrade (const char *path)
 {
+	nih_local char  *_json_string = NULL;
 	nih_local char  *json_string = NULL;
 	Event           *event;
 	struct stat      statbuf;
@@ -3352,7 +3353,10 @@ test_upstart1_6_upgrade (const char *path)
 	/* Check data file exists */
 	TEST_EQ (stat (path, &statbuf), 0);
 
-	json_string = nih_file_read (NULL, path, &len);
+	_json_string = nih_file_read (NULL, path, &len);
+	TEST_NE_P (_json_string, NULL);
+
+	json_string = nih_strndup (NULL, _json_string, len);
 	TEST_NE_P (json_string, NULL);
 
 	/* Recreate state from JSON data file */
@@ -3426,6 +3430,7 @@ test_upstart1_6_upgrade (const char *path)
 void
 test_session_upgrade_midflight (const char *path)
 {
+	nih_local char  *_json_string = NULL;
 	nih_local char  *json_string = NULL;
 	struct stat      statbuf;
 	size_t           len;
@@ -3447,7 +3452,10 @@ test_session_upgrade_midflight (const char *path)
 	/* Check data file exists */
 	TEST_EQ (stat (path, &statbuf), 0);
 
-	json_string = nih_file_read (NULL, path, &len);
+	_json_string = nih_file_read (NULL, path, &len);
+	TEST_NE_P (_json_string, NULL);
+
+	json_string = nih_strndup (NULL, _json_string, len);
 	TEST_NE_P (json_string, NULL);
 
 	/* Recreate state from JSON data file */
@@ -3551,6 +3559,7 @@ test_session_upgrade_exists (const char *original_path)
 	int              got_tty1 = FALSE;
 	char             chroot_path[PATH_MAX];
 	nih_local char  *path = NULL;
+	nih_local char  *_file = NULL;
 	nih_local char  *file = NULL;
 	nih_local char  *processed_json = NULL;
 	mode_t           old_perms;
@@ -3572,7 +3581,10 @@ test_session_upgrade_exists (const char *original_path)
 	TEST_EQ (stat (original_path, &statbuf), 0);
 
 	/* Read the original file */
-	file = nih_file_read (NULL, original_path, &len);
+	_file = nih_file_read (NULL, original_path, &len);
+	TEST_NE_P (_file, NULL);
+
+	file = nih_strndup (NULL, _file, len);
 	TEST_NE_P (file, NULL);
 
 	old_perms = umask (0);
@@ -3708,6 +3720,7 @@ test_session_upgrade_exists (const char *original_path)
 void
 test_session_upgrade_stale (const char *path)
 {
+	nih_local char  *_json_string = NULL;
 	nih_local char  *json_string = NULL;
 	struct stat      statbuf;
 	size_t           len;
@@ -3729,7 +3742,10 @@ test_session_upgrade_stale (const char *path)
 	/* Check data file exists */
 	TEST_EQ (stat (path, &statbuf), 0);
 
-	json_string = nih_file_read (NULL, path, &len);
+	_json_string = nih_file_read (NULL, path, &len);
+	TEST_NE_P (_json_string, NULL);
+
+	json_string = nih_strndup (NULL, _json_string, len);
 	TEST_NE_P (json_string, NULL);
 
 	/* Recreate state from JSON data file */
@@ -3826,6 +3842,7 @@ test_session_upgrade_stale (const char *path)
 void
 test_upstart1_8_upgrade (const char *path)
 {
+	nih_local char  *_json_string = NULL;
 	nih_local char  *json_string = NULL;
 	struct stat      statbuf;
 	size_t           len;
@@ -3846,7 +3863,10 @@ test_upstart1_8_upgrade (const char *path)
 	/* Check data file exists */
 	TEST_EQ (stat (path, &statbuf), 0);
 
-	json_string = nih_file_read (NULL, path, &len);
+	_json_string = nih_file_read (NULL, path, &len);
+	TEST_NE_P (_json_string, NULL);
+
+	json_string = nih_strndup (NULL, _json_string, len);
 	TEST_NE_P (json_string, NULL);
 
 	/* Recreate state from JSON data file */
@@ -3886,6 +3906,7 @@ test_upstart1_8_upgrade (const char *path)
 void
 test_upstart_pre_security_upgrade (const char *path)
 {
+	nih_local char  *_json_string = NULL;
 	nih_local char  *json_string = NULL;
 	Event           *event;
 	ConfSource      *source;
@@ -3910,11 +3931,14 @@ test_upstart_pre_security_upgrade (const char *path)
 	/* Check data file exists */
 	TEST_EQ (stat (path, &statbuf), 0);
 
-	json_string = nih_file_read (NULL, path, &len);
+	_json_string = nih_file_read (NULL, path, &len);
+	TEST_NE_P (_json_string, NULL);
+
+	json_string = nih_strndup (NULL, _json_string, len);
 	TEST_NE_P (json_string, NULL);
 
 	/* Recreate state from JSON data file */
-	assert0 (state_from_string (json_string));
+	TEST_EQ (state_from_string (json_string), 0);
 
 	TEST_LIST_NOT_EMPTY (events);
 	TEST_HASH_NOT_EMPTY (job_classes);
@@ -4010,6 +4034,7 @@ test_upstart_pre_security_upgrade (const char *path)
 void
 test_upstart_with_apparmor_upgrade (const char *path)
 {
+	nih_local char   *_json_string = NULL;
 	nih_local char   *json_string = NULL;
 	struct stat       statbuf;
 	size_t            len;
@@ -4042,7 +4067,10 @@ test_upstart_with_apparmor_upgrade (const char *path)
 	/* Check data file exists */
 	TEST_EQ (stat (path, &statbuf), 0);
 
-	json_string = nih_file_read (NULL, path, &len);
+	_json_string = nih_file_read (NULL, path, &len);
+	TEST_NE_P (_json_string, NULL);
+
+	json_string = nih_strndup (NULL, _json_string, len);
 	TEST_NE_P (json_string, NULL);
 
 	/* Recreate state from JSON data file */
@@ -4131,6 +4159,7 @@ test_upstart_with_apparmor_upgrade (const char *path)
 void
 test_upstart_full_serialise_without_apparmor_upgrade (const char *path)
 {
+	nih_local char   *_json_string = NULL;
 	nih_local char   *json_string = NULL;
 	struct stat       statbuf;
 	size_t            len;
@@ -4164,7 +4193,10 @@ test_upstart_full_serialise_without_apparmor_upgrade (const char *path)
 	/* Check data file exists */
 	TEST_EQ (stat (path, &statbuf), 0);
 
-	json_string = nih_file_read (NULL, path, &len);
+	_json_string = nih_file_read (NULL, path, &len);
+	TEST_NE_P (_json_string, NULL);
+
+	json_string = nih_strndup (NULL, _json_string, len);
 	TEST_NE_P (json_string, NULL);
 
 	/* Recreate state from JSON data file */
@@ -4272,6 +4304,7 @@ test_upstart_full_serialise_without_apparmor_upgrade (const char *path)
 void
 test_upstart_full_serialise_with_apparmor_upgrade (const char *path)
 {
+	nih_local char   *_json_string = NULL;
 	nih_local char   *json_string = NULL;
 	struct stat       statbuf;
 	size_t            len;
@@ -4305,7 +4338,10 @@ test_upstart_full_serialise_with_apparmor_upgrade (const char *path)
 	/* Check data file exists */
 	TEST_EQ (stat (path, &statbuf), 0);
 
-	json_string = nih_file_read (NULL, path, &len);
+	_json_string = nih_file_read (NULL, path, &len);
+	TEST_NE_P (_json_string, NULL);
+
+	json_string = nih_strndup (NULL, _json_string, len);
 	TEST_NE_P (json_string, NULL);
 
 	/* Recreate state from JSON data file */
@@ -4412,6 +4448,7 @@ test_upstart_full_serialise_with_apparmor_upgrade (const char *path)
 void
 test_reload_signal_state (const char *path)
 {
+	nih_local char   *_json_string = NULL;
 	nih_local char   *json_string = NULL;
 	struct stat       statbuf;
 	size_t            len;
@@ -4432,7 +4469,10 @@ test_reload_signal_state (const char *path)
 	/* Check data file exists */
 	TEST_EQ (stat (path, &statbuf), 0);
 
-	json_string = nih_file_read (NULL, path, &len);
+	_json_string = nih_file_read (NULL, path, &len);
+	TEST_NE_P (_json_string, NULL);
+
+	json_string = nih_strndup (NULL, _json_string, len);
 	TEST_NE_P (json_string, NULL);
 
 	/* Recreate state from JSON data file */
@@ -4479,6 +4519,7 @@ test_reload_signal_state (const char *path)
 void
 test_job_environ_upgrade (const char *path)
 {
+	nih_local char   *_json_string = NULL;
 	nih_local char   *json_string = NULL;
 	json_object      *json = NULL;
 	json_object      *json_value = NULL;
@@ -4501,7 +4542,10 @@ test_job_environ_upgrade (const char *path)
 	/* Check data file exists */
 	TEST_EQ (stat (path, &statbuf), 0);
 
-	json_string = nih_file_read (NULL, path, &len);
+	_json_string = nih_file_read (NULL, path, &len);
+	TEST_NE_P (_json_string, NULL);
+
+	json_string = nih_strndup (NULL, _json_string, len);
 	TEST_NE_P (json_string, NULL);
 
 	/* Read the json, checking for expected content */

@@ -324,7 +324,8 @@ test_cgroup_job_start (void)
 	logfile = nih_file_read (NULL, logfile_name, &len);
 	TEST_NE_P (logfile, NULL);
 
-	TEST_EQ_STR (logfile, "hello\r\n");
+	TEST_EQ_STRN (logfile, "hello\r\n");
+	TEST_EQ (len, strlen("hello\r\n"));
 
 	DELETE_FILE (confdir, "cgroup.conf");
 	assert0 (unlink (logfile_name));

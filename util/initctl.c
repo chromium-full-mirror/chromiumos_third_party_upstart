@@ -2129,6 +2129,7 @@ list_sessions_action (NihCommand *command, char * const *args)
 		goto error;
 
 	while ((ent = readdir (dir))) {
+		nih_local char  *_contents = NULL;
 		nih_local char  *contents = NULL;
 		size_t           len;
 		nih_local char  *path = NULL;
@@ -2177,8 +2178,12 @@ list_sessions_action (NihCommand *command, char * const *args)
 			continue;
 		}
 
-		contents = nih_file_read (NULL, path, &len);
+		_contents = nih_file_read (NULL, path, &len);
 
+		if (! _contents)
+			continue;
+
+		contents = nih_strndup (NULL, _contents, len);
 		if (! contents)
 			continue;
 
