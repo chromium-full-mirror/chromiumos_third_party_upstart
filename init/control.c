@@ -1623,11 +1623,14 @@ control_unset_env_list (void            *data,
 		}
 
 		if (job) {
+			char **ret;
 			/* Modify job-specific environment */
 			nih_assert (job->env);
 
-			if (! environ_remove (&job->env, job, NULL, *name))
+			ret = environ_remove (&job->env, job, NULL, *name);
+			if (! ret)
 				return -1;
+			job->env = ret;
 		} else if (job_class_environment_unset (*name) < 0) {
 			goto error;
 		}

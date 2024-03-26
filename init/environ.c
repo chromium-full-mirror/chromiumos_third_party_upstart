@@ -211,10 +211,7 @@ environ_remove (char        ***env,
 	}
 
 	/* shrink amount of memory used */
-	if (! nih_realloc (*env, parent, sizeof (**env) * (*len + 1)))
-		return NULL;
-
-	return *env;
+	return nih_realloc (*env, parent, sizeof (**env) * (*len + 1));
 }
 
 /**

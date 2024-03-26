@@ -706,10 +706,10 @@ test_remove (void)
 
 		TEST_NE_P (ret, NULL);
 		TEST_EQ (len, 0);
-		TEST_EQ_P (env[0], NULL);
+		TEST_EQ_P (ret[0], NULL);
 		TEST_FREE (removed);
 
-		nih_free (env);
+		nih_free (ret);
 	}
 
 	TEST_FEATURE ("remove bare name from table of size 1");
@@ -741,10 +741,10 @@ test_remove (void)
 
 		TEST_NE_P (ret, NULL);
 		TEST_EQ (len, 0);
-		TEST_EQ_P (env[0], NULL);
+		TEST_EQ_P (ret[0], NULL);
 		TEST_FREE (removed);
 
-		nih_free (env);
+		nih_free (ret);
 	}
 
 	TEST_FEATURE ("remove first name=value entry from table of size 2");
@@ -791,14 +791,14 @@ test_remove (void)
 		TEST_NE_P (ret, NULL);
 		TEST_EQ (len, 1);
 
-		TEST_ALLOC_PARENT (env[0], env);
-		TEST_ALLOC_SIZE (env[0], 8);
-		TEST_EQ_STR (env[0], "BAZ=QUX");
+		TEST_ALLOC_PARENT (ret[0], ret);
+		TEST_ALLOC_SIZE (ret[0], 8);
+		TEST_EQ_STR (ret[0], "BAZ=QUX");
 		TEST_FREE (removed);
 
-		TEST_EQ_P (env[1], NULL);
+		TEST_EQ_P (ret[1], NULL);
 
-		nih_free (env);
+		nih_free (ret);
 	}
 
 	TEST_FEATURE ("remove first bare name entry from table of size 2");
@@ -853,14 +853,14 @@ test_remove (void)
 		TEST_NE_P (ret, NULL);
 		TEST_EQ (len, 1);
 
-		TEST_ALLOC_PARENT (env[0], env);
-		TEST_ALLOC_SIZE (env[0], 8);
-		TEST_EQ_STR (env[0], "BAZ=QUX");
+		TEST_ALLOC_PARENT (ret[0], ret);
+		TEST_ALLOC_SIZE (ret[0], 8);
+		TEST_EQ_STR (ret[0], "BAZ=QUX");
 		TEST_FREE (removed);
 
-		TEST_EQ_P (env[1], NULL);
+		TEST_EQ_P (ret[1], NULL);
 
-		nih_free (env);
+		nih_free (ret);
 	}
 
 	assert0 (unsetenv ("UPSTART_TEST_VARIABLE"));
@@ -909,14 +909,14 @@ test_remove (void)
 		TEST_NE_P (ret, NULL);
 		TEST_EQ (len, 1);
 
-		TEST_ALLOC_PARENT (env[0], env);
-		TEST_ALLOC_SIZE (env[0], 8);
-		TEST_EQ_STR (env[0], "FOO=BAR");
+		TEST_ALLOC_PARENT (ret[0], ret);
+		TEST_ALLOC_SIZE (ret[0], 8);
+		TEST_EQ_STR (ret[0], "FOO=BAR");
 
-		TEST_EQ_P (env[1], NULL);
+		TEST_EQ_P (ret[1], NULL);
 		TEST_FREE (removed);
 
-		nih_free (env);
+		nih_free (ret);
 	}
 
 	TEST_FEATURE ("remove last bare name entry from table of size 2");
@@ -970,14 +970,14 @@ test_remove (void)
 		TEST_NE_P (ret, NULL);
 		TEST_EQ (len, 1);
 
-		TEST_ALLOC_PARENT (env[0], env);
-		TEST_ALLOC_SIZE (env[0], 8);
-		TEST_EQ_STR (env[0], "FOO=BAR");
+		TEST_ALLOC_PARENT (ret[0], ret);
+		TEST_ALLOC_SIZE (ret[0], 8);
+		TEST_EQ_STR (ret[0], "FOO=BAR");
 
-		TEST_EQ_P (env[1], NULL);
+		TEST_EQ_P (ret[1], NULL);
 		TEST_FREE (removed);
 
-		nih_free (env);
+		nih_free (ret);
 	}
 
 	assert0 (unsetenv ("UPSTART_TEST_VARIABLE"));

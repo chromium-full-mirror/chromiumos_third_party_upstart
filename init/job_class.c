@@ -214,11 +214,15 @@ job_class_environment_set (const char *var, int replace)
 int
 job_class_environment_unset (const char *name)
 {
+	char **ret = NULL;
+
 	nih_assert (name);
 	nih_assert (job_environ);
 
-	if (! environ_remove (&job_environ, NULL, NULL, name))
+	ret = environ_remove (&job_environ, NULL, NULL, name);
+	if (! ret)
 		return -1;
+	job_environ = ret;
 
 	/* Update all running jobs */
 	NIH_HASH_FOREACH (job_classes, iter) {
@@ -227,8 +231,10 @@ job_class_environment_unset (const char *name)
 		NIH_HASH_FOREACH (class->instances, job_iter) {
 			Job *job = (Job *)job_iter;
 
-			if ( ! environ_remove (&job->env, job, NULL, name))
+			ret = environ_remove (&job->env, job, NULL, name);
+			if (! ret)
 				return -1;
+			job->env = ret;
 		}
 	}
 
