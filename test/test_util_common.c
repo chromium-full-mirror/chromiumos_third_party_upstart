@@ -984,6 +984,8 @@ test_common_cleanup (void)
 		assert0 (rmdir (path));
 
 	assert0 (rmdir (test_xdg_config_home));
+	nih_free (path);
+	path = NULL;
 
 
 	if (saved_xdg_runtime_dir) {
@@ -1017,8 +1019,11 @@ test_common_cleanup (void)
 
 		/* Remove the directory tree the first Session Init created */
 		assert0 (rmdir (path));
+		nih_free (path);
 		path = NIH_MUST (nih_sprintf (NULL, "%s/upstart", xdg_runtime_dir));
 		assert0 (rmdir (path));
+		nih_free (path);
+		path = NULL;
 	}
 
 	path = NIH_MUST (nih_sprintf (NULL, "%s/dbus-1/services", xdg_runtime_dir));
@@ -1032,8 +1037,11 @@ test_common_cleanup (void)
 
 		/* Remove the directory tree the first Session Init created */
 		assert0 (rmdir (path));
+		nih_free (path);
 		path = NIH_MUST (nih_sprintf (NULL, "%s/dbus-1", xdg_runtime_dir));
 		assert0 (rmdir (path));
+		nih_free (path);
+		path = NULL;
 	}
 
 	assert0 (rmdir (test_xdg_runtime_dir));

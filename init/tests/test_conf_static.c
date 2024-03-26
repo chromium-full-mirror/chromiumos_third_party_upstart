@@ -152,6 +152,7 @@ test_conf_get_best_override (void)
 		nih_free (path);
 	}	
 	TEST_EQ (unlink (expected), 0);
+	nih_free (expected);
 
 	TEST_FEATURE ("with single middle priority override");
 	expected = nih_sprintf (NULL, "%s/%s/foo.override", dirname, sources[1]);
@@ -174,6 +175,7 @@ test_conf_get_best_override (void)
 		nih_free (dir);
 	}	
 	TEST_EQ (unlink (expected), 0);
+	nih_free (expected);
 
 	TEST_FEATURE ("with single lowest priority override");
 	expected = nih_sprintf (NULL, "%s/%s/foo.override", dirname, sources[2]);
@@ -196,6 +198,7 @@ test_conf_get_best_override (void)
 		nih_free (dir);
 	}	
 	TEST_EQ (unlink (expected), 0);
+	nih_free (expected);
 
 	/* Clean up */
 	for (const char **src = sources; *src; src++) {

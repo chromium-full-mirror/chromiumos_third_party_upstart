@@ -509,6 +509,7 @@ test_change_goal (void)
 
 		TEST_LIST_EMPTY (&job->blocker->blocking);
 
+		nih_free (job_path);
 		nih_free (job);
 	}
 
@@ -867,6 +868,7 @@ test_change_state (void)
 		TEST_EQ (job->failed_process, PROCESS_INVALID);
 		TEST_EQ (job->exit_status, 0);
 
+		nih_free (job_path);
 		nih_free (job);
 	}
 
@@ -3324,7 +3326,7 @@ test_change_state (void)
 
 
 	/* Check that a job with a stop process that fails to run moves
-	 * from killed to post-start, the goal gets changed to stop, the
+	 * from killed to post-stop, the goal gets changed to stop, the
 	 * status to stopped (and thus through to being deleted) and the
 	 * failed information set correctly.
 	 */

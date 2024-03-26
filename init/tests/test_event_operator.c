@@ -1442,6 +1442,8 @@ test_operator_serialisation (void)
 				TEST_EQ_STR (oper1_sub->name, oper2_sub->name);
 			}
 		}
+
+		nih_free (oper2);
 	}
 
 }

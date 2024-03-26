@@ -80,6 +80,7 @@ test_server_open (void)
 	control_init ();
 	nih_io_init ();
 
+	nih_free (control_server_address);
 	control_server_address = "unix:abstract=/com/ubuntu/upstart/test";
 
 	/* Check that control_server_open() creates a new listening D-Bus
@@ -143,6 +144,8 @@ test_server_open (void)
 	dbus_shutdown ();
 
 	close (fd);
+
+	control_server_address = NULL;
 }
 
 void
@@ -161,6 +164,7 @@ test_server_connect (void)
 	control_init ();
 	nih_io_init ();
 
+	nih_free (control_server_address);
 	control_server_address = "unix:abstract=/com/ubuntu/upstart/test";
 
 	assert0 (control_server_open ());
@@ -337,6 +341,8 @@ test_server_connect (void)
 	control_server_close ();
 
 	dbus_shutdown ();
+
+	control_server_address = NULL;
 }
 
 void
@@ -348,6 +354,7 @@ test_server_close (void)
 	TEST_FUNCTION ("control_server_close");
 	control_init ();
 
+	nih_free (control_server_address);
 	control_server_address = "unix:abstract=/com/ubuntu/upstart/test";
 
 	assert0 (control_server_open ());
@@ -358,6 +365,8 @@ test_server_close (void)
 	TEST_EQ_P (control_server, NULL);
 
 	dbus_shutdown ();
+
+	control_server_address = NULL;
 }
 
 
