@@ -2552,11 +2552,6 @@ job_process_child_reader (JobProcessData  *process_data,
 		job->log[process] = NULL;
 	}
 
-	/* Now call the handler registered via job_process_start()
-	 * to deal with the error condition.
-	 */
-	job_child_error_handler (job, process);
-
 	/* Note that pts_master is closed automatically in the parent
 	 * when the log object is destroyed.
 	 */
@@ -2566,6 +2561,12 @@ job_process_child_reader (JobProcessData  *process_data,
 
 	/* Invalidate */
 	process_data->job_process_fd = -1;
+
+	/* Now call the handler registered via job_process_start() to deal with
+	 * the error condition. Note that the job and associated process data
+	 * might be destroyed after this.
+	 */
+	job_child_error_handler (job, process);
 }
 
 /**
