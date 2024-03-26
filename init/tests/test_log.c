@@ -1232,6 +1232,9 @@ test_log_destroy (void)
 	NihListEntry *entry;
 	struct stat  statbuf;
 	char  *p;
+	char  *path;
+	NihIo *io;
+	NihIoBuffer *unflushed;
 
 	TEST_FUNCTION ("log_destroy");
 
@@ -1261,14 +1264,17 @@ test_log_destroy (void)
 	log = log_new (NULL, "/bar", pty_master, 0);
 	TEST_NE_P (log, NULL);
 
-	TEST_FREE_TAG (log->path);
-	TEST_FREE_TAG (log->io);
+	path = log->path;
+	io = log->io;
+
+	TEST_FREE_TAG (path);
+	TEST_FREE_TAG (io);
 
 	close (pty_slave);
 	nih_free (log);
 
-	TEST_FREE (log->path);
-	TEST_FREE (log->io);
+	TEST_FREE (path);
+	TEST_FREE (io);
 
 	/************************************************************/
 	TEST_FEATURE ("ensure unflushed data freed with uid 0");
@@ -1294,11 +1300,13 @@ test_log_destroy (void)
 	TEST_NE_P (log->unflushed, NULL);
 	TEST_EQ (log->unflushed->len, strlen(str));
 	TEST_EQ_STR (log->unflushed->buf, str);
-	TEST_FREE_TAG (log->unflushed);
+
+	unflushed = log->unflushed;
+	TEST_FREE_TAG (unflushed);
 
 	close (pty_slave);
 	nih_free (log);
-	TEST_FREE (log->unflushed);
+	TEST_FREE (unflushed);
 
 	TEST_EQ (unlink (filename), 0);
 
@@ -1426,7 +1434,9 @@ test_log_destroy (void)
 	TEST_NE_P (log->unflushed, NULL);
 	TEST_EQ (log->unflushed->len, strlen(str));
 	TEST_EQ_STR (log->unflushed->buf, str);
-	TEST_FREE_TAG (log->unflushed);
+
+	unflushed = log->unflushed;
+	TEST_FREE_TAG (unflushed);
 
 	close (pty_slave);
 	nih_free (log);
@@ -1445,7 +1455,7 @@ test_log_destroy (void)
 	/* Freeing the log object should have removed the watch */
 	TEST_EQ (found_fd, 0);
 
-	TEST_FREE (log->unflushed);
+	TEST_FREE (unflushed);
 }
 
 int

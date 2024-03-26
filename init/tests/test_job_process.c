@@ -4019,21 +4019,25 @@ test_start (void)
 		}
 	}
 
-	TEST_FREE_TAG (job);
-	TEST_FREE_TAG (job->log);
+	{
+		Log **log = job->log;
 
-	/* Wait until the process is in a known state. This ensures that
-	 * when job_process_terminated() calls log_handle_unflushed(), 
-	 * the log object will _not_ get added to the unflushed list,
-	 * meaning it will get destroyed immediately.
-	 */
-	waitid (P_PID, pid, &siginfo, WEXITED | WNOWAIT);
+		TEST_FREE_TAG (job);
+		TEST_FREE_TAG (log);
 
-	nih_child_poll ();
+		/* Wait until the process is in a known state. This ensures that
+		 * when job_process_terminated() calls log_handle_unflushed(),
+		 * the log object will _not_ get added to the unflushed list,
+		 * meaning it will get destroyed immediately.
+		 */
+		waitid (P_PID, pid, &siginfo, WEXITED | WNOWAIT);
 
-	/* Should have been destroyed now */
-	TEST_FREE (job);
-	TEST_FREE (job->log);
+		nih_child_poll ();
+
+		/* Should have been destroyed now */
+		TEST_FREE (job);
+		TEST_FREE (log);
+	}
 
 	nih_free (class);
 	unlink (filename);
