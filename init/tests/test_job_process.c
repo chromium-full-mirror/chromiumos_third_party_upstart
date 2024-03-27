@@ -70,11 +70,6 @@
 /* Used to generate single- and multi-line output. */
 #define TEST_CMD_ECHO             "/bin/echo"
 
-/* Used to generate multi-line output out stdout without using shell
- * meta-characters.
- */
-#define TEST_CMD_YES              "/usr/bin/yes"
-
 /* Used to generate multi-line output on stderr without using shell
  * meta-characters.
  */
@@ -1840,9 +1835,13 @@ test_start (void)
 
 	class->console = CONSOLE_LOG;
 	class->process[PROCESS_MAIN] = process_new (class);
+	/* We want a single-line command that produces a few lines of output
+	 * and never terminates on its own. We wrap the 'yes' command to
+	 * bound the amount of output we have to process.
+	 */
 	class->process[PROCESS_MAIN]->command = nih_sprintf (
 			class->process[PROCESS_MAIN],
-			"%s", TEST_CMD_YES);
+			"%s/%s", TEST_DATA_DIR, "yes.sh");
 	class->process[PROCESS_MAIN]->script = FALSE;
 
 	job = job_new (class, "");
