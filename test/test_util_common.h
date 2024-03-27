@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <time.h>
 
 #include <nih-dbus/test_dbus.h>
 #include <nih/timer.h>
@@ -563,19 +564,19 @@
  * _WAIT_FOR_FILE():
  *
  * @path: full path to file to look for,
- * @sleep_secs: number of seconds to sleep per loop,
+ * @sleep_msecs: number of milliseconds to sleep per loop,
  * @loops: number of times to check for file.
  *
  * Wait for a reasonable period of time for @path to be created.
  *
- * Abort if file does not appear within (sleep_secs * loops) seconds.
+ * Abort if file does not appear within (sleep_msecs * loops) milliseconds.
  *
  * XXX:WARNING: this is intrinsically racy since although the file has
  * been _created_, it has not necessarily been fully written at the
  * point this macro signifies success. For that we need inotify or
  * similar.
  **/
-#define _WAIT_FOR_FILE(path, sleep_secs, loops)                      \
+#define _WAIT_FOR_FILE(path, sleep_msecs, loops)                     \
 {                                                                    \
 	int              ok;                                         \
 	struct stat      statbuf;                                    \
@@ -585,7 +586,7 @@
 	/* Wait for log to be created */                             \
 	ok = FALSE;                                                  \
 	for (int i = 0; i < loops; i++) {                            \
-		sleep (sleep_secs);                                  \
+		msleep (sleep_msecs);                                \
 		if (! stat (path, &statbuf)) {                       \
 			ok = TRUE;                                   \
 			break;                                       \
@@ -604,7 +605,7 @@
  * Abort if file does not appear within.
  **/
 #define WAIT_FOR_FILE(path)                                         \
-        _WAIT_FOR_FILE (path, 1, 5)
+        _WAIT_FOR_FILE (path, 100, 50)
 
 /**
  * TEST_STR_MATCH:
@@ -752,6 +753,16 @@
         _TEST_STR_ARRAY_CONTAINS (_array, _pattern, TRUE)
 
 extern int test_user_mode;
+
+static inline void
+msleep (unsigned int msecs) {
+	struct timespec req = {
+		.tv_sec = msecs / 1000,
+		.tv_nsec = (msecs % 1000) * 1000 * 1000,
+	};
+
+	nanosleep (&req, NULL);
+}
 
 /**
  * NihTreeHandler:

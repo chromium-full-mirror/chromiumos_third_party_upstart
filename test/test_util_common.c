@@ -108,7 +108,7 @@ wait_for_upstart (int session_init_pid)
 	int                     running = FALSE;
 
 	/* XXX: arbitrary value */
-	int                     attempts = 10;
+	int                     attempts = 100;
 
 	if (session_init_pid) {
 		TEST_TRUE (set_upstart_session (session_init_pid));
@@ -121,7 +121,7 @@ wait_for_upstart (int session_init_pid)
 
 	while (attempts) {
 		attempts--;
-		sleep (1);
+		msleep (100);
 		connection = nih_dbus_connect (address, NULL);
 
 		if (! connection) {
@@ -229,7 +229,7 @@ set_upstart_session (pid_t session_init_pid)
 	pid_t                     pid;
 
 	/* XXX: arbitrary value */
-	int                       loops = 5;
+	int                       loops = 50;
 
 	nih_assert (session_init_pid);
 
@@ -244,7 +244,7 @@ set_upstart_session (pid_t session_init_pid)
 	 * within a reasonable period of time.
 	 */
 	for (i = 0; i < loops; i++) {
-		sleep (1);
+		msleep (100);
 
 		RUN_COMMAND (NULL, cmd, &output, &lines);
 
@@ -423,7 +423,7 @@ timed_waitpid (pid_t pid, time_t timeout)
 
 	    if (! ret2)
 		    /* give child a chance to change state */
-		    sleep (1);
+		    msleep (100);
 
 	    if (ret2) {
 		    if (WIFEXITED (status))

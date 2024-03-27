@@ -54,9 +54,9 @@
 /**
  * JOB_STOP_SECONDS:
  *
- * Number of attempts to make to check that job has stopped.
+ * Number of seconds to poll that job has stopped.
  **/
-#define JOB_STOP_ATTEMPTS 10
+#define JOB_STOP_SECONDS 10
 
 void
 test_source_new (void)
@@ -4732,10 +4732,10 @@ test_source_reload (void)
 			}
 		}
 
-		if (got || attempts == JOB_STOP_ATTEMPTS)
+		if (got || attempts == (JOB_STOP_SECONDS * 10))
 			break;
 
-		sleep (1);
+		msleep (100);
 		attempts++;
 	}
 
@@ -4920,10 +4920,10 @@ test_source_reload (void)
 			}
 		}
 
-		if (got || attempts == JOB_STOP_ATTEMPTS)
+		if (got || attempts == (JOB_STOP_SECONDS * 10))
 			break;
 
-		sleep (1);
+		msleep (100);
 		attempts++;
 	}
 

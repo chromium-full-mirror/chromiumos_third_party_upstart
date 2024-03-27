@@ -11122,8 +11122,8 @@ test_reexec (void)
 
 	/* Wait for log to be created */
 	ok = FALSE;
-	for (int i = 0; i < 5; i++) {
-		sleep (1);
+	for (int i = 0; i < 50; i++) {
+		msleep (100);
 		if (! stat (logfile, &statbuf)) {
 			ok = TRUE;
 			break;
@@ -11162,14 +11162,14 @@ test_reexec (void)
 
 	/* wait for script to remove flag file */
 	ok = FALSE;
-	for (int i = 1; i < 6; i++) {
+	for (int i = 1; i < 60; i++) {
 		ret = stat (flagfile, &statbuf);
 	       
 		if (ret	< 0 && errno == ENOENT) {
 			ok = TRUE;
 			break;
 		}
-		sleep (1);
+		msleep (100);
 	}
 
 	TEST_EQ (ok, TRUE);
@@ -11184,13 +11184,13 @@ test_reexec (void)
 	 * of our children.
 	 */
 	ok = FALSE;
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < 50; i++) {
 		nih_local char *path = NIH_MUST (nih_sprintf (NULL, "/proc/%d", job_pid));
 		if (stat (path, &statbuf) < 0 && errno == ENOENT) {
 			ok = TRUE;
 			break;
 		}
-		sleep (1);
+		msleep (100);
 	}
 	TEST_EQ (ok, TRUE);
 	tmp = job_to_pid ("foo");
@@ -11338,8 +11338,8 @@ test_reexec (void)
 
 	/* Wait for log to be created */
 	ok = FALSE;
-	for (int i = 0; i < 5; i++) {
-		sleep (1);
+	for (int i = 0; i < 50; i++) {
+		msleep (100);
 		if (! stat (logfile, &statbuf)) {
 			ok = TRUE;
 			break;
@@ -11367,8 +11367,8 @@ test_reexec (void)
 
 	/* Wait for log to be recreated */
 	ok = FALSE;
-	for (int i = 0; i < 5; i++) {
-		sleep (1);
+	for (int i = 0; i < 50; i++) {
+		msleep (100);
 		if (! stat (logfile, &statbuf)) {
 			ok = TRUE;
 			break;
@@ -11726,6 +11726,7 @@ test_quiesce (void)
 	TEST_FEATURE ("system shutdown: one long-running job which ignores SIGTERM");
 
 	CREATE_FILE (confdir, "long-running-term.conf",
+			"kill timeout 1\n"
 			"script\n"
 			"  trap '' TERM\n"
 		        "  sleep 999\n"
@@ -11841,6 +11842,7 @@ test_quiesce (void)
 	job = NIH_MUST (nih_sprintf (NULL,
 				"console log\n"
 				"start on session-end\n"
+				"kill timeout 1\n"
 				"\n"
 				"script\n"
 				"  trap '' TERM\n"
@@ -11903,6 +11905,7 @@ test_quiesce (void)
 
 	CREATE_FILE (confdir, "long-running-term.conf",
 			"console log\n"
+			"kill timeout 1\n"
 			"script\n"
 			"  trap '' TERM\n"
 		        "  exec sleep 999\n"
@@ -11913,6 +11916,7 @@ test_quiesce (void)
 	job = NIH_MUST (nih_sprintf (NULL,
 				"console log\n"
 				"start on session-end\n"
+				"kill timeout 1\n"
 				"\n"
 				"script\n"
 				"  trap '' TERM\n"
@@ -12098,6 +12102,7 @@ test_quiesce (void)
 	TEST_FEATURE ("session shutdown: one long-running job which ignores SIGTERM");
 
 	CREATE_FILE (confdir, "long-running-term.conf",
+			"kill timeout 1\n"
 			"script\n"
 			"  trap '' TERM\n"
 		        "  sleep 999\n"
@@ -12152,6 +12157,7 @@ test_quiesce (void)
 	job = NIH_MUST (nih_sprintf (NULL,
 				"console log\n"
 				"start on session-end\n"
+				"kill timeout 1\n"
 				"\n"
 				"script\n"
 				"  echo hello\n"
@@ -12216,6 +12222,7 @@ test_quiesce (void)
 	job = NIH_MUST (nih_sprintf (NULL,
 				"console log\n"
 				"start on session-end\n"
+				"kill timeout 1\n"
 				"\n"
 				"script\n"
 				"  trap '' TERM\n"
@@ -12279,6 +12286,7 @@ test_quiesce (void)
 			"1 which starts on session-end and ignores SIGTERM)");
 
 	CREATE_FILE (confdir, "long-running-term.conf",
+			"kill timeout 1\n"
 			"script\n"
 			"  trap '' TERM\n"
 		        "  sleep 999\n"
@@ -12289,6 +12297,7 @@ test_quiesce (void)
 	job = NIH_MUST (nih_sprintf (NULL,
 				"console log\n"
 				"start on session-end\n"
+				"kill timeout 1\n"
 				"\n"
 				"script\n"
 				"  trap '' TERM\n"
@@ -13627,7 +13636,7 @@ test_notify_disk_writeable (void)
 	/* Give Upstart a chance to respond */
 	{
 		int i   = 0;
-		int max = 5;
+		int max = 50;
 		int ret;
 
 		for (i=0; i < max; ++i) {
@@ -13645,7 +13654,7 @@ test_notify_disk_writeable (void)
 				break;
 			}
 
-			sleep (1);
+			msleep (100);
 		}
 	}
 
