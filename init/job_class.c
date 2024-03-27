@@ -2730,7 +2730,7 @@ error:
 time_t
 job_class_max_kill_timeout (void)
 {
-	time_t kill_timeout = JOB_DEFAULT_KILL_TIMEOUT;
+	time_t kill_timeout = 1;
 
 	job_class_init ();
 
