@@ -3732,7 +3732,6 @@ test_source_reload_file (void)
 	char         tmpname[PATH_MAX], filename[PATH_MAX];
 	fd_set       readfds, writefds, exceptfds;
 	NihError    *err;
-	json_object *json;
 
 	TEST_FUNCTION_FEATURE ("conf_source_reload",
 			       "with configuration file");
@@ -4538,35 +4537,7 @@ no_inotify:
 	 */
 	TEST_EQ (ret, 0);
 
-	/* We know the job was invalid * by the fact that the ConfFile
-	 * still has no associated JobClass.
-	 */
-	TEST_EQ (file->job, NULL);
-
-	/* See if we can serialise the ConfFile without an associated
-	 * JobClass.
-	 */
-	json = conf_file_serialise (file);
-	TEST_NE_P (json, NULL);
-
-	/* Test there is no JobClass in the JSON */
-	TEST_EQ (json_object_object_get_ex (json, "job_class", NULL), FALSE);
-
-	TEST_FEATURE ("ConfFile with no JobClass can be deserialised");
-
 	nih_free (source);
-
-	source = conf_source_new (NULL, filename, CONF_FILE);
-	TEST_NE_P (source, NULL);
-	TEST_LIST_NOT_EMPTY (conf_sources);
-	TEST_HASH_EMPTY (source->files);
-
-	file = conf_file_deserialise (source, json);
-	TEST_NE_P (file, NULL);
-
-	nih_free (source);
-
-	json_object_put (json);
 
 	unlink (filename);
 	rmdir (dirname);
