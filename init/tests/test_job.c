@@ -1057,18 +1057,19 @@ test_change_state (void)
 	 * Because we get there, we should get a started event emitted.
 	 */
 	TEST_FEATURE ("starting to tmpfiles");
+	TEST_FILENAME (filename);
 	tmp = class->process[PROCESS_TMPFILES];
 	class->process[PROCESS_TMPFILES] = process_new (class);
 	class->process[PROCESS_TMPFILES]->script = FALSE;
-	class->process[PROCESS_TMPFILES]->command =
-	    "/usr/bin/systemd-tmpfiles --create --clean --remove "
-	    "/tmp/upstart-tmpfiles-test.conf";
+	class->process[PROCESS_TMPFILES]->command = nih_sprintf (
+		class->process[PROCESS_TMPFILES],
+		"/usr/bin/systemd-tmpfiles --create --clean --remove %s",
+		filename);
 
 	/* Write a test configuration. */
-	f = fopen ("/tmp/upstart-tmpfiles-test.conf", "w");
+	f = fopen (filename, "w");
 	TEST_NE_P (f, NULL);
-	TEST_GT (fprintf (f, "d= /tmp/upstart-tmpfiles-test.conf.d - - -\n"),
-		 0);
+	TEST_GT (fprintf (f, "d= %s.d - - -\n", filename), 0);
 	close(f);
 
 	TEST_ALLOC_FAIL {
