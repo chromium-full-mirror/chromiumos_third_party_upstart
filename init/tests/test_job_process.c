@@ -4953,8 +4953,11 @@ test_spawn (void)
 
 		pid = job_process_spawn_with_fd (job, args_array, NULL, FALSE, -1, PROCESS_MAIN, &job_process_fd);
 
-		if (test_alloc_failed) {
-			TEST_LT (pid, 0);
+		/* If we're logging extra (e.g., NIH_LOG_DEBUG), the failing
+		 * allocation might be in a log message, and we'll still
+		 * succeed.
+		 */
+		if (test_alloc_failed && pid < 0) {
 			err = nih_error_get ();
 			TEST_NE_P (err, NULL);
 			TEST_EQ (err->number, ENOMEM);
