@@ -11717,7 +11717,7 @@ test_quiesce (void)
 	unlink (session_file);
 
 	/* pid should no longer exist */
-	TEST_EQ (kill (job_pid, SIGKILL), -1);
+	TEST_EQ (kill (job_pid, 0), -1);
 	TEST_EQ (errno, ESRCH);
 
 	DELETE_FILE (confdir, "long-running.conf");
@@ -11765,7 +11765,7 @@ test_quiesce (void)
 	unlink (session_file);
 
 	/* pid should no longer exist */
-	TEST_EQ (kill (job_pid, SIGKILL), -1);
+	TEST_EQ (kill (job_pid, 0), -1);
 	TEST_EQ (errno, ESRCH);
 
 	DELETE_FILE (confdir, "long-running-term.conf");
@@ -11959,7 +11959,7 @@ test_quiesce (void)
 	unlink (session_file);
 
 	/* the long-running job pid should no longer exist */
-	kill (job_pid, SIGKILL);
+	TEST_EQ (kill (job_pid, 0), -1);
 	TEST_EQ (errno, ESRCH);
 
 	file = fopen (pid_file, "r");
@@ -12050,7 +12050,7 @@ test_quiesce (void)
 	unlink (session_file);
 
 	/* pid should no longer exist */
-	TEST_EQ (kill (job_pid, SIGKILL), -1);
+	TEST_EQ (kill (job_pid, 0), -1);
 	TEST_EQ (errno, ESRCH);
 
 	DELETE_FILE (confdir, "long-running.conf");
@@ -12093,7 +12093,7 @@ test_quiesce (void)
 	unlink (session_file);
 
 	/* pid should no longer exist */
-	TEST_EQ (kill (job_pid, SIGKILL), -1);
+	TEST_EQ (kill (job_pid, 0), -1);
 	TEST_EQ (errno, ESRCH);
 
 	DELETE_FILE (confdir, "startup.conf");
@@ -12144,7 +12144,7 @@ test_quiesce (void)
 	unlink (session_file);
 
 	/* pid should no longer exist */
-	TEST_EQ (kill (job_pid, SIGKILL), -1);
+	TEST_EQ (kill (job_pid, 0), -1);
 	TEST_EQ (errno, ESRCH);
 
 	DELETE_FILE (confdir, "long-running-term.conf");
@@ -12203,7 +12203,7 @@ test_quiesce (void)
 	fclose (file);
 
 	/* pid should no longer exist */
-	TEST_EQ (kill (job_pid, SIGKILL), -1);
+	TEST_EQ (kill (job_pid, 0), -1);
 	TEST_EQ (errno, ESRCH);
 
 	assert0 (unlink (pid_file));
@@ -12269,7 +12269,7 @@ test_quiesce (void)
 	fclose (file);
 
 	/* pid should no longer exist */
-	TEST_EQ (kill (job_pid, SIGKILL), -1);
+	TEST_EQ (kill (job_pid, 0), -1);
 	TEST_EQ (errno, ESRCH);
 
 	assert0 (unlink (pid_file));
@@ -12342,7 +12342,7 @@ test_quiesce (void)
 	unlink (session_file);
 
 	/* pid should no longer exist */
-	TEST_EQ (kill (job_pid, SIGKILL), -1);
+	TEST_EQ (kill (job_pid, 0), -1);
 	TEST_EQ (errno, ESRCH);
 
 	file = fopen (pid_file, "r");
@@ -12351,7 +12351,7 @@ test_quiesce (void)
 	fclose (file);
 
 	/* pid should no longer exist */
-	TEST_EQ (kill (job_pid, SIGKILL), -1);
+	TEST_EQ (kill (job_pid, 0), -1);
 	TEST_EQ (errno, ESRCH);
 
 	assert0 (unlink (pid_file));
