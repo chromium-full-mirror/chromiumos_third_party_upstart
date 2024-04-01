@@ -4312,7 +4312,6 @@ test_spawn (void)
 	struct stat       statbuf;
 	int               ret;
 	int               job_process_fd = -1;
-	nih_local NihIoBuffer *buffer = NULL;
 
 	log_unflushed_init ();
 
@@ -4630,15 +4629,16 @@ test_spawn (void)
 
 	NihIo *io = nih_io_reopen (job, job_process_fd, NIH_IO_STREAM, NULL, NULL, NULL, NULL);
 	TEST_NE_P (io, NULL);
-	buffer = read_from_fd (NULL, job_process_fd);
-	TEST_NE_P (buffer, NULL);
+	io->recv_buf = read_from_fd (io->recv_buf, job_process_fd);
+	TEST_NE_P (io->recv_buf, NULL);
 	TEST_NE_P (job->process_data[PROCESS_MAIN], NULL);
 	TEST_TRUE (job->process_data[PROCESS_MAIN]->valid);
 	
 
 	TEST_NE_P (job->log[PROCESS_MAIN], NULL);
 
-	job_process_child_reader (job->process_data[PROCESS_MAIN], io, buffer->buf, buffer->len);
+	job_process_child_reader (job->process_data[PROCESS_MAIN],
+			io, io->recv_buf->buf, io->recv_buf->len);
 
 	/* The log should have been allocated in job_process_spawn,
 	 * but then freed on error.
@@ -9150,10 +9150,10 @@ test_handler (void)
 	close (fds[1]);
 	pid = job->pid[PROCESS_MAIN];
 
-	buffer = read_from_fd (NULL, fds[0]);
+	io->recv_buf = read_from_fd (io->recv_buf, fds[0]);
 
 	job_process_child_reader (job->process_data[PROCESS_MAIN],
-			io, buffer->buf, buffer->len);
+			io, io->recv_buf->buf, io->recv_buf->len);
 
 	/* Setup failed, so goal should have changed to stop */
 	TEST_EQ (job->goal, JOB_STOP);
