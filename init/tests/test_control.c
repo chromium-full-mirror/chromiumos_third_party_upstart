@@ -63,7 +63,7 @@
 
 #include "test_util_common.h"
 
-extern const char *control_server_address;
+extern char *control_server_address;
 extern int no_inherit_env;
 
 void
@@ -117,7 +117,7 @@ test_server_open (void)
 	assert (fd >= 0);
 
 	address = "unix:abstract=/com/ubuntu/upstart/test";
-	assert (address = strchr (address, '/'));
+	TEST_NE_P ((address = strchr (address, '/')), NULL);
 
 	addr.sun_family = AF_UNIX;
 	addr.sun_path[0] = '\0';

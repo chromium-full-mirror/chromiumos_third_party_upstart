@@ -726,7 +726,7 @@ main (int   argc,
 				KEY_SPEC_SESSION_KEYRING);
 		if (keyring_id == -1) {
 			nih_warn ("%s: %s",
-				  _("Unable to create dircrypt keyring: %s"),
+				  _("Unable to create dircrypt keyring"),
 				  strerror (errno));
 		} else {
 			keyctl_setperm(keyring_id,
@@ -760,14 +760,14 @@ main (int   argc,
 		global_keyring =
 			add_key("keyring", "global", 0, 0, KEY_SPEC_SESSION_KEYRING);
 		if (global_keyring == -1) {
-			nih_warn("%s: %s", _("Unable to create global keyring: %s"),
+			nih_warn("%s: %s", _("Unable to create global keyring"),
 				 strerror(errno));
 			break;
 		}
 
 		session_keyring = add_key("keyring", "session", 0, 0, global_keyring);
 		if (session_keyring == -1) {
-			nih_warn("%s: %s", _("Unable to create session keyring: %s"),
+			nih_warn("%s: %s", _("Unable to create session keyring"),
 				 strerror(errno));
 			break;
 		}
@@ -775,7 +775,7 @@ main (int   argc,
 		reboot_vault_keyring =
 			add_key("keyring", "reboot_vault", 0, 0, global_keyring);
 		if (reboot_vault_keyring == -1) {
-			nih_warn("%s: %s", _("Unable to create reboot_vault keyring: %s"),
+			nih_warn("%s: %s", _("Unable to create reboot_vault keyring"),
 				 strerror(errno));
 			break;
 		}
@@ -783,7 +783,7 @@ main (int   argc,
 		encstateful_keyring =
 			add_key("keyring", "encstateful", 0, 0, global_keyring);
 		if (reboot_vault_keyring == -1) {
-			nih_warn("%s: %s", _("Unable to create encstateful keyring: %s"),
+			nih_warn("%s: %s", _("Unable to create encstateful keyring"),
 				 strerror(errno));
 			break;
 		}

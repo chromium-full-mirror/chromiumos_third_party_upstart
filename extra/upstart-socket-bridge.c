@@ -677,15 +677,15 @@ error:
 static void
 cleanup (void)
 {
-	Job *job;
-
 	nih_debug ("Performing cleanup");
 
 	/*
 	 * Free each job, so it gets to clean up its resources (e.g., unlinking
 	 * local domain sockets).
 	 */
-	NIH_HASH_FOREACH_SAFE (jobs, job) {
+	NIH_HASH_FOREACH_SAFE (jobs, iter) {
+		Job *job = (Job *)iter;
+
 		nih_free (job);
 	}
 }

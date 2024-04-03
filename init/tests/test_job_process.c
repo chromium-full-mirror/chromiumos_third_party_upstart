@@ -1207,7 +1207,7 @@ test_start (void)
 		
 		TEST_GT (sprintf (buffer, "test: test (foo) main process (%i) terminated with status 255\n", pid), 0);
 
-		TEST_GT (fgets (filebuf, sizeof (filebuf), output), 0);
+		TEST_NE_P (fgets (filebuf, sizeof (filebuf), output), NULL);
 
 		TEST_TRUE (strcmp (filebuf, ("test: Failed to spawn test (foo) main "
 						"process: unable to execute: "

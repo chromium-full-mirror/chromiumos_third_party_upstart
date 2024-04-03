@@ -146,7 +146,9 @@ int check_cgroup_sandbox(void)
 void
 test_checks (void)
 {
-	int ret;
+#ifdef ENABLE_CGROUPS
+	int ret = 0;
+#endif
 
 	TEST_GROUP ("test environment");
 

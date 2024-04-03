@@ -317,7 +317,6 @@ event_environment_init (EventOperator *root,
 			const char    *event_list_key) {
 	nih_local char **event_op_env = NULL;
 	size_t event_op_env_len = 0;
-	char *const *event_list = NULL;
 	char **e = NULL;
 
 	NIH_MUST (event_operator_environment (root, &event_op_env, NULL,

@@ -2066,7 +2066,7 @@ job_class_serialise (JobClass *class)
 	json_object_object_add (json, "emits", json_emits);
 
 	json_processes = process_serialise_all (
-			(const Process const * const * const)class->process);
+			(const Process * const * const)class->process);
 	if (! json_processes)
 		goto error;
 	json_object_object_add (json, "process", json_processes);

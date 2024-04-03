@@ -1253,7 +1253,8 @@ test_process_serialise (void)
 	foo->process[PROCESS_POST_STOP]->command = NIH_MUST (nih_strdup (foo->process[PROCESS_POST_STOP],
 			"/bin/true"));
 
-	json_processes = process_serialise_all ((const Process const * const * const)foo->process);
+	json_processes = process_serialise_all (
+			(const Process * const * const)foo->process);
 	TEST_NE_P (json_processes, NULL);
 	json_object_object_add (json, "process", json_processes);
 

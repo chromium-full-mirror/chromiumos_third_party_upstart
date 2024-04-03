@@ -141,7 +141,6 @@ int list_env_action                      (NihCommand *command, char * const *arg
 int unset_env_action                     (NihCommand *command, char * const *args);
 int reset_env_action                     (NihCommand *command, char * const *args);
 int list_sessions_action                 (NihCommand *command, char * const *args);
-static int disable_respawn_action        (NihCommand *command, char * const *args);
 
 /**
  * use_dbus:
@@ -2212,6 +2211,7 @@ error:
 
 }
 
+#ifndef TEST
 /**
  * disable_respawn_action:
  * @command: NihCommand invoked,
@@ -2247,6 +2247,7 @@ error:
 	return 1;
 
 }
+#endif  /* TEST */
 
 static void
 start_reply_handler (char **         job_path,
