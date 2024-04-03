@@ -89,6 +89,80 @@ static void selfpipe_write (int n);
 static void selfpipe_setup (void);
 
 /**
+ * upstart_dbus_ready:
+ *
+ * @use_session_init: TRUE if we should use the private session bus (i.e.,
+ * peer-to-peer D-Bus); FALSE otherwise.
+ * @address: D-Bus address to check.
+ *
+ * Check if Upstart is ready on D-Bus. Notably, for |use_session_init==TRUE|,
+ * we can't really guarantee everything is ready, since that relies on the
+ * service name, which isn't supported in peer-to-peer D-Bus. Callers should
+ * assert readiness using additional means (e.g., polling `initctl`).
+ *
+ * Returns: TRUE if Upstart is ready; FALSE otherwise.
+ **/
+static int
+upstart_dbus_ready(int use_session_init, const char *address)
+{
+	nih_local NihDBusProxy *upstart = NULL;
+	DBusConnection         *connection;
+	NihError               *err;
+	const char             *service_name = NULL;
+
+	connection = nih_dbus_connect (address, NULL);
+	if (! connection) {
+		err = nih_error_get ();
+		nih_free (err);
+		return FALSE;
+	}
+
+	if (! use_session_init) {
+		DBusError error;
+
+		dbus_error_init (&error);
+
+		/* nih_dbus_connect() doesn't do this for us. We need
+		 * this before we can start doing AddMatch name
+		 * requests.
+		 */
+		if (! dbus_bus_register (connection, &error)) {
+			TEST_FAILED ("Failed D-Bus registration: %s: %s",
+				     error.name, error.message);
+		}
+
+		/* The private session interface is peer-to-peer; it doesn't
+		 * support service names.
+		 */
+		service_name = DBUS_SERVICE_UPSTART;
+	}
+
+	upstart = nih_dbus_proxy_new (NULL, connection, service_name,
+				      DBUS_PATH_UPSTART, NULL, NULL);
+	if (! use_session_init) {
+		/* Drop the dbus_bus_register() reference here; the
+		 * NihDBusProxy is holding another reference.
+		 */
+		dbus_connection_unref (connection);
+	}
+
+	if (! upstart) {
+		err = nih_error_get ();
+		nih_free (err);
+		return FALSE;
+	}
+
+	/* Wait for the owner name when available; the private interface
+	 * doesn't support owner names.
+	 */
+	if (! use_session_init && ! upstart->owner) {
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+/**
  * wait_for_upstart:
  *
  * @session_init_pid: pid of Session Init (which uses a private bus
@@ -101,12 +175,7 @@ static void selfpipe_setup (void);
 void
 wait_for_upstart (int session_init_pid)
 {
-	nih_local NihDBusProxy *upstart = NULL;
-	DBusConnection         *connection;
 	char                   *address;
-	NihError               *err;
-	int                     running = FALSE;
-
 	/* XXX: arbitrary value */
 	int                     attempts = 100;
 
@@ -119,32 +188,13 @@ wait_for_upstart (int session_init_pid)
 
 	TEST_TRUE (address);
 
-	while (attempts) {
-		attempts--;
+	for (int i = 0; i < attempts; i++) {
+		if (upstart_dbus_ready(!! session_init_pid, address))
+			return;
+
 		msleep (100);
-		connection = nih_dbus_connect (address, NULL);
-
-		if (! connection) {
-			err = nih_error_get ();
-			nih_free (err);
-			continue;
-		}
-
-		upstart = nih_dbus_proxy_new (NULL, connection,
-				      	      NULL,
-					      DBUS_PATH_UPSTART,
-				      	      NULL, NULL);
-
-		if (! upstart) {
-			err = nih_error_get ();
-			nih_free (err);
-			dbus_connection_unref (connection);
-		} else {
-			running = TRUE;
-			break;
-		}
 	}
-	TEST_EQ (running, TRUE);
+	TEST_FAILED ("failed to wait for Upstart D-Bus");
 }
 
 /**
@@ -244,7 +294,8 @@ set_upstart_session (pid_t session_init_pid)
 	 * within a reasonable period of time.
 	 */
 	for (i = 0; i < loops; i++) {
-		msleep (100);
+		if (i != 0)
+			msleep (100);
 
 		RUN_COMMAND (NULL, cmd, &output, &lines);
 
@@ -526,6 +577,11 @@ _start_upstart (pid_t *pid, int user, char * const *args)
 	}
 
 	sigprocmask (SIG_SETMASK, &orig_set, NULL);
+
+	for (int i = 0; argv[i] != NULL; i++) {
+		if (! strcmp (argv[i], "--no-dbus"))
+			return;
+	}
 	wait_for_upstart (user ? *pid : 0);
 }
 
