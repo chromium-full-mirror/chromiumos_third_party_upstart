@@ -508,7 +508,6 @@ test_start (void)
 	struct passwd   *pwd;
 	struct group    *grp;
 	char            *p;
-	int              ok;
 	char             buffer[1024];
 	pid_t            pid;
 	int              i;
@@ -1886,41 +1885,15 @@ test_start (void)
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
 
-	/* Timed repeated read until we get the result we expect.
-	 */
-	ok = FALSE;
 	while (fgets (filebuf, sizeof(filebuf), output) != NULL) {
-		if (! strncmp (filebuf, "y\r\n", 3))
-			ok = TRUE;
-		else
-			ok = FALSE;
-
-		if (! ok)
-			break;
-	}
-
-	if (! ok) {
-		/* The last entry has been truncated, probably due to
-		 * the kernel breaking the data on one of the newline
-		 * characters. Attempt a few times to re-read all the
-		 * expected data.
+		/* We may have SIGKILL'd this job in the middle of something,
+		 * so it's OK if the contents are truncated.
 		 */
-		for (int i = 0; i < MAX_ITERATIONS; i++) {
-			/* rewind until 3 bytes ('y', '\r' and '\n')
-			 * before EOF.
-			 */
-			fseek (output, 3, SEEK_END);
-
-			TEST_NE_P (fgets (filebuf, sizeof (filebuf), output), NULL);
-			if (! strcmp (filebuf, "y\r\n")) {
-				ok = TRUE;
-				break;
-			}
-			sleep (1);
-			rewind (output);
+		if (strncmp (filebuf, "y\r\n", strlen(filebuf))) {
+			TEST_FAILED ("Unexpected contents: %s, %zu\n", filebuf,
+				     strlen(filebuf));
 		}
 	}
-	TEST_EQ (ok, TRUE);
 
 	TEST_FILE_END (output);
 	fclose (output);
