@@ -1532,7 +1532,8 @@ test_start (void)
 	ENSURE_DIRECTORY_EMPTY (dirname);
 
 	/* Paranoia */
-	TEST_TRUE (stat (filename, &statbuf) < 0 && errno == ENOENT);
+	TEST_LT (stat (filename, &statbuf), 0);
+	TEST_EQ (errno, ENOENT);
 
 	nih_free (class);
 
@@ -1568,7 +1569,8 @@ test_start (void)
 	ENSURE_DIRECTORY_EMPTY (dirname);
 
 	/* Paranoia */
-	TEST_TRUE (stat (filename, &statbuf) < 0 && errno == ENOENT);
+	TEST_LT (stat (filename, &statbuf), 0);
+	TEST_EQ (errno, ENOENT);
 
 	nih_free (class);
 
@@ -1614,7 +1616,8 @@ test_start (void)
 	ENSURE_DIRECTORY_EMPTY (dirname);
 
 	/* Paranoia */
-	TEST_TRUE (stat (filename, &statbuf) < 0 && errno == ENOENT);
+	TEST_LT (stat (filename, &statbuf), 0);
+	TEST_EQ (errno, ENOENT);
 
 	nih_free (class);
 
@@ -1659,7 +1662,8 @@ test_start (void)
 	ENSURE_DIRECTORY_EMPTY (dirname);
 
 	/* Paranoia */
-	TEST_TRUE (stat (filename, &statbuf) < 0 && errno == ENOENT);
+	TEST_LT (stat (filename, &statbuf), 0);
+	TEST_EQ (errno, ENOENT);
 
 	nih_free (class);
 
@@ -4410,11 +4414,12 @@ test_spawn (void)
 		unsigned int unused;
 
 		TEST_EQ (fscanf (output, "1: %u %u\n", &major, &unused), 2);
-		TEST_TRUE (major >= 136 && major <= 143);
+		TEST_GE (major, 136);
+		TEST_LE (major, 143);
 		saved_major = major;
 
 		TEST_EQ (fscanf (output, "2: %u %u\n", &major, &unused), 2);
-		TEST_TRUE (major == saved_major);
+		TEST_EQ (major, saved_major);
 	}
 
 

@@ -426,7 +426,7 @@
 	if (wait) {                                                  \
 		TEST_EQ (waitpid (pid, &status, 0), pid);            \
 		TEST_TRUE (WIFSIGNALED (status));                    \
-		TEST_TRUE (WTERMSIG (status) == signo);              \
+		TEST_EQ (WTERMSIG (status), signo);                  \
 	}                                                            \
 	/* reset since a subsequent start could specify a different  \
 	 * user_mode value.                                          \
