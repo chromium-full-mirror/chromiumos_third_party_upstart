@@ -18387,6 +18387,10 @@ test_dbus_connection (void)
 
 	/* Re-apply in the test environment */
 	assert0 (setenv ("DBUS_SESSION_BUS_ADDRESS", dbus_session_address, 1));
+	/* We only waited for the private control interface above; now wait for
+	 * D-Bus again.
+	 */
+	wait_for_upstart (0);
 
 	/* It should still be possible to query the running version via
 	 * the D-Bus session bus since Upstart should have reconnected
