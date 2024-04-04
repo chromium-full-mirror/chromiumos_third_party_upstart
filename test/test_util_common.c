@@ -252,7 +252,7 @@ set_upstart_session (pid_t session_init_pid)
 			continue;
 
 		/* Look for the specific session */
-		for (size_t line = 0; line < lines; lines++) {
+		for (size_t line = 0; line < lines; line++) {
 
 			/* No pid in output */
 			if (! isdigit(output[line][0]))
