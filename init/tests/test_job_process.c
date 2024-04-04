@@ -285,7 +285,12 @@ child (enum child_tests  test,
 		fprintf (out, "wd: %s\n", path);
 		break;
 	case TEST_ENVIRONMENT: {
-		char *ignore_env[] = { "LD_PRELOAD", "SANDBOX_", NULL };
+		char *ignore_env[] = {
+			"LD_PRELOAD",
+			"SANDBOX_",
+			"__LLVM_",
+			NULL
+		};
 		char **s;
 
 		/* guarantee output ordering */
