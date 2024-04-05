@@ -432,58 +432,55 @@ have_timed_waitpid (void)
 pid_t
 timed_waitpid (pid_t pid, time_t timeout)
 {
-    static char     buffer[1];
-    fd_set          read_fds;
-    struct timeval  tv;
-    int             status;
-    int             nfds;
-    int             ret;
-    pid_t           ret2;
+	static char     buffer[1];
+	fd_set          read_fds;
+	struct timeval  tv;
+	int             status;
+	int             nfds;
+	int             ret;
+	pid_t           ret2;
 
-    assert (pid);
-    assert (timeout);
+	assert (pid);
+	assert (timeout);
 
-    if (selfpipe[0] == -1)
-	    selfpipe_setup ();
+	if (selfpipe[0] == -1)
+		selfpipe_setup ();
 
-    FD_ZERO (&read_fds);
-    FD_SET (selfpipe[0], &read_fds);
+	FD_ZERO (&read_fds);
+	FD_SET (selfpipe[0], &read_fds);
 
-    nfds = 1 + selfpipe[0];
+	nfds = 1 + selfpipe[0];
 
-    tv.tv_sec   = timeout;
-    tv.tv_usec  = 0;
+	tv.tv_sec   = timeout;
+	tv.tv_usec  = 0;
 
-    /* wait for some activity */
-    ret = select (nfds, &read_fds, NULL, NULL, &tv);
+	while (TRUE) {
+		ret2 = waitpid (pid, &status, WNOHANG);
+		if (ret2 < 0)
+			return -1;
+		if (ret2) {
+			if (WIFEXITED (status))
+				return ret2;
 
-    if (! ret)
-	    /* timed out */
-	    return 0;
+			/* unexpected status change */
+			return -1;
+		}
 
-    /* discard any data written to pipe */
-    while (read (selfpipe[0], buffer, sizeof (buffer)) > 0)
-	    ;
+		/*
+		 * Wait for some activity.
+		 * NB: we potentially reuse |tv|, assuming it contains
+		 * the time remaining. This is Linux-specific behavior.
+		 */
+		ret = select (nfds, &read_fds, NULL, NULL, &tv);
 
-    while (TRUE) {
-	    /* wait for status change or error */
-	    ret2 = waitpid (pid, &status, WNOHANG);
+		if (! ret)
+			/* timed out */
+			return 0;
 
-	    if (ret2 < 0)
-		    return -1;
-
-	    if (! ret2)
-		    /* give child a chance to change state */
-		    msleep (100);
-
-	    if (ret2) {
-		    if (WIFEXITED (status))
-			    return ret2;
-
-		    /* unexpected status change */
-		    return -1;
-	    }
-    }
+		/* discard any data written to pipe */
+		while (read (selfpipe[0], buffer, sizeof (buffer)) > 0)
+			;
+	}
 }
 
 

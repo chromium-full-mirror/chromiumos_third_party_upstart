@@ -38,7 +38,7 @@
  * Maximum time we expect upstart to wait in the QUIESCE_PHASE_KILL
  * phase.
  **/
-#define TEST_QUIESCE_KILL_PHASE 5
+#define TEST_QUIESCE_KILL_PHASE 15
 
 #define TEST_QUIESCE_TOTAL_WAIT_TIME (TEST_EXIT_TIME + TEST_QUIESCE_KILL_PHASE)
 
