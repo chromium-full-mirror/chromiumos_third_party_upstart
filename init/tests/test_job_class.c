@@ -3781,6 +3781,99 @@ test_get_emits (void)
 }
 
 
+void
+test_max_kill_timeout (void)
+{
+	JobClass       *class = NULL, *class2 = NULL;
+	Job            *job = NULL, *job2 = NULL;
+	time_t          kill_timeout;
+
+	TEST_FUNCTION ("job_class_max_kill_timeout");
+	nih_error_init ();
+	job_class_init ();
+
+	/* Check the default timeout with no jobs -- we pick 1.
+	 */
+	TEST_FEATURE ("with no jobs");
+	TEST_ALLOC_FAIL {
+		kill_timeout = job_class_max_kill_timeout ();
+		TEST_EQ (kill_timeout, 1);
+	}
+
+	/* With 1 job with a main process at default timeout. */
+	TEST_FEATURE ("with 1 job at default timeouts");
+	TEST_ALLOC_FAIL {
+		TEST_ALLOC_SAFE {
+			class = job_class_new (NULL, "test", NULL);
+			class->process[PROCESS_MAIN] = process_new (class);
+			job_class_add_safe (class);
+
+			job = job_new (class, "");
+		}
+
+		TEST_EQ (class->kill_timeout, JOB_DEFAULT_KILL_TIMEOUT);
+		kill_timeout = job_class_max_kill_timeout ();
+		TEST_EQ (kill_timeout, JOB_DEFAULT_KILL_TIMEOUT);
+
+		nih_free (job);
+		nih_free (class);
+	}
+
+	/* With 1 job with a main and {pre,post}-stop processes at default
+	 * timeout.
+	 */
+	TEST_FEATURE ("with 1 pre/post-stop + main job at default timeouts");
+	TEST_ALLOC_FAIL {
+		TEST_ALLOC_SAFE {
+			class = job_class_new (NULL, "test", NULL);
+			class->process[PROCESS_MAIN] = process_new (class);
+			class->process[PROCESS_PRE_STOP] = process_new (class);
+			class->process[PROCESS_POST_STOP] = process_new (class);
+			job_class_add_safe (class);
+
+			job = job_new (class, "");
+		}
+
+		TEST_EQ (class->kill_timeout, JOB_DEFAULT_KILL_TIMEOUT);
+
+		kill_timeout = job_class_max_kill_timeout ();
+		TEST_EQ (kill_timeout, 3 * JOB_DEFAULT_KILL_TIMEOUT);
+
+		nih_free (job);
+		nih_free (class);
+	}
+
+	/* With 2 jobs. */
+	TEST_FEATURE ("with 2 jobs");
+	TEST_ALLOC_FAIL {
+		TEST_ALLOC_SAFE {
+			class = job_class_new (NULL, "test", NULL);
+			class->process[PROCESS_MAIN] = process_new (class);
+			class->kill_timeout = 42;
+			job_class_add_safe (class);
+
+			class2 = job_class_new (NULL, "test2", NULL);
+			class2->process[PROCESS_MAIN] = process_new (class2);
+			job_class_add_safe (class2);
+
+			job = job_new (class, "");
+			job2 = job_new (class2, "");
+		}
+
+		TEST_EQ (class->kill_timeout, 42);
+		TEST_EQ (class2->kill_timeout, JOB_DEFAULT_KILL_TIMEOUT);
+
+		kill_timeout = job_class_max_kill_timeout ();
+		TEST_EQ (kill_timeout, 42);
+
+		nih_free (job);
+		nih_free (job2);
+		nih_free (class);
+		nih_free (class2);
+	}
+}
+
+
 int
 main (int   argc,
       char *argv[])
@@ -3810,6 +3903,7 @@ main (int   argc,
 	test_get_start_on ();
 	test_get_stop_on ();
 	test_get_emits ();
+	test_max_kill_timeout ();
 
 	return 0;
 }

@@ -2739,9 +2739,17 @@ job_class_max_kill_timeout (void)
 
 		NIH_HASH_FOREACH (class->instances, job_iter) {
 			Job *job = (Job *)job_iter;
+			time_t timeout = 0;
 
-			if (job->class->kill_timeout > kill_timeout) {
-				kill_timeout = job->class->kill_timeout;
+			if (job->class->process[PROCESS_MAIN])
+				timeout += job->class->kill_timeout;
+			if (job->class->process[PROCESS_PRE_STOP])
+				timeout += job->class->kill_timeout;
+			if (job->class->process[PROCESS_POST_STOP])
+				timeout += job->class->kill_timeout;
+
+			if (timeout > kill_timeout) {
+				kill_timeout = timeout;
 				break;
 			}
 		}
