@@ -585,8 +585,9 @@
                                                                      \
 	/* Wait for log to be created */                             \
 	ok = FALSE;                                                  \
-	for (int i = 0; i < loops; i++) {                            \
-		msleep (sleep_msecs);                                \
+	for (int i = 0; i <= loops; i++) {                           \
+		if (i != 0)                                          \
+			msleep (sleep_msecs);                        \
 		if (! stat (path, &statbuf)) {                       \
 			ok = TRUE;                                   \
 			break;                                       \

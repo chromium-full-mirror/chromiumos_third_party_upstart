@@ -11520,13 +11520,40 @@ void
 test_no_dbus (void)
 {
 	nih_local char  *cmd = NULL;
+	char             confdir[PATH_MAX];
+	char             logdir[PATH_MAX];
+	nih_local char  *contents = NULL;
+	nih_local char  *logfile = NULL;
 	char           **output;
 	size_t           lines;
 	pid_t            upstart_pid = 0;
 	pid_t            dbus_pid = 0;
 	char            *extra[] = { "--no-dbus", NULL };
+	struct stat      statbuf;
 
 	TEST_GROUP ("Test '--no-dbus'");
+
+	TEST_FILENAME (confdir);
+	TEST_EQ (mkdir (confdir, 0755), 0);
+
+	TEST_FILENAME (logdir);
+	TEST_EQ (mkdir (logdir, 0755), 0);
+
+	/* Use the "secret" interface */
+	TEST_EQ (setenv ("UPSTART_CONFDIR", confdir, 1), 0);
+	TEST_EQ (setenv ("UPSTART_LOGDIR", logdir, 1), 0);
+
+	/* We need a signaling mechanism besides D-Bus; we make an auxiliary
+	 * starup job for this.
+	 */
+	contents = nih_sprintf (NULL,
+			"console log\n"
+			"start on startup\n"
+			"exec echo started\n");
+	TEST_NE_P (contents, NULL);
+	CREATE_FILE (confdir, "startup.conf", contents);
+
+	logfile = NIH_MUST (nih_sprintf (NULL, "%s/%s", logdir, "startup.log"));
 
 	TEST_DBUS (dbus_pid);
 
@@ -11535,7 +11562,15 @@ test_no_dbus (void)
 
 	TEST_FEATURE ("Ensure version can be queried normally");
 
-	start_upstart_common (&upstart_pid, FALSE, FALSE, NULL, NULL, NULL);
+	TEST_LT (stat (logfile, &statbuf), 0);
+	TEST_EQ (errno, ENOENT);
+
+	start_upstart_common (&upstart_pid, FALSE, FALSE, confdir, logdir, NULL);
+
+	/* Just check we got far enough to run the startup job and (start to)
+	 * write its logfile.
+	 */
+	WAIT_FOR_FILE(logfile);
 
 	cmd = nih_sprintf (NULL, "%s version 2>/dev/null", get_initctl ());
 	TEST_NE_P (cmd, NULL);
@@ -11545,13 +11580,22 @@ test_no_dbus (void)
 	nih_free (output);
 
 	STOP_UPSTART (upstart_pid);
+	assert0 (unlink (logfile));
 
 	/*******************************************************************/
 	/* Now, try with dbus disabled */
 
 	TEST_FEATURE ("Ensure '--no-dbus' disables D-Bus");
 
-	start_upstart_common (&upstart_pid, FALSE, FALSE, NULL, NULL, extra);
+	TEST_LT (stat (logfile, &statbuf), 0);
+	TEST_EQ (errno, ENOENT);
+
+	start_upstart_common (&upstart_pid, FALSE, FALSE, confdir, logdir, extra);
+
+	/* Just check we got far enough to run the startup job and (start to)
+	 * write its logfile.
+	 */
+	WAIT_FOR_FILE(logfile);
 
 	cmd = nih_sprintf (NULL, "%s version 2>/dev/null", get_initctl ());
 	TEST_NE_P (cmd, NULL);
@@ -11573,10 +11617,15 @@ test_no_dbus (void)
 	TEST_EQ (lines, 0);
 
 	STOP_UPSTART (upstart_pid);
+	assert0 (unlink (logfile));
 
 	/*******************************************************************/
 
 	TEST_DBUS_END (dbus_pid);
+
+	DELETE_FILE (confdir, "startup.conf");
+	TEST_EQ (rmdir (logdir), 0);
+	TEST_EQ (rmdir (confdir), 0);
 }
 
 void
