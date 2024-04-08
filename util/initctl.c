@@ -2182,6 +2182,9 @@ list_sessions_action (NihCommand *command, char * const *args)
 		if (! _contents)
 			continue;
 
+		if (len == 0)
+			continue;
+
 		contents = nih_strndup (NULL, _contents, len);
 		if (! contents)
 			continue;

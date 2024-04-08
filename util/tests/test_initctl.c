@@ -11417,6 +11417,7 @@ test_list_sessions (void)
 	nih_local char  *original_runtime = NULL;
 	size_t           len;
 	char            *value;
+	FILE            *f = NULL;
 
 	TEST_GROUP ("list-sessions");
 
@@ -11449,6 +11450,29 @@ test_list_sessions (void)
 	TEST_NE_P (cmd, NULL);
 	RUN_COMMAND (NULL, cmd, &output, &lines);
 	TEST_EQ (lines, 0);
+
+	/*******************************************************************/
+	TEST_FEATURE ("with no instances and an empty session file");
+
+	/* Use the "secret" interface */
+	TEST_EQ (setenv ("UPSTART_CONFDIR", confdir, 1), 0);
+	TEST_EQ (setenv ("XDG_RUNTIME_DIR", dirname, 1), 0);
+
+	/* Garbage PID; it doesn't really matter if it exists. */
+	session_file = get_session_file (dirname, 42);
+
+	/* Empty file */
+	f = fopen (session_file, "w");
+	TEST_NE_P (f, NULL);
+	fclose (f);
+
+	cmd = nih_sprintf (NULL, "%s list-sessions 2>&1", get_initctl_binary ());
+	TEST_NE_P (cmd, NULL);
+	RUN_COMMAND (NULL, cmd, &output, &lines);
+	TEST_EQ (lines, 0);
+	nih_free (output);
+
+	TEST_EQ (unlink(session_file), 0);
 
 	/*******************************************************************/
 	TEST_FEATURE ("with 1 running instance");
@@ -11500,9 +11524,50 @@ test_list_sessions (void)
 
 	/* Remove the directory tree the Session Init created */
 	path = NIH_MUST (nih_sprintf (NULL, "%s/upstart/sessions", dirname));
-        TEST_EQ (rmdir (path), 0);
+	TEST_EQ (rmdir (path), 0);
 	path = NIH_MUST (nih_sprintf (NULL, "%s/upstart", dirname));
-        TEST_EQ (rmdir (path), 0);
+	TEST_EQ (rmdir (path), 0);
+
+	/*******************************************************************/
+	TEST_FEATURE ("with 1 instance and an empty session file");
+
+	/* Use the "secret" interface */
+	TEST_EQ (setenv ("UPSTART_CONFDIR", confdir, 1), 0);
+	TEST_EQ (setenv ("XDG_RUNTIME_DIR", dirname, 1), 0);
+
+	/* Reset initctl global from previous tests */
+	dest_name = NULL;
+
+	start_upstart_common (&upstart_pid, TRUE, FALSE, NULL, NULL, NULL);
+
+	session_file = get_session_file (dirname, upstart_pid);
+
+	/* session file should now have been created by Upstart */
+	TEST_EQ (stat (session_file, &statbuf), 0);
+
+	/* Rewrite with empty contents */
+	f = fopen (session_file, "w");
+	TEST_NE_P (f, NULL);
+	fclose (f);
+
+	cmd = nih_sprintf (NULL, "%s list-sessions 2>&1", get_initctl_binary ());
+	TEST_NE_P (cmd, NULL);
+	RUN_COMMAND (NULL, cmd, &output, &lines);
+	TEST_EQ (lines, 0);
+	nih_free (output);
+
+	STOP_UPSTART (upstart_pid);
+
+	/* Upstart cannot yet be instructed to shutdown cleanly, so for
+	 * now we have to remove the session file manually.
+	 */
+	TEST_EQ (unlink (session_file), 0);
+
+	/* Remove the directory tree the Session Init created */
+	path = NIH_MUST (nih_sprintf (NULL, "%s/upstart/sessions", dirname));
+	TEST_EQ (rmdir (path), 0);
+	path = NIH_MUST (nih_sprintf (NULL, "%s/upstart", dirname));
+	TEST_EQ (rmdir (path), 0);
 
 	/*******************************************************************/
 
