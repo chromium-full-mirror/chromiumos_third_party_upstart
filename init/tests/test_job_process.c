@@ -3256,10 +3256,11 @@ test_start (void)
 		TEST_EQ (child_exit_status[1], 255);
 		/* Post-stop */
 		TEST_EQ (child_exit_status[0], 0);
-		/* And the post stop should have written data */
-		TEST_EQ (stat (filename, &statbuf), 0);
 	}
 	fclose (output);
+
+	/* allow destructor to write any lingering unflushed data */
+	nih_free (class);
 
 	/* check file contents */
 	output = fopen (filename, "r");
@@ -3271,8 +3272,6 @@ test_start (void)
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with single-line command running an invalid command, then a 2-line post-stop script");
@@ -3323,11 +3322,11 @@ test_start (void)
 		TEST_EQ (nih_main_loop (), 0);
 		TEST_EQ (child_exit_status[1], 255);
 		TEST_EQ (child_exit_status[0], 0);
-		
-		/* And the post stop should have written data */
-		TEST_EQ (stat (filename, &statbuf), 0);
 	}
 	fclose (output);
+
+	/* allow destructor to write any lingering unflushed data */
+	nih_free (class);
 
 	/* check file contents */
 	output = fopen (filename, "r");
@@ -3340,8 +3339,6 @@ test_start (void)
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-
-	nih_free (class);
 	TEST_RESET_MAIN_LOOP ();
 
 	/************************************************************/
@@ -3392,12 +3389,11 @@ test_start (void)
 		TEST_GT (job->pid[PROCESS_POST_STOP], 0);
 		TEST_EQ (child_exit_status[1], 255);
 		TEST_EQ (child_exit_status[0], 0);
-
-		/* The post stop should have written data */
-		TEST_EQ (stat (filename, &statbuf), 0);
-
 	}
 	fclose (output);
+
+	/* allow destructor to write any lingering unflushed data */
+	nih_free (class);
 
 	/* check file contents */
 	output = fopen (filename, "r");
@@ -3409,8 +3405,6 @@ test_start (void)
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-
-	nih_free (class);
 
 	TEST_RESET_MAIN_LOOP ();
 #endif
@@ -3519,8 +3513,9 @@ test_start (void)
 		TEST_EQ (child_exit_status[0], 0);
 		TEST_EQ (child_exit_status[1], -1);
 
-		/* Expect a log file */
-		TEST_EQ (stat (filename, &statbuf), 0);
+		/* NB: we expect a log file here, but it may not be flushed.
+		 * Check below.
+		 */
 
 		job->goal = JOB_STOP;
 		job->state = JOB_POST_STOP;
@@ -3534,6 +3529,9 @@ test_start (void)
 	}
 	fclose (output);
 
+	/* allow destructor to write any lingering unflushed data */
+	nih_free (class);
+
 	/* check file contents */
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
@@ -3544,8 +3542,6 @@ test_start (void)
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-
-	nih_free (class);
 
 	TEST_RESET_MAIN_LOOP ();
 
