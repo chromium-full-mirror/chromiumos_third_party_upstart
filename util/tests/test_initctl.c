@@ -11037,6 +11037,7 @@ test_reexec (void)
 	char           **output;
 	size_t           lines;
 	nih_local char  *logfile = NULL;
+	nih_local char  *out_file = NULL;
 	struct stat      statbuf;
 	nih_local char  *contents = NULL;
 	FILE            *file;
@@ -11319,7 +11320,12 @@ test_reexec (void)
 	/*******************************************************************/
 	TEST_FEATURE ("ensure re-exec does not disrupt umask");
 
-	contents = nih_sprintf (NULL, "console log\nexec sh -c umask");
+	out_file = NIH_MUST (nih_sprintf (NULL, "%s/%s",
+				logdir,
+				"umask.out"));
+
+	contents = nih_sprintf (NULL, "task\nexec sh -c umask >\"%s\"",
+				out_file);
 	TEST_NE_P (contents, NULL);
 
 	CREATE_FILE (confdir, "umask.conf", contents);
@@ -11332,30 +11338,15 @@ test_reexec (void)
 	RUN_COMMAND (NULL, cmd, &output, &lines);
 	nih_free (output);
 
-	logfile = NIH_MUST (nih_sprintf (NULL, "%s/%s",
-				logdir,
-				"umask.log"));
-
-	/* Wait for log to be created */
-	ok = FALSE;
-	for (int i = 0; i < 50; i++) {
-		msleep (100);
-		if (! stat (logfile, &statbuf)) {
-			ok = TRUE;
-			break;
-		}
-	}
-	TEST_EQ (ok, TRUE);
-
-	contents = nih_file_read (NULL, logfile, &len);
+	contents = nih_file_read (NULL, out_file, &len);
 	TEST_NE_P (contents, NULL);
-	TEST_TRUE (len);
+	TEST_GT (len, 0);
 
 	/* overwrite '\n' */
 	contents[len-1] = '\0';
 
 	expected_umask = (mode_t)atoi (contents);
-	assert0 (unlink (logfile));
+	assert0 (unlink (out_file));
 	nih_free (contents);
 
 	/* Restart */
@@ -11365,20 +11356,9 @@ test_reexec (void)
 	RUN_COMMAND (NULL, cmd, &output, &lines);
 	nih_free (output);
 
-	/* Wait for log to be recreated */
-	ok = FALSE;
-	for (int i = 0; i < 50; i++) {
-		msleep (100);
-		if (! stat (logfile, &statbuf)) {
-			ok = TRUE;
-			break;
-		}
-	}
-	TEST_EQ (ok, TRUE);
-
-	contents = nih_file_read (NULL, logfile, &len);
+	contents = nih_file_read (NULL, out_file, &len);
 	TEST_NE_P (contents, NULL);
-	TEST_TRUE (len);
+	TEST_GT (len, 0);
 
 	/* overwrite '\n' */
 	contents[len-1] = '\0';
@@ -11388,7 +11368,7 @@ test_reexec (void)
 	STOP_UPSTART (upstart_pid);
 
 	DELETE_FILE (confdir, "umask.conf");
-	assert0 (unlink (logfile));
+	assert0 (unlink (out_file));
 
 	/*******************************************************************/
 
@@ -12506,7 +12486,8 @@ test_umask (void)
 	nih_local char  *path = NULL;
 	nih_local char  *cmd = NULL;
 	pid_t            upstart_pid = 0;
-	nih_local char  *logfile = NULL;
+	nih_local char  *out_file = NULL;
+	nih_local char  *contents = NULL;
 	nih_local char  *original_runtime = NULL;
 	mode_t           job_umask;
 	nih_local char  *_job_umask_str = NULL;
@@ -12516,6 +12497,8 @@ test_umask (void)
 	mode_t           original_umask;
 	mode_t           test_umask = 0077;
 	mode_t           default_umask = 022;
+	char           **output;
+	size_t           lines;
 
 	original_runtime = nih_strdup (NULL, getenv ("XDG_RUNTIME_DIR"));
 	TEST_NE_P (original_runtime, NULL);
@@ -12538,23 +12521,28 @@ test_umask (void)
 	/**********************************************************************/
 	TEST_FEATURE ("ensure Session Init inherits umask by default");
 
-	/* Has to be a script since umask is a shell built-in */
-	CREATE_FILE (confdir, "umask.conf",
-      "console log\n"
-			"start on startup\n"
-			"script\n"
-			"umask\n"
-			"end script");
+	out_file = NIH_MUST (nih_sprintf (NULL, "%s/%s",
+				logdir,
+				"umask.out"));
+
+	/* This is a script because umask is a shell built-in. This is a task
+	 * so 'initctl start <job>' knows exactly when it's done.
+	 */
+	contents = NIH_MUST (nih_sprintf (NULL,
+				"task\n"
+				"script\n"
+				"umask >\"%s\"\n"
+				"end script\n", out_file));
+	CREATE_FILE (confdir, "umask.conf", contents);
 
 	start_upstart_common (&upstart_pid, TRUE, TRUE, confdir, logdir, NULL);
 
-	logfile = NIH_MUST (nih_sprintf (NULL, "%s/%s",
-				logdir,
-				"umask.log"));
+	cmd = nih_sprintf (NULL, "%s start umask 2>&1", get_initctl ());
+	TEST_NE_P (cmd, NULL);
+	RUN_COMMAND (NULL, cmd, &output, &lines);
+	nih_free (output);
 
-	WAIT_FOR_FILE (logfile);
-
-	_job_umask_str = nih_file_read (NULL, logfile, &length);
+	_job_umask_str = nih_file_read (NULL, out_file, &length);
 	TEST_NE_P (_job_umask_str, NULL);
 
 	job_umask_str = nih_strndup (NULL, _job_umask_str, length);
@@ -12565,7 +12553,9 @@ test_umask (void)
 	TEST_EQ (job_umask, test_umask);
 
 	DELETE_FILE (confdir, "umask.conf");
-	assert0 (unlink (logfile));
+	assert0 (unlink (out_file));
+	nih_free (out_file);
+	out_file = NULL;
 
 	STOP_UPSTART (upstart_pid);
 
@@ -12577,23 +12567,28 @@ test_umask (void)
 	/**********************************************************************/
 	TEST_FEATURE ("ensure Session Init defaults umask with '--no-inherit-env'");
 
-	/* Has to be a script since umask is a shell built-in */
-	CREATE_FILE (confdir, "umask.conf",
-			"console log\n"
-			"start on startup\n"
-			"script\n"
-			"umask\n"
-			"end script");
+	out_file = NIH_MUST (nih_sprintf (NULL, "%s/%s",
+				logdir,
+				"umask.out"));
+
+	/* This is a script because umask is a shell built-in. This is a task
+	 * so 'initctl start <job>' knows exactly when it's done.
+	 */
+	contents = NIH_MUST (nih_sprintf (NULL,
+				"task\n"
+				"script\n"
+				"umask >\"%s\"\n"
+				"end script", out_file));
+	CREATE_FILE (confdir, "umask.conf", contents);
 
 	start_upstart_common (&upstart_pid, TRUE, FALSE, confdir, logdir, NULL);
 
-	logfile = NIH_MUST (nih_sprintf (NULL, "%s/%s",
-				logdir,
-				"umask.log"));
+	cmd = nih_sprintf (NULL, "%s start umask 2>&1", get_initctl ());
+	TEST_NE_P (cmd, NULL);
+	RUN_COMMAND (NULL, cmd, &output, &lines);
+	nih_free (output);
 
-	WAIT_FOR_FILE (logfile);
-
-	_job_umask_str = nih_file_read (NULL, logfile, &length);
+	_job_umask_str = nih_file_read (NULL, out_file, &length);
 	TEST_NE_P (_job_umask_str, NULL);
 
 	job_umask_str = nih_strndup (NULL, _job_umask_str, length);
@@ -12604,7 +12599,7 @@ test_umask (void)
 	TEST_EQ (job_umask, default_umask);
 
 	DELETE_FILE (confdir, "umask.conf");
-	assert0 (unlink (logfile));
+	assert0 (unlink (out_file));
 
 	STOP_UPSTART (upstart_pid);
 
@@ -16504,7 +16499,8 @@ test_default_job_env (const char *confdir, const char *logdir,
 {
 	nih_local char  *cmd = NULL;
 	char           **output;
-	nih_local char  *logfile = NULL;
+	nih_local char  *out_file = NULL;
+	nih_local char  *contents = NULL;
 	size_t           line_count;
 	FILE            *fi;
 
@@ -16589,9 +16585,16 @@ test_default_job_env (const char *confdir, const char *logdir,
 	/*******************************************************************/
 	TEST_FEATURE ("ensure job gets given default environment");
 
-	CREATE_FILE (confdir, "foo.conf",
-			"console log\n"
-			"exec env");
+	out_file = NIH_MUST (nih_sprintf (NULL, "%s/%s",
+				logdir,
+				"foo.out"));
+
+	/* This is a task so 'initctl start <job>' knows exacly when it's done.
+	 */
+	contents = NIH_MUST (nih_sprintf (NULL, "task\n"
+					        "exec env >\"%s\"\n",
+						out_file));
+	CREATE_FILE (confdir, "foo.conf", contents);
 
 	cmd = nih_sprintf (NULL, "%s reload-configuration 2>&1", get_initctl ());
 	TEST_NE_P (cmd, NULL);
@@ -16604,25 +16607,26 @@ test_default_job_env (const char *confdir, const char *logdir,
 	RUN_COMMAND (NULL, cmd, &output, &line_count);
 	nih_free (output);
 
-	logfile = NIH_MUST (nih_sprintf (NULL, "%s/%s",
+	out_file = NIH_MUST (nih_sprintf (NULL, "%s/%s",
 				logdir,
-				"foo.log"));
+				"foo.out"));
 
-	WAIT_FOR_FILE (logfile);
+	cmd = nih_sprintf (NULL, "%s start foo 2>&1", get_initctl ());
+	TEST_NE_P (cmd, NULL);
+	RUN_COMMAND (NULL, cmd, &output, &line_count);
+	nih_free (output);
 
-	fi = fopen (logfile, "r");
+	fi = fopen (out_file, "r");
 	TEST_NE_P (fi, NULL);
 	TEST_FILE_CONTAINS (fi, "PATH=*");
 	TEST_FILE_CONTAINS (fi, "TERM=*");
-
-	/* asterisk required to match '\r\n' */
 	TEST_FILE_CONTAINS (fi, "UPSTART_JOB=foo*");
 	TEST_FILE_CONTAINS (fi, "UPSTART_INSTANCE=*");
 	TEST_FILE_CONTAINS (fi, "UPSTART_SESSION=*");
 	fclose (fi);
 
 	DELETE_FILE (confdir, "foo.conf");
-	TEST_EQ (unlink (logfile), 0);
+	TEST_EQ (unlink (out_file), 0);
 
 	/*******************************************************************/
 	TEST_FEATURE ("ensure invalid query shows unknown variable");
@@ -16633,6 +16637,7 @@ test_default_job_env (const char *confdir, const char *logdir,
 	RUN_COMMAND (NULL, cmd, &output, &line_count);
 	TEST_EQ (line_count, 1);
 	TEST_EQ_STR (output[0], "initctl: No such variable: foo-bar-baz");
+	nih_free (output);
 
 	/*******************************************************************/
 }
@@ -16693,7 +16698,7 @@ test_clear_job_env (const char *confdir, const char *logdir,
 {
 	nih_local char  *cmd = NULL;
 	char           **output;
-	nih_local char  *logfile = NULL;
+	nih_local char  *out_file = NULL;
 	nih_local char  *contents = NULL;
 	size_t           line_count;
 	FILE            *fi;
@@ -16734,15 +16739,19 @@ test_clear_job_env (const char *confdir, const char *logdir,
 	/*******************************************************************/
 	TEST_FEATURE ("ensure job runs in empty environment");
 
+	out_file = NIH_MUST (nih_sprintf (NULL, "%s/%s",
+				logdir,
+				"empty-env.out"));
+
 	/* we have to cheat by setting PATH to allow 'env' to be found.
 	 * Add a silly entry at the end so we can check our version has
 	 * been set.
 	 */
-	contents = nih_sprintf (NULL,
-			"env PATH=%s\n"
-			"console log\n"
-			"exec env", TEST_INITCTL_DEFAULT_PATH);
-	TEST_NE_P (contents, NULL);
+	contents = NIH_MUST (nih_sprintf (NULL,
+				"task\n"
+				"env PATH=%s\n"
+				"exec env >\"%s\"",
+				TEST_INITCTL_DEFAULT_PATH, out_file));
 
 	CREATE_FILE (confdir, "empty-env.conf", contents);
 
@@ -16757,13 +16766,7 @@ test_clear_job_env (const char *confdir, const char *logdir,
 	RUN_COMMAND (NULL, cmd, &output, &line_count);
 	nih_free (output);
 
-	logfile = NIH_MUST (nih_sprintf (NULL, "%s/%s",
-				logdir,
-				"empty-env.log"));
-
-	WAIT_FOR_FILE (logfile);
-
-	fi = fopen (logfile, "r");
+	fi = fopen (out_file, "r");
 	TEST_NE_P (fi, NULL);
 
 	/* Ensure it looks like our PATH */
@@ -16778,7 +16781,7 @@ test_clear_job_env (const char *confdir, const char *logdir,
 	fclose (fi);
 
 	DELETE_FILE (confdir, "empty-env.conf");
-	TEST_EQ (unlink (logfile), 0);
+	TEST_EQ (unlink (out_file), 0);
 
 	/* reset environment */
 	cmd = nih_sprintf (NULL, "%s reset-env 2>&1", get_initctl ());
@@ -16804,7 +16807,8 @@ test_modified_job_env (const char *confdir, const char *logdir,
 	nih_local char  *name4 = NULL;
 	nih_local char  *value4 = NULL;
 	char           **output;
-	nih_local char  *logfile = NULL;
+	nih_local char  *out_file = NULL;
+	nih_local char  *contents = NULL;
 	size_t           line_count;
 	FILE            *fi;
 
@@ -17860,7 +17864,15 @@ test_modified_job_env (const char *confdir, const char *logdir,
 	RUN_COMMAND (NULL, cmd, &output, &line_count);
 	TEST_EQ (line_count, 0);
 
-	CREATE_FILE (confdir, "modified-env.conf", "console log\nexec env");
+	out_file = NIH_MUST (nih_sprintf (NULL, "%s/%s",
+				logdir,
+				"modified-env.out"));
+
+	contents = NIH_MUST (nih_sprintf (NULL,
+				"task\n"
+				"exec env >\"%s\"\n", out_file));
+
+	CREATE_FILE (confdir, "modified-env.conf", contents);
 
 	cmd = nih_sprintf (NULL, "%s reload-configuration 2>&1", get_initctl ());
 	TEST_NE_P (cmd, NULL);
@@ -17874,13 +17886,7 @@ test_modified_job_env (const char *confdir, const char *logdir,
 	TEST_EQ (line_count, 1);
 	nih_free (output);
 
-	logfile = NIH_MUST (nih_sprintf (NULL, "%s/%s",
-				logdir,
-				"modified-env.log"));
-
-	WAIT_FOR_FILE (logfile);
-
-	fi = fopen (logfile, "r");
+	fi = fopen (out_file, "r");
 	TEST_NE_P (fi, NULL);
 
 	/* defaults */
@@ -17900,7 +17906,7 @@ test_modified_job_env (const char *confdir, const char *logdir,
 	fclose (fi);
 
 	DELETE_FILE (confdir, "modified-env.conf");
-	TEST_EQ (unlink (logfile), 0);
+	TEST_EQ (unlink (out_file), 0);
 
 	/* reset environment */
 	cmd = nih_sprintf (NULL, "%s reset-env 2>&1", get_initctl ());
@@ -17969,7 +17975,7 @@ test_global_and_local_job_env (const char *confdir, const char *logdir,
 	nih_local char  *cmd = NULL;
 	nih_local char  *name = NULL;
 	nih_local char  *value = NULL;
-	nih_local char  *logfile = NULL;
+	nih_local char  *out_file = NULL;
 	nih_local char  *contents = NULL;
 	char           **output;
 	size_t           line_count;
@@ -17983,11 +17989,15 @@ test_global_and_local_job_env (const char *confdir, const char *logdir,
 	/*******************************************************************/
 	TEST_FEATURE ("ensure pre-start can inject variable into main process");
 
+	out_file = NIH_MUST (nih_sprintf (NULL, "%s/%s",
+				logdir,
+				"foo.out"));
+
 	contents = nih_sprintf (NULL,
-			"console log\n"
+			"task\n"
 			"pre-start exec %s set-env hello=world\n"
-			"exec %s list-env\n",
-			get_initctl (), get_initctl ());
+			"exec %s list-env >\"%s\"\n",
+			get_initctl (), get_initctl (), out_file);
 
 	TEST_NE_P (contents, NULL);
 
@@ -18006,23 +18016,23 @@ test_global_and_local_job_env (const char *confdir, const char *logdir,
 	TEST_EQ (line_count, 1);
 	nih_free (output);
 
-	logfile = NIH_MUST (nih_sprintf (NULL, "%s/%s",
-				logdir,
-				"foo.log"));
-
-	WAIT_FOR_FILE (logfile);
-
-	fi = fopen (logfile, "r");
+	fi = fopen (out_file, "r");
 	TEST_FILE_CONTAINS (fi, "hello=world*");
 	TEST_NE_P (fi, NULL);
 
 	fclose (fi);
 
-	TEST_EQ (unlink (logfile), 0);
+	TEST_EQ (unlink (out_file), 0);
+	nih_free (out_file);
+	out_file = NULL;
 	DELETE_FILE (confdir, "foo.conf");
 
 	/*******************************************************************/
 	TEST_FEATURE ("ensure 'set-env --global' can inject a variable into main process");
+
+	out_file = NIH_MUST (nih_sprintf (NULL, "%s/%s",
+				logdir,
+				"foo.out"));
 
 	cmd = nih_sprintf (NULL, "%s list-env 2>&1", get_initctl ());
 	TEST_NE_P (cmd, NULL);
@@ -18035,12 +18045,12 @@ test_global_and_local_job_env (const char *confdir, const char *logdir,
 	nih_free (output);
 
 	contents = nih_sprintf (NULL,
-			"console log\n"
+			"task\n"
 			"script\n"
 			"  %s set-env --global hello=world\n"
-			"  %s get-env hello\n"
+			"  %s get-env hello >\"%s\"\n"
 			"end script",
-			get_initctl (), get_initctl ());
+			get_initctl (), get_initctl (), out_file);
 	TEST_NE_P (contents, NULL);
 
 	CREATE_FILE (confdir, "foo.conf", contents);
@@ -18057,27 +18067,22 @@ test_global_and_local_job_env (const char *confdir, const char *logdir,
 	TEST_EQ (line_count, 1);
 	nih_free (output);
 
-	logfile = NIH_MUST (nih_sprintf (NULL, "%s/%s",
-				logdir,
-				"foo.log"));
-
-	WAIT_FOR_FILE (logfile);
-
-	fi = fopen (logfile, "r");
+	fi = fopen (out_file, "r");
 	TEST_NE_P (fi, NULL);
-
-	/* we don't expect output from either set-env or get-env
-	 * (since 'hello' variable should not be set).
-	 */
 	TEST_FILE_MATCH (fi, "world*\n");
 	TEST_FILE_END (fi);
 	fclose (fi);
 
-	TEST_EQ (unlink (logfile), 0);
+	TEST_EQ (unlink (out_file), 0);
 	DELETE_FILE (confdir, "foo.conf");
 
+	out_file = NIH_MUST (nih_sprintf (NULL, "%s/%s",
+				logdir,
+				"bar.out"));
+
 	/* Create a new job */
-	contents = nih_sprintf (NULL, "console log\nexec %s list-env", get_initctl ());
+	contents = nih_sprintf (NULL, "task\nexec %s list-env >\"%s\"",
+				get_initctl (), out_file);
 	TEST_NE_P (contents, NULL);
 
 	CREATE_FILE (confdir, "bar.conf", contents);
@@ -18093,13 +18098,7 @@ test_global_and_local_job_env (const char *confdir, const char *logdir,
 	RUN_COMMAND (NULL, cmd, &output, &line_count);
 	nih_free (output);
 
-	logfile = NIH_MUST (nih_sprintf (NULL, "%s/%s",
-				logdir,
-				"bar.log"));
-
-	WAIT_FOR_FILE (logfile);
-
-	fi = fopen (logfile, "r");
+	fi = fopen (out_file, "r");
 	TEST_NE_P (fi, NULL);
 
 	/* Since foo.conf modified the global table, a subsequent job
@@ -18133,7 +18132,7 @@ test_global_and_local_job_env (const char *confdir, const char *logdir,
 	TEST_STR_ARRAY_NOT_CONTAINS (output, "hello=world");
 	nih_free (output);
 
-	assert0 (unlink (logfile));
+	assert0 (unlink (out_file));
 	DELETE_FILE (confdir, "bar.conf");
 
 	/*******************************************************************/
@@ -18147,9 +18146,11 @@ test_no_inherit_job_env (const char *runtimedir, const char *confdir, const char
 	size_t           lines;
 	pid_t            upstart_pid = 0;
 	char            *extra[] = { "--no-inherit-env", NULL };
-	nih_local char  *logfile = NULL;
 	nih_local char  *session_file = NULL;
+	nih_local char  *out_file = NULL;
+	nih_local char  *contents = NULL;
 	FILE            *fi;
+	struct stat      statbuf;
 
 	start_upstart_common (&upstart_pid, TRUE, FALSE, confdir, logdir, extra);
 
@@ -18169,7 +18170,14 @@ test_no_inherit_job_env (const char *runtimedir, const char *confdir, const char
 	/*******************************************************************/
 	TEST_FEATURE ("ensure '--user --no-inherit-env' provides expected job environment");
 
-	CREATE_FILE (confdir, "foo.conf", "console log\nexec env");
+	out_file = NIH_MUST (nih_sprintf (NULL, "%s/%s", logdir, "foo.out"));
+	TEST_EQ (stat (out_file, &statbuf), -1);
+	TEST_EQ (errno, ENOENT);
+
+	contents = NIH_MUST (nih_sprintf (NULL,
+					  "task\n"
+					  "exec env >\"%s\"\n", out_file));
+	CREATE_FILE (confdir, "foo.conf", contents);
 
 	cmd = nih_sprintf (NULL, "%s reload-configuration 2>&1", get_initctl ());
 	TEST_NE_P (cmd, NULL);
@@ -18182,25 +18190,17 @@ test_no_inherit_job_env (const char *runtimedir, const char *confdir, const char
 	RUN_COMMAND (NULL, cmd, &output, &lines);
 	nih_free (output);
 
-	logfile = NIH_MUST (nih_sprintf (NULL, "%s/%s",
-				logdir,
-				"foo.log"));
-
-	WAIT_FOR_FILE (logfile);
-
-	fi = fopen (logfile, "r");
+	fi = fopen (out_file, "r");
 	TEST_NE_P (fi, NULL);
 	TEST_FILE_CONTAINS (fi, "PATH=*");
 	TEST_FILE_CONTAINS (fi, "TERM=*");
-
-	/* asterisk required to match '\r\n' */
 	TEST_FILE_CONTAINS (fi, "UPSTART_JOB=foo*");
 	TEST_FILE_CONTAINS (fi, "UPSTART_INSTANCE=*");
 	TEST_FILE_CONTAINS (fi, "UPSTART_SESSION=*");
 	fclose (fi);
 
 	DELETE_FILE (confdir, "foo.conf");
-	TEST_EQ (unlink (logfile), 0);
+	TEST_EQ (unlink (out_file), 0);
 
 	/*******************************************************************/
 
