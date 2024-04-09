@@ -11918,33 +11918,35 @@ test_quiesce (void)
 	TEST_EQ (kill (upstart_pid, 0), -1);
 	TEST_EQ (errno, ESRCH);
 
+	/* NB: on system shutdown, sessions purposely do not wait for
+	 * session-end jobs (they may run, but few guarantees are given). So we
+	 * can't expect a session-end.log file here. Remove it if it exists
+	 * though.
+	 */
 	logfile = NIH_MUST (nih_sprintf (NULL, "%s/%s",
 				logdir,
 				"session-end.log"));
-
-	file = fopen (logfile, "r");
-	TEST_NE_P (file, NULL);
-	TEST_FILE_EQ (file, "hello\r\n");
-	TEST_FILE_END (file);
-	TEST_EQ (fclose (file), 0);
-	assert0 (unlink (logfile));
+	unlink (logfile);
+	nih_free (logfile);
+	logfile = NULL;
 
 	session_file = NIH_MUST (nih_sprintf (NULL, "%s/upstart/sessions/%d.session",
 				sessiondir, (int)upstart_pid));
 	unlink (session_file);
 
-	file = fopen (pid_file, "r");
-	TEST_NE_P (file, NULL);
-	TEST_EQ (fscanf (file, "%d", &job_pid), 1);
-	fclose (file);
-
-	/* pid should be running since Upstart won't have signalled it
-	 * to stop (since it started as a result of session-end being
-	 * emitted _after_ the job pids were sent SIGTERM).
+	/* Kill job pid if not already dead; per the above, the job may never
+	 * have even started, so none of the following cleanup is fatal.
 	 */
-	TEST_EQ (kill (job_pid, SIGKILL), 0);
+	file = fopen (pid_file, "r");
+	if (file) {
+		if (fscanf (file, "%d", &job_pid) == 1) {
+			/* pid may still be running; kill it for completeness. */
+			kill (job_pid, SIGKILL);
+		}
+		fclose (file);
 
-	assert0 (unlink (pid_file));
+		assert0 (unlink (pid_file));
+	}
 
 	DELETE_FILE (confdir, "session-end.conf");
 
@@ -11984,32 +11986,35 @@ test_quiesce (void)
 	TEST_EQ (kill (upstart_pid, 0), -1);
 	TEST_EQ (errno, ESRCH);
 
+	/* NB: on system shutdown, sessions purposely do not wait for
+	 * session-end jobs (they may run, but few guarantees are given). So we
+	 * can't expect a session-end.log file here.
+	 */
 	logfile = NIH_MUST (nih_sprintf (NULL, "%s/%s",
 				logdir,
 				"session-end-term.log"));
-
-	file = fopen (logfile, "r");
-	TEST_NE_P (file, NULL);
-	TEST_FILE_EQ (file, "hello\r\n");
-	TEST_FILE_END (file);
-	TEST_EQ (fclose (file), 0);
-	assert0 (unlink (logfile));
+	unlink (logfile);
+	nih_free (logfile);
+	logfile = NULL;
 
 	session_file = NIH_MUST (nih_sprintf (NULL, "%s/upstart/sessions/%d.session",
 				sessiondir, (int)upstart_pid));
 	unlink (session_file);
 
-	/* kill job pid if not already dead */
+	/* Kill job pid if not already dead; per the above, the job may never
+	 * have even started, so none of the following cleanup is fatal.
+	 */
 	file = fopen (pid_file, "r");
-	TEST_NE_P (file, NULL);
-	TEST_EQ (fscanf (file, "%d", &job_pid), 1);
-	fclose (file);
+	if (file) {
+		if (fscanf (file, "%d", &job_pid) == 1) {
+			/* pid may still be running; kill it for completeness. */
+			kill (job_pid, SIGKILL);
+		}
+		fclose (file);
 
-	/* pid should still be running */
-	TEST_EQ (kill (job_pid, SIGKILL), 0);
+		assert0 (unlink (pid_file));
 
-	assert0 (unlink (pid_file));
-
+	}
 	DELETE_FILE (confdir, "session-end-term.conf");
 
 	/*******************************************************************/
@@ -12076,15 +12081,19 @@ test_quiesce (void)
 	TEST_EQ (kill (job_pid, 0), -1);
 	TEST_EQ (errno, ESRCH);
 
+	/* Kill session-end job pid if not already dead; job may never have
+	 * even started, so none of the following cleanup is fatal.
+	 */
 	file = fopen (pid_file, "r");
-	TEST_NE_P (file, NULL);
-	TEST_EQ (fscanf (file, "%d", &job_pid), 1);
-	fclose (file);
+	if (file) {
+		if (fscanf (file, "%d", &job_pid) == 1) {
+			/* The session-end job pid may still be running */
+			kill (job_pid, SIGKILL);
+		}
+		fclose (file);
 
-	/* .... but the session-end job pid should still be running */
-	TEST_EQ (kill (job_pid, SIGKILL), 0);
-
-	assert0 (unlink (pid_file));
+		assert0 (unlink (pid_file));
+	}
 
 	DELETE_FILE (confdir, "long-running-term.conf");
 	DELETE_FILE (confdir, "session-end-term.conf");
