@@ -671,8 +671,8 @@
  * @_pattern: pattern to expect,
  * @_invert: invert meaning.
  *
- * Check that any subsequent line in file @_file matches the glob pattern
- * @_pattern, which should include the terminating newline if one is expected.
+ * Check that any line in file @_file matches the glob pattern @_pattern, which
+ * should include the terminating newline if one is expected.
  *
  * If @_invert is TRUE, ensure @_pattern is _NOT_ found in @_file.
  **/
@@ -681,6 +681,7 @@
 		char   buffer[1024];                                 \
 		int    got = FALSE;                                  \
 		int    ret;                                          \
+		rewind (_file);                                      \
 		while (fgets (buffer, sizeof (buffer), _file)) {     \
                                                                      \
 			ret = fnmatch ((_pattern), buffer, 0);       \
@@ -712,8 +713,8 @@
  * @_file: FILE to read from,
  * @_pattern: pattern to expect.
  *
- * Check that any subsequent line in file @_file matches the glob pattern
- * @_pattern, which should include the terminating newline if one is expected.
+ * Check that any line in file @_file matches the glob pattern @_pattern, which
+ * should include the terminating newline if one is expected.
  *
  **/
 #define TEST_FILE_CONTAINS(_file, _pattern)                          \
@@ -724,8 +725,8 @@
  * @_file: FILE to read from,
  * @_pattern: pattern NOT to expect.
  *
- * Check that no subsequent line in file @_file does NOT match the glob pattern
- * @_pattern, which should include the terminating newline if one is expected.
+ * Check that no line in file @_file does NOT match the glob pattern @_pattern,
+ * which should include the terminating newline if one is expected.
  *
  **/
 #define TEST_FILE_NOT_CONTAINS(_file, _pattern)                      \
