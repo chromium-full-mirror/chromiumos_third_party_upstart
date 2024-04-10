@@ -75,9 +75,6 @@
  */
 #define TEST_CMD_DD               "/bin/dd"
 
-/* number of iterations to perform to check file contents */
-#define MAX_ITERATIONS            5
-
 /**
  * SHELL_CHARS:
  *
@@ -85,39 +82,6 @@
  * it to always be run with a shell.
  **/
 #define SHELL_CHARS "~`!$^&*()=|\\{}[];\"'<>?"
-
-/**
- * CHECK_FILE_EQ:
- *
- * @_file: FILE to read from,
- * @_line: line to expect.
- *
- * Check that the next line in the file @_file is @_line, which should
- * include the terminating newline if one is expected.
- *
- * This differs from TEST_FILE_EQ() in that the test is performed
- * MAX_ITERATIONS times with a 1 second sleep between iterations.
- **/
-#define CHECK_FILE_EQ(_file, _line, _select) \
-	do { \
-		int ok = FALSE; \
-		char filebuf[1024]; \
-		for (int i = 0; i < MAX_ITERATIONS; i++) { \
-			TEST_NE_P (fgets (filebuf, sizeof (filebuf), _file), NULL); \
-			if (! strcmp (filebuf, _line)) { \
-				ok = TRUE; \
-				break; \
-			} \
-			if (_select) { \
-				TEST_WATCH_UPDATE_TIMEOUT_SECS (1); \
-			} else { \
-				sleep (1); \
-			} \
-			rewind (_file); \
-		} \
-		TEST_EQ (ok, TRUE); \
-	} while (0)
-
 
 /* 
  * Register regular child handler.
@@ -490,6 +454,75 @@ close_all_files (void)
 		close(i);
 }
 
+/**
+ * handle_process_startup:
+ * @process_data: Process to follow for setup.
+ *
+ * Selectively watch for establishing the job process and (if it's a
+ * shell) the piping of the shell script to the process. These may be
+ * necessary to ensure we process NihIo handlers, even when we're not
+ * running a main loop.
+ *
+ * Note that all tests which use multi-line scripts must
+ * call this function to ensure we process NihIo callbacks appropriately:
+ *
+ * 1. first, to handle the closing of its job_process_fd (i.e., ack that the
+ *    child process is up and running) and
+ * 2. second, to process writing the shell script data into the child.
+ *
+ * Commands and single-line script don't do the second step.
+ *
+ * Note that we don't want to just use nih_io_select_fds() (as in
+ * TEST_WATCH_UPDATE()) because it's racy as to which file
+ * descriptors will be picked up, and so we don't really know how
+ * many times to call it.
+ **/
+static void
+handle_process_startup (JobProcessData *process_data)
+{
+	int         nfds;
+	int         job_fd, shell_fd, fd;
+	int         ret = 0;
+	fd_set      readfds, writefds, exceptfds;
+
+	TEST_NE_P (process_data, NULL);
+	TEST_NE (process_data->job_process_fd, -1);
+	/* Stash these now, as they may get destroyed along the way.
+	 */
+	job_fd = process_data->job_process_fd;
+	shell_fd = process_data->shell_fd;
+
+	/* Step 1: wait for job to set up (i.e., close its
+	 * job_process_fd).
+	 */
+	fd = job_fd;
+	nfds = fd + 1;
+	FD_SET (fd, &readfds);
+	FD_SET (fd, &writefds);
+	FD_SET (fd, &exceptfds);
+
+	ret = select (nfds, &readfds, &writefds, &exceptfds, NULL);
+	TEST_GT (ret, 0);
+	nih_io_handle_fds (&readfds, &writefds, &exceptfds);
+
+	/* Not a shell? Then we're done. */
+	if (shell_fd == -1)
+		return;
+
+	/* Step 2: now again with shell_fd, to ensure shell script is
+	 * written out to child process.
+	 */
+	fd = shell_fd;
+	nfds = fd + 1;
+	FD_SET (fd, &readfds);
+	FD_SET (fd, &writefds);
+	FD_SET (fd, &exceptfds);
+
+	ret = select (nfds, &readfds, &writefds, &exceptfds, NULL);
+	TEST_GT (ret, 0);
+	nih_io_handle_fds (&readfds, &writefds, &exceptfds);
+}
+
 /* XXX: Note that none of these tests attempts to test with a Session
  * passed to job_class_new() since to do so would modify the home
  * directory of the user running these tests (BAD!!).
@@ -505,7 +538,7 @@ test_start (void)
 	FILE            *output;
 	struct stat      statbuf;
 	char             filename[PATH_MAX], buf[80];
-	char             fifoname[PATH_MAX];
+	char             *fifo1 = NULL, *fifo2 = NULL;
 	char             function[PATH_MAX];
 	int              status;
 	siginfo_t        info;
@@ -1508,6 +1541,7 @@ test_start (void)
 	/************************************************************/
 	TEST_FEATURE ("ensure that no log file written for single-line no-output script");
 	TEST_HASH_EMPTY (job_classes);
+	TEST_LIST_EMPTY (nih_io_watches);
 
 	class = job_class_new (NULL, "test", NULL);
 	TEST_NE_P (class, NULL);
@@ -1545,6 +1579,7 @@ test_start (void)
 	/************************************************************/
 	TEST_FEATURE ("ensure that no log file written for single-line no-output command");
 	TEST_HASH_EMPTY (job_classes);
+	TEST_LIST_EMPTY (nih_io_watches);
 
 	class = job_class_new (NULL, "test", NULL);
 	TEST_NE_P (class, NULL);
@@ -1582,6 +1617,7 @@ test_start (void)
 	/************************************************************/
 	TEST_FEATURE ("ensure that no log file written for CONSOLE_NONE");
 	TEST_HASH_EMPTY (job_classes);
+	TEST_LIST_EMPTY (nih_io_watches);
 
 	class = job_class_new (NULL, "test", NULL);
 	TEST_NE_P (class, NULL);
@@ -1629,6 +1665,7 @@ test_start (void)
 	/************************************************************/
 	TEST_FEATURE ("ensure that no log file written for multi-line no-output script");
 	TEST_HASH_EMPTY (job_classes);
+	TEST_LIST_EMPTY (nih_io_watches);
 
 	class = job_class_new (NULL, "test", NULL);
 	TEST_NE_P (class, NULL);
@@ -1649,11 +1686,8 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
-	/* XXX: call 0: async process setup */
-	TEST_WATCH_UPDATE ();
-
-	/* XXX: call 1: wait for script write to child shell */
-	TEST_WATCH_UPDATE ();
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
 
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
@@ -1661,7 +1695,7 @@ test_start (void)
 	/* we've just run /bin/false remember? :) */
 	TEST_EQ (WEXITSTATUS (status), 1);
 
-	/* XXX: call 2: wait for read from pty allowing logger to write to log file */
+	/* wait for read from pty allowing logger to write to log file */
 	TEST_WATCH_UPDATE ();
 
 	ENSURE_DIRECTORY_EMPTY (dirname);
@@ -1675,6 +1709,7 @@ test_start (void)
 	/************************************************************/
 	TEST_FEATURE ("with single-line script that writes 1 line to stdout");
 	TEST_HASH_EMPTY (job_classes);
+	TEST_LIST_EMPTY (nih_io_watches);
 
 	/* Note we can't use TEST_ALLOC_FAIL() for this test since on
 	 * the ENOMEM loop all we could do is discard the error and
@@ -1706,11 +1741,15 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
+
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Flush any log data. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -1730,25 +1769,27 @@ test_start (void)
 
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "hello world\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "hello world\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with single-line script that is killed");
 	TEST_HASH_EMPTY (job_classes);
+	TEST_LIST_EMPTY (nih_io_watches);
 
-	/* Create a fifo that we can use to read from in our scripts,
-	 * so we have a sensible way to block in shell without spawning
-	 * a separate process.
+	/* Create two fifos:
+	 * 1. to read from in our script, so we can block in shell without
+	 *    spawning a separate process.
+	 * 2. to write from in our script, so we can signal when we've gone far
+	 *    enough.
 	 */
-	TEST_GT (sprintf (fifoname, "%s/pipe", dirname), 0);
-	TEST_EQ (mknod (fifoname, S_IFIFO|S_IRUSR|S_IWUSR, 0), 0);
+	fifo1 = NIH_MUST (nih_sprintf (NULL, "%s/pipe1", dirname));
+	fifo2 = NIH_MUST (nih_sprintf (NULL, "%s/pipe2", dirname));
+	TEST_EQ (mknod (fifo1, S_IFIFO|S_IRUSR|S_IWUSR, 0), 0);
+	TEST_EQ (mknod (fifo2, S_IFIFO|S_IRUSR|S_IWUSR, 0), 0);
 
 	class = job_class_new (NULL, "test", NULL);
 	TEST_NE_P (class, NULL);
@@ -1759,7 +1800,8 @@ test_start (void)
 	class->process[PROCESS_MAIN] = process_new (class);
 	class->process[PROCESS_MAIN]->command = nih_sprintf (
 			class->process[PROCESS_MAIN],
-			"%s hello world;read <%s", TEST_CMD_ECHO, fifoname);
+			"%s hello world; %s >%s; read <%s",
+			TEST_CMD_ECHO, TEST_CMD_ECHO, fifo2, fifo1);
 	class->process[PROCESS_MAIN]->script = TRUE;
 
 	job = job_new (class, "");
@@ -1770,16 +1812,22 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
-	/*  wait for process to setup */
-	TEST_WATCH_UPDATE ();
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
 
-	/*  wait for read from pty allowing logger to write to log file */
-	TEST_WATCH_UPDATE ();
+	/* Read one line from fifo2, to ensure child process got far enough. */
+	output = fopen (fifo2, "r");
+	TEST_NE_P (output, NULL);
+	TEST_NE_P (fgets (filebuf, sizeof(filebuf), output), NULL);
+	fclose (output);
 
 	TEST_EQ (kill (-job->pid[PROCESS_MAIN], SIGKILL), 0);
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFSIGNALED (status));
 	TEST_EQ (WTERMSIG (status), SIGKILL);
+
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -1799,41 +1847,23 @@ test_start (void)
 
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	/* This is very icky...
-	 *
-	 * Since we're not running an nih_main_loop, select(2) is
-	 * not being called for us. We have already called
-	 * select(2) once via TEST_WATCH_UPDATE() (since we expect
-	 * the job to have produced output) but we have absolutely
-	 * no way of knowing if it should be called again unless we have
-	 * a custom loop which calls select(2) and then checks for the
-	 * expected result. However, that would either mean
-	 * TEST_WATCH_UPDATE() could not be called "in isolation" or
-	 * that it would need to accept a block that could check some
-	 * condition to know whether to call select(2) again.
-	 *
-	 * For now, we cheat by re-reading the log file a number of
-	 * times. If we don't see the expected result within a
-	 * "reasonable" period, we fail.
-	 *
-	 * This loop is necessary since although the amount of data
-	 * being transferred is tiny, the kernel occasionally splits it
-	 * into multiple chunks using one of the line end characters as
-	 * a "delimiter".
-	 */
-	CHECK_FILE_EQ (output, "hello world\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "hello world\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	TEST_EQ (unlink (fifoname), 0);
-	nih_free (class);
+	TEST_EQ (unlink (fifo1), 0);
+	TEST_EQ (unlink (fifo2), 0);
+	nih_free (fifo1);
+	nih_free (fifo2);
 
 	/************************************************************/
 	TEST_FEATURE ("with single-line command that is killed");
 	TEST_HASH_EMPTY (job_classes);
+	TEST_LIST_EMPTY (nih_io_watches);
+
+	fifo2 = NIH_MUST (nih_sprintf (NULL, "%s/pipe2", dirname));
+	TEST_EQ (mknod (fifo2, S_IFIFO|S_IRUSR|S_IWUSR, 0), 0);
 
 	class = job_class_new (NULL, "test", NULL);
 	TEST_NE_P (class, NULL);
@@ -1843,12 +1873,13 @@ test_start (void)
 	class->console = CONSOLE_LOG;
 	class->process[PROCESS_MAIN] = process_new (class);
 	/* We want a single-line command that produces a few lines of output
-	 * and never terminates on its own. We wrap the 'yes' command to
-	 * bound the amount of output we have to process.
+	 * and never terminates on its own. We wrap the 'yes' command to bound
+	 * the amount of output we have to process, and we pass a fifo, so it
+	 * can notify us when it has gotten "far enough" along.
 	 */
 	class->process[PROCESS_MAIN]->command = nih_sprintf (
 			class->process[PROCESS_MAIN],
-			"%s/%s", TEST_DATA_DIR, "yes.sh");
+			"%s/%s %s", TEST_DATA_DIR, "yes.sh", fifo2);
 	class->process[PROCESS_MAIN]->script = FALSE;
 
 	job = job_new (class, "");
@@ -1861,11 +1892,14 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
-	/*  wait for process to setup */
-	TEST_WATCH_UPDATE ();
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
 
-	/*  wait for read from pty allowing logger to write to log file */
-	TEST_WATCH_UPDATE ();
+	/* Read one line from fifo2, to ensure child process got far enough. */
+	output = fopen (fifo2, "r");
+	TEST_NE_P (output, NULL);
+	TEST_NE_P (fgets (filebuf, sizeof(filebuf), output), NULL);
+	fclose (output);
 
 	TEST_EQ (kill (job->pid[PROCESS_MAIN], SIGKILL), 0);
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
@@ -1908,17 +1942,23 @@ test_start (void)
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
+	TEST_EQ (unlink (fifo2), 0);
+	nih_free (fifo2);
 
 	/************************************************************/
 	TEST_FEATURE ("with multi-line script that is killed");
 	TEST_HASH_EMPTY (job_classes);
 
-	/* Create a fifo that we can use to read from in our scripts,
-	 * so we have a sensible way to block in shell without spawning
-	 * a separate process.
+	/* Create two fifos:
+	 * 1. to read from in our script, so we can block in shell without
+	 *    spawning a separate process.
+	 * 2. to write from in our script, so we can signal when we've gone far
+	 *    enough.
 	 */
-	TEST_GT (sprintf (fifoname, "%s/pipe", dirname), 0);
-	TEST_EQ (mknod (fifoname, S_IFIFO|S_IRUSR|S_IWUSR, 0), 0);
+	fifo1 = NIH_MUST (nih_sprintf (NULL, "%s/pipe1", dirname));
+	fifo2 = NIH_MUST (nih_sprintf (NULL, "%s/pipe2", dirname));
+	TEST_EQ (mknod (fifo1, S_IFIFO|S_IRUSR|S_IWUSR, 0), 0);
+	TEST_EQ (mknod (fifo2, S_IFIFO|S_IRUSR|S_IWUSR, 0), 0);
 
 	/* Note we can't use TEST_ALLOC_FAIL() for this test since on
 	 * the ENOMEM loop all we could do is discard the error and
@@ -1939,7 +1979,8 @@ test_start (void)
 	class->process[PROCESS_MAIN] = process_new (class);
 	class->process[PROCESS_MAIN]->command = nih_sprintf (
 			class->process[PROCESS_MAIN],
-			"%s hello world\nread <%s", TEST_CMD_ECHO, fifoname);
+			"%s hello world\n%s >%s\nread <%s",
+			TEST_CMD_ECHO, TEST_CMD_ECHO, fifo2, fifo1);
 	class->process[PROCESS_MAIN]->script = TRUE;
 
 	job = job_new (class, "");
@@ -1950,19 +1991,22 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
-	/*  wait for process to setup */
-	TEST_WATCH_UPDATE ();
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
 
-	/* XXX: call 1: wait for script write to child shell */
-	TEST_WATCH_UPDATE ();
-
-	/* XXX: call 2: wait for read from pty allowing logger to write to log file */
-	TEST_WATCH_UPDATE ();
+	/* Read one line from fifo2, to ensure child process got far enough. */
+	output = fopen (fifo2, "r");
+	TEST_NE_P (output, NULL);
+	TEST_NE_P (fgets (filebuf, sizeof(filebuf), output), NULL);
+	fclose (output);
 
 	TEST_EQ (kill (-job->pid[PROCESS_MAIN], SIGKILL), 0);
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFSIGNALED (status));
 	TEST_EQ (WTERMSIG (status), SIGKILL);
+
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -1982,26 +2026,30 @@ test_start (void)
 
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "hello world\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "hello world\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	TEST_EQ (unlink (fifoname), 0);
-	nih_free (class);
+	TEST_EQ (unlink (fifo1), 0);
+	TEST_EQ (unlink (fifo2), 0);
+	nih_free (fifo1);
+	nih_free (fifo2);
 
 	/************************************************************/
 	TEST_FEATURE ("with single-line script that writes 1 byte and is killed");
 	TEST_HASH_EMPTY (job_classes);
 
-	/* Create a fifo that we can use to read from in our scripts,
-	 * so we have a sensible way to block in shell without spawning
-	 * a separate process.
+	/* Create two fifos:
+	 * 1. to read from in our script, so we can block in shell without
+	 *    spawning a separate process.
+	 * 2. to write from in our script, so we can signal when we've gone far
+	 *    enough.
 	 */
-	TEST_GT (sprintf (fifoname, "%s/pipe", dirname), 0);
-	TEST_EQ (mknod (fifoname, S_IFIFO|S_IRUSR|S_IWUSR, 0), 0);
+	fifo1 = NIH_MUST (nih_sprintf (NULL, "%s/pipe1", dirname));
+	fifo2 = NIH_MUST (nih_sprintf (NULL, "%s/pipe2", dirname));
+	TEST_EQ (mknod (fifo1, S_IFIFO|S_IRUSR|S_IWUSR, 0), 0);
+	TEST_EQ (mknod (fifo2, S_IFIFO|S_IRUSR|S_IWUSR, 0), 0);
 
 	class = job_class_new (NULL, "test", NULL);
 	TEST_NE_P (class, NULL);
@@ -2012,7 +2060,8 @@ test_start (void)
 	class->process[PROCESS_MAIN] = process_new (class);
 	class->process[PROCESS_MAIN]->command = nih_sprintf (
 			class->process[PROCESS_MAIN],
-			"%s -ne X; read <%s", TEST_CMD_ECHO, fifoname);
+			"%s -ne X; %s >%s; read <%s",
+			TEST_CMD_ECHO, TEST_CMD_ECHO, fifo2, fifo1);
 	class->process[PROCESS_MAIN]->script = TRUE;
 
 	job = job_new (class, "");
@@ -2023,16 +2072,22 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
-	/*  wait for process to setup */
-	TEST_WATCH_UPDATE ();
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
 
-	/*  wait for read from pty allowing logger to write to log file */
-	TEST_WATCH_UPDATE ();
+	/* Read one line from fifo2, to ensure child process got far enough. */
+	output = fopen (fifo2, "r");
+	TEST_NE_P (output, NULL);
+	TEST_NE_P (fgets (filebuf, sizeof(filebuf), output), NULL);
+	fclose (output);
 
 	TEST_EQ (kill (-job->pid[PROCESS_MAIN], SIGKILL), 0);
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFSIGNALED (status));
 	TEST_EQ (WTERMSIG (status), SIGKILL);
+
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -2058,8 +2113,10 @@ test_start (void)
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	TEST_EQ (unlink (fifoname), 0);
-	nih_free (class);
+	TEST_EQ (unlink (fifo1), 0);
+	TEST_EQ (unlink (fifo2), 0);
+	nih_free (fifo1);
+	nih_free (fifo2);
 
 	/************************************************************/
 	/* Can't think of a command that would echo 1 byte and then
@@ -2095,18 +2152,15 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
-	/*  wait for process to setup */
-	TEST_WATCH_UPDATE ();
-
-	/* XXX: call 1: wait for script write to child shell */
-	TEST_WATCH_UPDATE ();
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
 
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
 
-	/* XXX: call 2: wait for read from pty allowing logger to write to log file */
-	TEST_WATCH_UPDATE ();
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -2132,7 +2186,6 @@ test_start (void)
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with single-line command that writes 1 line to stdout");
@@ -2168,11 +2221,15 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
+
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -2192,36 +2249,15 @@ test_start (void)
 
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "hello world\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "hello world\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with multi-line script that writes 1 line to stdout");
 	TEST_HASH_EMPTY (job_classes);
-
-	/* XXX: Note that all tests which use multi-line scripts (but
-	 * XXX: *NOT* commands!) and produce output must call
-	 * XXX: TEST_WATCH_UPDATE() *TWICE* to ensure select(2) is
-	 * XXX: called twice.
-	 *
-	 * This is required since job_process_start() uses an NihIo object
-	 * to squirt the script to the shell sub-process and this
-	 * triggers select to return when the data is written to the shell.
-	 * However, we don't care about that directly - we care more about
-	 * a subsequent fd becoming ready to read data from - the fd
-	 * associated with the pty which will trigger the log file to be
-	 * written.
-	 *
-	 * Note that the 2nd call to TEST_WATCH_UPDATE would not be
-	 * required should job_process_start() simple invoke write(2) to
-	 * send the data.
-	 */
 
 	class = job_class_new (NULL, "multiline", NULL);
 	TEST_NE_P (class, NULL);
@@ -2244,18 +2280,15 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
-	/*  wait for process to setup */
-	TEST_WATCH_UPDATE ();
-
-	/* XXX: call 1: wait for script write to child shell */
-	TEST_WATCH_UPDATE ();
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
 
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
 
-	/* XXX: call 2: wait for read from pty allowing logger to write to log file */
-	TEST_WATCH_UPDATE ();
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -2275,14 +2308,11 @@ test_start (void)
 
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "hello world\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "hello world\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with instance job and single-line script that writes 1 line to stdout");
@@ -2308,11 +2338,15 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
+
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -2332,14 +2366,11 @@ test_start (void)
 
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "hello world\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "hello world\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with single-line script that writes >1 lines to stdout");
@@ -2367,11 +2398,15 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
+
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -2395,15 +2430,14 @@ test_start (void)
 	/* Yup, pseudo-terminals record *everything*,
 	 * even the carriage returns.
 	 */
-	CHECK_FILE_EQ (output, "hello world\r\n", TRUE);
-	CHECK_FILE_EQ (output, "\r\n", TRUE);
-	CHECK_FILE_EQ (output, "\r\n", TRUE);
+	TEST_FILE_EQ (output, "hello world\r\n");
+	TEST_FILE_EQ (output, "\r\n");
+	TEST_FILE_EQ (output, "\r\n");
 
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with single-line command that writes >1 lines to stdout");
@@ -2431,11 +2465,15 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
+
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -2455,16 +2493,13 @@ test_start (void)
 
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "hello world\r\n", TRUE);
-	CHECK_FILE_EQ (output, "\r\n", TRUE);
-	CHECK_FILE_EQ (output, "\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "hello world\r\n");
+	TEST_FILE_EQ (output, "\r\n");
+	TEST_FILE_EQ (output, "\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with multi-line script that writes >1 lines to stdout");
@@ -2492,12 +2527,15 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
-	TEST_WATCH_UPDATE ();
-	TEST_WATCH_UPDATE ();
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
+
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
-	TEST_WATCH_UPDATE ();
+
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -2517,16 +2555,13 @@ test_start (void)
 
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "hello world\r\n", TRUE);
-	CHECK_FILE_EQ (output, "\r\n", TRUE);
-	CHECK_FILE_EQ (output, "\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "hello world\r\n");
+	TEST_FILE_EQ (output, "\r\n");
+	TEST_FILE_EQ (output, "\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with single-line script that writes 1 line to stderr");
@@ -2552,11 +2587,15 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
+
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -2576,14 +2615,11 @@ test_start (void)
 
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "hello world\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "hello world\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with single-line command that writes 1 line to stderr");
@@ -2614,11 +2650,15 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
+
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -2638,16 +2678,13 @@ test_start (void)
 
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "0+0 records in\r\n", TRUE);
-	CHECK_FILE_EQ (output, "0+0 records out\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "0+0 records in\r\n");
+	TEST_FILE_EQ (output, "0+0 records out\r\n");
 	TEST_FILE_MATCH (output, "0 bytes copied,*\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with multi-line script that writes 1 line to stderr");
@@ -2673,14 +2710,15 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
-	TEST_WATCH_UPDATE ();
-	TEST_WATCH_UPDATE ();
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
 
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -2700,14 +2738,11 @@ test_start (void)
 
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "hello world\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "hello world\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with single-line script that writes >1 lines to stderr");
@@ -2735,11 +2770,15 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
+
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -2763,16 +2802,15 @@ test_start (void)
 	/* Yup, pseudo-terminals record *everything*,
 	 * even the carriage returns.
 	 */
-	CHECK_FILE_EQ (output, "hello\r\n", TRUE);
-	CHECK_FILE_EQ (output, "world\r\n", TRUE);
-	CHECK_FILE_EQ (output, "\r\n", TRUE);
-	CHECK_FILE_EQ (output, "\r\n", TRUE);
+	TEST_FILE_EQ (output, "hello\r\n");
+	TEST_FILE_EQ (output, "world\r\n");
+	TEST_FILE_EQ (output, "\r\n");
+	TEST_FILE_EQ (output, "\r\n");
 
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with single-line command that writes >1 lines to stderr");
@@ -2800,11 +2838,15 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
+
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -2825,15 +2867,14 @@ test_start (void)
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
 
-	CHECK_FILE_EQ (output, "hello world\r\n", TRUE);
-	CHECK_FILE_EQ (output, "\r\n", TRUE);
-	CHECK_FILE_EQ (output, "\r\n", TRUE);
+	TEST_FILE_EQ (output, "hello world\r\n");
+	TEST_FILE_EQ (output, "\r\n");
+	TEST_FILE_EQ (output, "\r\n");
 
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with multi-line script that writes >1 lines to stderr");
@@ -2861,14 +2902,15 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
-	TEST_WATCH_UPDATE ();
-	TEST_WATCH_UPDATE ();
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
 
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -2889,14 +2931,13 @@ test_start (void)
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
 
-	CHECK_FILE_EQ (output, "hello world\r\n", TRUE);
-	CHECK_FILE_EQ (output, "\r\n", TRUE);
+	TEST_FILE_EQ (output, "hello world\r\n");
+	TEST_FILE_EQ (output, "\r\n");
 
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with single-line script that writes 1 line to stdout then 1 line to stderr");
@@ -2925,11 +2966,15 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
+
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -2949,15 +2994,12 @@ test_start (void)
 
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "stdout\r\n", TRUE);
-	CHECK_FILE_EQ (output, "stderr\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "stdout\r\n");
+	TEST_FILE_EQ (output, "stderr\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with single-line script that writes 1 line to stderr then 1 line to stdout");
@@ -2986,11 +3028,15 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
+
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -3011,14 +3057,13 @@ test_start (void)
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
 
-	CHECK_FILE_EQ (output, "stderr\r\n", TRUE);
-	CHECK_FILE_EQ (output, "stdout\r\n", TRUE);
+	TEST_FILE_EQ (output, "stderr\r\n");
+	TEST_FILE_EQ (output, "stdout\r\n");
 
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with single-line command that writes to stdout and stderr");
@@ -3045,11 +3090,15 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
+
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -3075,13 +3124,12 @@ test_start (void)
 	p = filebuf + 7;
 	TEST_EQ_STR (p, "7+0 records in\r\n");
 
-	CHECK_FILE_EQ (output, "7+0 records out\r\n", TRUE);
+	TEST_FILE_EQ (output, "7+0 records out\r\n");
 	TEST_FILE_MATCH (output, "7 bytes copied,*\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with single-line script running an invalid command");
@@ -3108,11 +3156,15 @@ test_start (void)
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
+
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_NE (WEXITSTATUS (status), 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -3140,7 +3192,6 @@ test_start (void)
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************
 	 * Superficially, there seems little point in running a test for
@@ -3265,9 +3316,7 @@ test_start (void)
 	/* check file contents */
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "hello\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "hello\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
@@ -3331,10 +3380,8 @@ test_start (void)
 	/* check file contents */
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "hello\r\n", TRUE);
-	CHECK_FILE_EQ (output, "world\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "hello\r\n");
+	TEST_FILE_EQ (output, "world\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
@@ -3398,9 +3445,7 @@ test_start (void)
 	/* check file contents */
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "hello\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "hello\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
@@ -3535,9 +3580,7 @@ test_start (void)
 	/* check file contents */
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "hello world\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "hello world\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
@@ -3576,6 +3619,9 @@ test_start (void)
 	TEST_EQ (nih_main_loop (), 0);
 	TEST_EQ (child_exit_status[0], 127);
 
+	/* Flush any logs. */
+	nih_free (class);
+
 	TEST_EQ (stat (filename, &statbuf), 0);
 
 	TEST_TRUE (S_ISREG (statbuf.st_mode));
@@ -3602,7 +3648,6 @@ test_start (void)
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 	TEST_RESET_MAIN_LOOP ();
 
 	/************************************************************/
@@ -3628,17 +3673,18 @@ test_start (void)
 	job->state = JOB_SPAWNED;
 
 	job_process_start (job, PROCESS_MAIN);
-	TEST_WATCH_UPDATE ();
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
 
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -3658,15 +3704,12 @@ test_start (void)
 
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "stdout\r\n", TRUE);
-	CHECK_FILE_EQ (output, "stderr\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "stdout\r\n");
+	TEST_FILE_EQ (output, "stderr\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with multi-line script that writes 1 line to stderr then 1 line to stdout");
@@ -3691,17 +3734,18 @@ test_start (void)
 	job->state = JOB_SPAWNED;
 
 	job_process_start (job, PROCESS_MAIN);
-	TEST_WATCH_UPDATE ();
 
 	TEST_NE (job->pid[PROCESS_MAIN], 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Ensure process has started up. */
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
 
 	waitpid (job->pid[PROCESS_MAIN], &status, 0);
 	TEST_TRUE (WIFEXITED (status));
 	TEST_EQ (WEXITSTATUS (status), 0);
 
-	TEST_WATCH_UPDATE ();
+	/* Flush any logs. */
+	nih_free (class);
 
 	TEST_EQ (stat (filename, &statbuf), 0);
 
@@ -3721,15 +3765,12 @@ test_start (void)
 
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "stderr\r\n", TRUE);
-	CHECK_FILE_EQ (output, "stdout\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "stderr\r\n");
+	TEST_FILE_EQ (output, "stdout\r\n");
 	TEST_FILE_END (output);
 	fclose (output);
 
 	TEST_EQ (unlink (filename), 0);
-	nih_free (class);
 
 	/************************************************************/
 	/* XXX: Note that we don't force a watch update here to simulate
@@ -3800,7 +3841,7 @@ test_start (void)
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
 
-	CHECK_FILE_EQ (output, "hello\r\n", TRUE);
+	TEST_FILE_EQ (output, "hello\r\n");
 
 	TEST_FILE_END (output);
 	fclose (output);
@@ -3844,7 +3885,10 @@ test_start (void)
 	job->state = JOB_SPAWNED;
 
 	job_process_start (job, PROCESS_MAIN);
-	TEST_WATCH_UPDATE ();
+
+	handle_process_startup (job->process_data[PROCESS_MAIN]);
+
+	/* wait for read from pty allowing logger to write to log file */
 	TEST_WATCH_UPDATE ();
 
 	pid = job->pid[PROCESS_MAIN];
@@ -3913,7 +3957,9 @@ test_start (void)
 	TEST_EQ (kill (pid, 0), -1);
 	TEST_EQ (errno, ESRCH);
 
+	/* Flush any logs. */
 	nih_free (class);
+
 	TEST_EQ (stat (filename, &statbuf), 0);
 
 	TEST_TRUE (S_ISREG (statbuf.st_mode));
@@ -4211,9 +4257,9 @@ test_start (void)
 	/* initial output from main process, followed by all output from
 	 * post-start process.
 	 */
-	CHECK_FILE_EQ (output, "started\r\n", TRUE);
-	CHECK_FILE_EQ (output, "stdout\r\n", TRUE);
-	CHECK_FILE_EQ (output, "stderr\r\n", TRUE);
+	TEST_FILE_EQ (output, "started\r\n");
+	TEST_FILE_EQ (output, "stdout\r\n");
+	TEST_FILE_EQ (output, "stderr\r\n");
 
 	TEST_FILE_END (output);
 
@@ -4239,10 +4285,10 @@ test_start (void)
 	/* initial output from main process, followed by all output from
 	 * post-start process, followed by final data from main process.
 	 */
-	CHECK_FILE_EQ (output, "started\r\n", TRUE);
-	CHECK_FILE_EQ (output, "stdout\r\n", TRUE);
-	CHECK_FILE_EQ (output, "stderr\r\n", TRUE);
-	CHECK_FILE_EQ (output, "ended\r\n", TRUE);
+	TEST_FILE_EQ (output, "started\r\n");
+	TEST_FILE_EQ (output, "stdout\r\n");
+	TEST_FILE_EQ (output, "stderr\r\n");
+	TEST_FILE_EQ (output, "ended\r\n");
 
 	TEST_FILE_END (output);
 
@@ -4822,7 +4868,7 @@ test_spawn (void)
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
 
-	CHECK_FILE_EQ (output, "started\r\n", TRUE);
+	TEST_FILE_EQ (output, "started\r\n");
 
 	TEST_FILE_END (output);
 	TEST_EQ (fclose (output), 0);
@@ -4852,13 +4898,13 @@ test_spawn (void)
 	TEST_NE_P (output, NULL);
 
 	/* from main process */
-	CHECK_FILE_EQ (output, "started\r\n", TRUE);
+	TEST_FILE_EQ (output, "started\r\n");
 
 	/* from post-start process */
-	CHECK_FILE_EQ (output, "stdout\r\n", TRUE);
+	TEST_FILE_EQ (output, "stdout\r\n");
 
 	/* from post-start process */
-	CHECK_FILE_EQ (output, "stderr\r\n", TRUE);
+	TEST_FILE_EQ (output, "stderr\r\n");
 
 	TEST_FILE_END (output);
 	fclose (output);
@@ -4879,16 +4925,16 @@ test_spawn (void)
 	TEST_NE_P (output, NULL);
 
 	/* from main process */
-	CHECK_FILE_EQ (output, "started\r\n", TRUE);
+	TEST_FILE_EQ (output, "started\r\n");
 
 	/* from post-start process */
-	CHECK_FILE_EQ (output, "stdout\r\n", TRUE);
+	TEST_FILE_EQ (output, "stdout\r\n");
 
 	/* from post-start process */
-	CHECK_FILE_EQ (output, "stderr\r\n", TRUE);
+	TEST_FILE_EQ (output, "stderr\r\n");
 
 	/* from main process */
-	CHECK_FILE_EQ (output, "ended\r\n", TRUE);
+	TEST_FILE_EQ (output, "ended\r\n");
 
 	TEST_FILE_END (output);
 	fclose (output);
@@ -4957,7 +5003,7 @@ test_spawn (void)
 			if (!test_alloc_failed) {
 				output = fopen (filename, "r");
 				TEST_NE_P (output, NULL);
-				CHECK_FILE_EQ (output, "hello world\r\n", TRUE);
+				TEST_FILE_EQ (output, "hello world\r\n");
 				TEST_FILE_END (output);
 				TEST_EQ (fclose (output), 0);
 			}
@@ -5012,21 +5058,19 @@ test_spawn (void)
 
 	TEST_WATCH_UPDATE ();
 
+	/* Flush any logs. */
+	nih_free (class);
+
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "hello world\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "hello world\r\n");
 	TEST_FILE_END (output);
-
 	TEST_EQ (fclose (output), 0);
 
 	assert0 (unlink (filename));
 	assert0 (unlink (script));
 	TEST_EQ (rmdir (dirname), 0);
 	TEST_EQ (unsetenv ("UPSTART_LOGDIR"), 0);
-
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("with multi-line script and 'console log'");
@@ -5071,9 +5115,7 @@ test_spawn (void)
 
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "hello world\r\n", TRUE);
-
+	TEST_FILE_EQ (output, "hello world\r\n");
 	TEST_FILE_END (output);
 
 	TEST_EQ (fclose (output), 0);
@@ -5124,6 +5166,9 @@ test_spawn (void)
 	ret = log_handle_unflushed (job->log, job->log[PROCESS_MAIN]);
 	TEST_EQ (ret, 1);
 
+	nih_free (job);
+	nih_free (class);
+
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
 
@@ -5137,9 +5182,6 @@ test_spawn (void)
 
 	TEST_EQ (rmdir (dirname), 0);
 	TEST_EQ (unsetenv ("UPSTART_LOGDIR"), 0);
-
-	nih_free (job);
-	nih_free (class);
 
 	/************************************************************/
 	TEST_FEATURE ("read data from forked process");
@@ -5192,10 +5234,8 @@ test_spawn (void)
 
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "stdout\r\n", FALSE);
-	CHECK_FILE_EQ (output, "stderr\r\n", FALSE);
-
+	TEST_FILE_EQ (output, "stdout\r\n");
+	TEST_FILE_EQ (output, "stderr\r\n");
 	TEST_FILE_END (output);
 
 	TEST_EQ (fclose (output), 0);
@@ -5249,12 +5289,9 @@ test_spawn (void)
 
 	output = fopen (filename, "r");
 	TEST_NE_P (output, NULL);
-
-	CHECK_FILE_EQ (output, "stdout\r\n", FALSE);
-	CHECK_FILE_EQ (output, "stderr\r\n", FALSE);
-
+	TEST_FILE_EQ (output, "stdout\r\n");
+	TEST_FILE_EQ (output, "stderr\r\n");
 	TEST_FILE_END (output);
-
 	TEST_EQ (fclose (output), 0);
 
 	assert0 (unlink (filename));
