@@ -4809,6 +4809,9 @@ test_spawn (void)
 	pid = job->pid[PROCESS_MAIN];
 	TEST_GT (pid, 0);
 
+	TEST_EQ (waitpid (pid, &status, WUNTRACED), pid);
+	TEST_TRUE (WIFSTOPPED (status));
+
 	/* The main process is now running, but paused. It should have
 	 * produced some output so check that now.
 	 */
