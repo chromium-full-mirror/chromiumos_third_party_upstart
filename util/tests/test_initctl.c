@@ -21,6 +21,7 @@
  */
 
 #include <nih/test.h>
+#include <nih/child.h>
 #include <nih/file.h>
 #include <nih-dbus/test_dbus.h>
 
@@ -30,6 +31,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <regex.h>
+#include <sys/prctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
@@ -11693,6 +11695,14 @@ test_quiesce (void)
 
 	TEST_GROUP ("Session Init quiesce");
 
+	/*******************************************************************
+	 * NB: quiesce features are known to be unreliable at reaping all
+	 * children. To control reaping even when our children misbehave, we
+	 * claim subreaper privileges.
+	 */
+	TEST_EQ (prctl (PR_SET_CHILD_SUBREAPER, 1), 0);
+	/*******************************************************************/
+
 	TEST_FILENAME (confdir);
 	TEST_EQ (mkdir (confdir, 0755), 0);
 
@@ -11810,6 +11820,9 @@ test_quiesce (void)
 				sessiondir, (int)upstart_pid));
 	unlink (session_file);
 
+	/* Quiesce does not reliably reap all children. Let's do that now. */
+	nih_child_poll ();
+
 	/* pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
 	TEST_EQ (errno, ESRCH);
@@ -11857,6 +11870,9 @@ test_quiesce (void)
 	session_file = NIH_MUST (nih_sprintf (NULL, "%s/upstart/sessions/%d.session",
 				sessiondir, (int)upstart_pid));
 	unlink (session_file);
+
+	/* Quiesce does not reliably reap all children. Let's do that now. */
+	nih_child_poll ();
 
 	/* pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
@@ -12057,6 +12073,9 @@ test_quiesce (void)
 				sessiondir, (int)upstart_pid));
 	unlink (session_file);
 
+	/* Quiesce does not reliably reap all children. Let's do that now. */
+	nih_child_poll ();
+
 	/* the long-running job pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
 	TEST_EQ (errno, ESRCH);
@@ -12152,6 +12171,9 @@ test_quiesce (void)
 				sessiondir, (int)upstart_pid));
 	unlink (session_file);
 
+	/* Quiesce does not reliably reap all children. Let's do that now. */
+	nih_child_poll ();
+
 	/* pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
 	TEST_EQ (errno, ESRCH);
@@ -12194,6 +12216,9 @@ test_quiesce (void)
 	session_file = NIH_MUST (nih_sprintf (NULL, "%s/upstart/sessions/%d.session",
 				sessiondir, (int)upstart_pid));
 	unlink (session_file);
+
+	/* Quiesce does not reliably reap all children. Let's do that now. */
+	nih_child_poll ();
 
 	/* pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
@@ -12245,6 +12270,9 @@ test_quiesce (void)
 	session_file = NIH_MUST (nih_sprintf (NULL, "%s/upstart/sessions/%d.session",
 				sessiondir, (int)upstart_pid));
 	unlink (session_file);
+
+	/* Quiesce does not reliably reap all children. Let's do that now. */
+	nih_child_poll ();
 
 	/* pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
@@ -12304,6 +12332,9 @@ test_quiesce (void)
 	TEST_NE_P (file, NULL);
 	TEST_EQ (fscanf (file, "%d", &job_pid), 1);
 	fclose (file);
+
+	/* Quiesce does not reliably reap all children. Let's do that now. */
+	nih_child_poll ();
 
 	/* pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
@@ -12370,6 +12401,9 @@ test_quiesce (void)
 	TEST_NE_P (file, NULL);
 	TEST_EQ (fscanf (file, "%d", &job_pid), 1);
 	fclose (file);
+
+	/* Quiesce does not reliably reap all children. Let's do that now. */
+	nih_child_poll ();
 
 	/* pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
@@ -12444,6 +12478,9 @@ test_quiesce (void)
 				sessiondir, (int)upstart_pid));
 	unlink (session_file);
 
+	/* Quiesce does not reliably reap all children. Let's do that now. */
+	nih_child_poll ();
+
 	/* pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
 	TEST_EQ (errno, ESRCH);
@@ -12452,6 +12489,9 @@ test_quiesce (void)
 	TEST_NE_P (file, NULL);
 	TEST_EQ (fscanf (file, "%d", &job_pid), 1);
 	fclose (file);
+
+	/* Quiesce does not reliably reap all children. Let's do that now. */
+	nih_child_poll ();
 
 	/* pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
