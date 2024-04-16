@@ -11778,7 +11778,7 @@ test_quiesce (void)
 			get_initctl (), "long-running");
 	TEST_NE_P (cmd, NULL);
 
-	RUN_COMMAND (NULL, cmd, &output, &lines);
+	TEST_RUN_COMMAND (NULL, cmd, &output, &lines);
 	TEST_EQ (lines, 1);
 	nih_free (output);
 
@@ -11863,7 +11863,7 @@ test_quiesce (void)
 			get_initctl (), "long-running-term");
 	TEST_NE_P (cmd, NULL);
 
-	RUN_COMMAND (NULL, cmd, &output, &lines);
+	TEST_RUN_COMMAND (NULL, cmd, &output, &lines);
 	TEST_EQ (lines, 1);
 	nih_free (output);
 
@@ -12064,7 +12064,7 @@ test_quiesce (void)
 			get_initctl (), "long-running-term");
 	TEST_NE_P (cmd, NULL);
 
-	RUN_COMMAND (NULL, cmd, &output, &lines);
+	TEST_RUN_COMMAND (NULL, cmd, &output, &lines);
 	TEST_EQ (lines, 1);
 	nih_free (output);
 

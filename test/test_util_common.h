@@ -470,16 +470,20 @@
  * @len: size_t pointer which will be set to length of @result.
  *
  * Run a command and return its standard output. It is the callers
- * responsibility to free @result. Errors from running @cmd are fatal.
+ * responsibility to free @result. Errors from setting up the @cmd process are
+ * fatal. Returns the waitpid()-like status otherwise.
  *
  * Note: trailing '\n' characters are removed in returned command
  * output.
+ *
+ * Returns the exit status of the command.
  **/
 #define RUN_COMMAND(parent, cmd, result, len)                        \
-{                                                                    \
+({                                                                    \
 	FILE    *f;                                                  \
 	char     buffer[BUFFER_SIZE];                                \
 	char   **ret;                                                \
+	int      res;                                                \
 	                                                             \
 	assert (cmd[0]);                                             \
 	                                                             \
@@ -500,8 +504,12 @@
 		TEST_NE_P (ret, NULL);                               \
 	}                                                            \
 	                                                             \
-	TEST_NE (pclose (f), -1);                                    \
-}
+	TEST_NE ((res = pclose (f)), -1);                            \
+	res;                                                         \
+})
+
+#define TEST_RUN_COMMAND(parent, cmd, result, len)                   \
+	TEST_EQ (RUN_COMMAND(parent, cmd, result, len), 0)
 
 /**
  * CREATE_FILE:
