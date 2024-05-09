@@ -41,21 +41,21 @@ AC_CHECK_HEADER([sys/epoll.h], [have_epoll=yes], [have_epoll=no])
 AC_ARG_ENABLE([udev-bridge],
 	AS_HELP_STRING([--disable-udev-bridge],
 		[Disable building of upstart-udev-bridge even if required dependencies available]),
-		[udev_bridge=no], [udev_bridge=yes])
+		[udev_bridge=${enableval}], [udev_bridge=yes])
 
 AM_CONDITIONAL([ENABLE_UDEV_BRIDGE], [test "$have_udev" = yes && test "$udev_bridge" = yes])
 
 AC_ARG_ENABLE([socket-bridge],
 	AS_HELP_STRING([--disable-socket-bridge],
 		[Disable building of upstart-socket-bridge even if required dependencies available]),
-		[socket_bridge=no], [socket_bridge=yes])
+		[socket_bridge=${enableval}], [socket_bridge=yes])
 
 AM_CONDITIONAL([ENABLE_SOCKET_BRIDGE], [test "$have_epoll" = yes && test "$socket_bridge" = yes])
 
 AC_ARG_ENABLE([local-bridge],
 	AS_HELP_STRING([--disable-local-bridge],
 		[Disable building of upstart-local-bridge even if required dependencies available]),
-		[local_bridge=no], [local_bridge=yes])
+		[local_bridge=${enableval}], [local_bridge=yes])
 
 AM_CONDITIONAL([ENABLE_LOCAL_BRIDGE], [test "$local_bridge" = yes])
 
@@ -63,7 +63,7 @@ AM_CONDITIONAL([ENABLE_LOCAL_BRIDGE], [test "$local_bridge" = yes])
 AC_ARG_ENABLE([dconf-bridge],
 	AS_HELP_STRING([--disable-dconf-bridge],
 		[Disable building of upstart-dconf-bridge even if required dependencies available]),
-		[dconf_bridge=no], [dconf_bridge=yes])
+		[dconf_bridge=${enableval}], [dconf_bridge=yes])
 
 AM_CONDITIONAL([ENABLE_DCONF_BRIDGE], [test "$have_dconf" = yes &&
                                 test "$have_gio" = yes &&
@@ -80,7 +80,7 @@ AM_CONDITIONAL([ENABLE_TAP_OUTPUT], [test "$have_tap" = "yes"])
 AC_ARG_ENABLE([cgroups],
 	AS_HELP_STRING([--disable-cgroups],
 		[Disable support for Linux cgroups]),
-		[enable_cgroups=no], [enable_cgroups=yes])
+		[enable_cgroups=${enableval}], [enable_cgroups=yes])
 PKG_CHECK_MODULES([CGMANAGER], [libcgmanager], [have_cgmanager=yes], [have_cgmanager=no])
 AM_CONDITIONAL([ENABLE_CGROUPS], [test "$enable_cgroups" = yes && test "$have_cgmanager" = yes])
 
@@ -110,7 +110,7 @@ PKG_CHECK_MODULES([JSON], [json-c], [],
 AC_ARG_ENABLE([abi-check],
 	AS_HELP_STRING([--disable-abi-check],
 		[Disable libupstart ABI check performed if abi-compliance-checker available]),
-		[abi_check=no], [abi_check=yes])
+		[abi_check=${enableval}], [abi_check=yes])
 
 if test x$abi_check = xyes; then
 	AC_CHECK_PROGS([ABI_COMPLIANCE_CHECKER],[abi-compliance-checker])
@@ -153,7 +153,7 @@ AC_SUBST(KEYUTILS_LIBS)
 AC_ARG_ENABLE([scripts],
 	AS_HELP_STRING([--disable_scripts],
 		[Disable building script - including upstart-monitor]),
-		[], [enable_scripts=yes])
+		[enable_scripts=${enableval}], [enable_scripts=yes])
 
 AM_CONDITIONAL([ENABLE_SCRIPTS], [test "$enable_scripts" = "yes"])
 
@@ -162,7 +162,7 @@ AC_CHECK_HEADERS([valgrind/valgrind.h, sys/prctl.h])
 
 AC_ARG_ENABLE(selinux,
 	AS_HELP_STRING([--enable-selinux], [enable SELinux support]),
-	[], [enable_selinux=no])
+	[enable_selinux=${enableval}], [enable_selinux=no])
 
 if test "x$enable_selinux" = "xyes" ; then
 	PKG_CHECK_MODULES(SELINUX, [libselinux])
