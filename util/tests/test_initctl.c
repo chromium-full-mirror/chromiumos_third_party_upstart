@@ -11675,6 +11675,22 @@ test_no_dbus (void)
 	TEST_EQ (rmdir (confdir), 0);
 }
 
+/* Quiesce does not reliably reap all children. Supply a helper for reaping the
+ * child we're testing for, as well as a best-effort pass on anything else that
+ * may have leaked.
+ */
+static void
+reap_quiesced_child (pid_t pid)
+{
+	/* Quiesce *may* have already reaped; only ensure we don't time out
+	 * (ret == 0).
+	 */
+	TEST_NE (timed_waitpid (pid, 1+TEST_QUIESCE_KILL_PHASE), 0);
+
+	/* One last pass at reaping other children. */
+	nih_child_poll ();
+}
+
 void
 test_quiesce (void)
 {
@@ -11820,8 +11836,7 @@ test_quiesce (void)
 				sessiondir, (int)upstart_pid));
 	unlink (session_file);
 
-	/* Quiesce does not reliably reap all children. Let's do that now. */
-	nih_child_poll ();
+	reap_quiesced_child (job_pid);
 
 	/* pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
@@ -11871,8 +11886,7 @@ test_quiesce (void)
 				sessiondir, (int)upstart_pid));
 	unlink (session_file);
 
-	/* Quiesce does not reliably reap all children. Let's do that now. */
-	nih_child_poll ();
+	reap_quiesced_child (job_pid);
 
 	/* pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
@@ -12073,8 +12087,7 @@ test_quiesce (void)
 				sessiondir, (int)upstart_pid));
 	unlink (session_file);
 
-	/* Quiesce does not reliably reap all children. Let's do that now. */
-	nih_child_poll ();
+	reap_quiesced_child (job_pid);
 
 	/* the long-running job pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
@@ -12171,8 +12184,7 @@ test_quiesce (void)
 				sessiondir, (int)upstart_pid));
 	unlink (session_file);
 
-	/* Quiesce does not reliably reap all children. Let's do that now. */
-	nih_child_poll ();
+	reap_quiesced_child (job_pid);
 
 	/* pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
@@ -12217,8 +12229,7 @@ test_quiesce (void)
 				sessiondir, (int)upstart_pid));
 	unlink (session_file);
 
-	/* Quiesce does not reliably reap all children. Let's do that now. */
-	nih_child_poll ();
+	reap_quiesced_child (job_pid);
 
 	/* pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
@@ -12271,8 +12282,7 @@ test_quiesce (void)
 				sessiondir, (int)upstart_pid));
 	unlink (session_file);
 
-	/* Quiesce does not reliably reap all children. Let's do that now. */
-	nih_child_poll ();
+	reap_quiesced_child (job_pid);
 
 	/* pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
@@ -12333,8 +12343,7 @@ test_quiesce (void)
 	TEST_EQ (fscanf (file, "%d", &job_pid), 1);
 	fclose (file);
 
-	/* Quiesce does not reliably reap all children. Let's do that now. */
-	nih_child_poll ();
+	reap_quiesced_child (job_pid);
 
 	/* pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
@@ -12402,8 +12411,7 @@ test_quiesce (void)
 	TEST_EQ (fscanf (file, "%d", &job_pid), 1);
 	fclose (file);
 
-	/* Quiesce does not reliably reap all children. Let's do that now. */
-	nih_child_poll ();
+	reap_quiesced_child (job_pid);
 
 	/* pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
@@ -12478,8 +12486,7 @@ test_quiesce (void)
 				sessiondir, (int)upstart_pid));
 	unlink (session_file);
 
-	/* Quiesce does not reliably reap all children. Let's do that now. */
-	nih_child_poll ();
+	reap_quiesced_child (job_pid);
 
 	/* pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
@@ -12490,8 +12497,7 @@ test_quiesce (void)
 	TEST_EQ (fscanf (file, "%d", &job_pid), 1);
 	fclose (file);
 
-	/* Quiesce does not reliably reap all children. Let's do that now. */
-	nih_child_poll ();
+	reap_quiesced_child (job_pid);
 
 	/* pid should no longer exist */
 	TEST_EQ (kill (job_pid, 0), -1);
