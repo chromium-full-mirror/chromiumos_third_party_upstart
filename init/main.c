@@ -40,6 +40,7 @@
 
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <ftw.h>
 
 #include <errno.h>
 #include <stdio.h>
@@ -106,6 +107,7 @@ static void usr1_handler    (void *data, NihSignal *signal);
 
 static void handle_confdir          (void);
 static void handle_logdir           (void);
+static void prefetch_conf_files     (int is_override);
 static int  console_type_setter     (NihOption *option, const char *arg);
 static int  conf_dir_setter         (NihOption *option, const char *arg);
 static int  prepend_conf_dir_setter (NihOption *option, const char *arg);
@@ -388,6 +390,8 @@ main (int   argc,
 	char **args = NULL;
 	char  *arg_end = NULL;
 	int    ret;
+	pid_t  prefetch_pid1 = 0;
+	pid_t  prefetch_pid2 = 0;
 
 	conf_dirs = NIH_MUST (nih_str_array_new (NULL));
 	append_conf_dirs = NIH_MUST (nih_str_array_new (NULL));
@@ -412,6 +416,39 @@ main (int   argc,
 
 	handle_confdir ();
 	handle_logdir ();
+
+#ifdef HAVE_SELINUX
+	/* If SELinux is enabled, upstart execs itself twice. To avoid forking
+	 * more than required when prefetching conf files, we only do it after
+	 * SELinux has already initialized, on the second execution of init.
+	 */
+	if (getenv ("SELINUX_INIT")) {
+#endif
+	/* Trigger readahead for all config directories as early as possible to
+	 * prefetch job conf files in cache.
+	 */
+	if (! restart) {
+		prefetch_pid1 = fork ();
+		if (prefetch_pid1 == 0) {
+			prefetch_conf_files (FALSE);
+			exit (0);
+		} else if (prefetch_pid1 < 0) {
+			nih_warn ("%s: %s", _("Unable to fork prefetch conf file process"),
+				strerror (errno));
+		}
+		prefetch_pid2 = fork ();
+		if (prefetch_pid2 == 0) {
+			prefetch_conf_files (TRUE);
+			exit (0);
+		} else if (prefetch_pid2 < 0) {
+			nih_warn ("%s: %s",
+				_("Unable to fork prefetch override file process"),
+				strerror (errno));
+		}
+	}
+#ifdef HAVE_SELINUX
+	}
+#endif
 
 	if (disable_job_logging)
 		nih_debug ("Job logging disabled");
@@ -1055,6 +1092,18 @@ main (int   argc,
 
 	conf_reload ();
 
+	/* If we made it this far and the prefetch jobs haven't finished yet,
+	 * terminate them as we don't need them to run anymore.
+	 */
+	if (! restart) {
+		if (prefetch_pid1 > 0) {
+			kill (prefetch_pid1, SIGKILL);
+		}
+		if (prefetch_pid2 > 0) {
+			kill (prefetch_pid2, SIGKILL);
+		}
+	}
+
 	/* We must have atleast one source of configuration */
 	nih_assert (! NIH_LIST_EMPTY (conf_sources));
 
@@ -1489,6 +1538,112 @@ handle_confdir (void)
 	dir = getenv (CONFDIR_ENV);
 
 	NIH_MUST (nih_str_array_add (&conf_dirs, NULL, NULL, dir ? dir : CONFDIR));
+}
+
+/**
+ * prefetch_conf_file
+ *
+ * Prefetch a config file in memory using readahead to speed up access time
+ * in the main process.
+ **/
+static int
+prefetch_conf_file (const char *fpath, const struct stat *sb,
+		    int tflag, struct FTW *ftwbuf)
+{
+	struct stat conf_stat;
+	int ret;
+	int fd;
+
+	fd = open (fpath, O_RDONLY);
+	if (fd < 0)
+		return -1;
+	ret = fstat (fd, &conf_stat);
+	if (ret < 0) {
+		close (fd);
+		return -1;
+	}
+
+	/* We do not care whether readahead failed or not; we just move to the next
+	 * file.
+	 */
+	readahead (fd, 0, conf_stat.st_size);
+	close (fd);
+	return 0;
+}
+
+/**
+ * prefetch_override_file
+ *
+ * Prefetch an override file in memory using readahead to speed up access time
+ * in the main process. This is useful to pre-generate a table of negative
+ * dentry lookups so the main process won't spend too much time looking up files
+ * that don't exist.
+ **/
+static int
+prefetch_override_file (const char *fpath, const struct stat *sb,
+			int tflag, struct FTW *ftwbuf)
+{
+	struct stat conf_stat;
+	char *try_path=NULL;
+	char *ext;
+	int fd;
+	int ret;
+	size_t len;
+
+	ext = strrchr (fpath, '.');
+	if (!ext)
+		return 0;
+
+	len = strlen (CONF_EXT_OVERRIDE);
+
+	try_path = NIH_MUST (nih_strndup (NULL, fpath, (ext - fpath) + len));
+	if (!try_path)
+		return -1;
+	memcpy (try_path + (ext - fpath), CONF_EXT_OVERRIDE, len);
+
+	fd = open (try_path, O_RDONLY);
+	nih_free (try_path);
+	if (fd < 0)
+		return 0;
+
+	ret = fstat (fd, &conf_stat);
+	if (ret < 0) {
+		close (fd);
+		return 0;
+	}
+	/* We do not care whether readahead failed or not; we just move to the next
+	 * file.
+	 */
+	readahead (fd, 0, conf_stat.st_size);
+	close (fd);
+
+	return 0;
+}
+
+/**
+ * prefetch_conf_files
+ *
+ * Called by a separate process from the main process. It walks through the conf
+ * directories and tries to prefetch either conf or override files in memory to
+ * speed up file access in the main process.
+ **/
+static void
+prefetch_conf_files (int is_override)
+{
+	int i;
+	/* Maximum number of open dirs tracked by nftw. Ideally we only need one
+	 * for each conf dir but we give ourselves some more leeway to be safe
+	 * in case there are recursive directories to access in the init conf
+	 * dirs.
+	 */
+	const int maxdir_open = 4;
+
+	for (i = 0; conf_dirs[i] != NULL; i++) {
+		if (is_override)
+			nftw (conf_dirs[i], prefetch_override_file, maxdir_open, FTW_PHYS);
+		else
+			nftw (conf_dirs[i], prefetch_conf_file, maxdir_open, FTW_PHYS);
+	}
 }
 
 /**
