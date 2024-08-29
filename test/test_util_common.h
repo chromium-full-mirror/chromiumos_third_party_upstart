@@ -494,7 +494,12 @@
 	f = popen (cmd, "r");                                        \
 	TEST_NE_P (f, NULL);                                         \
 	                                                             \
-	while (fgets (buffer, BUFFER_SIZE, f)) {                     \
+	while (1) {                                                  \
+		if (! fgets (buffer, BUFFER_SIZE, f)) {              \
+			if (ferror (f) && errno == EINTR)            \
+				continue;                            \
+			break;                                       \
+		}                                                    \
 		size_t l = strlen (buffer)-1;                        \
 	                                                             \
 		if ( buffer[l] == '\n')                              \
@@ -503,6 +508,9 @@
 			buffer);                                     \
 		TEST_NE_P (ret, NULL);                               \
 	}                                                            \
+	if (ferror (f))                                              \
+		TEST_FAILED ("fgets() failure: %s",                  \
+			     strerror (errno));                      \
 	                                                             \
 	TEST_NE ((res = pclose (f)), -1);                            \
 	res;                                                         \
