@@ -496,8 +496,10 @@
 	                                                             \
 	while (1) {                                                  \
 		if (! fgets (buffer, BUFFER_SIZE, f)) {              \
-			if (ferror (f) && errno == EINTR)            \
+			if (ferror (f) && errno == EINTR) {          \
+				clearerr(f);                         \
 				continue;                            \
+			}                                            \
 			break;                                       \
 		}                                                    \
 		size_t l = strlen (buffer)-1;                        \
