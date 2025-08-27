@@ -299,6 +299,12 @@ error:
 	return -1;
 }
 
+const char *
+process_type_enum_to_str_int (int raw_type)
+{
+	return process_type_enum_to_str (raw_type);
+}
+
 /**
  * process_type_enum_to_str:
  *
@@ -321,6 +327,12 @@ process_type_enum_to_str (ProcessType type)
 	state_enum_to_str (PROCESS_TMPFILES, type);
 
 	return NULL;
+}
+
+int
+process_type_str_to_enum_int (const char *type)
+{
+	return process_type_str_to_enum (type);
 }
 
 /**
@@ -348,4 +360,3 @@ process_type_str_to_enum (const char *type)
 
 	return -1;
 }
-

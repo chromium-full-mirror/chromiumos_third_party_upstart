@@ -60,8 +60,15 @@ static void event_finished             (Event *event);
 static const char * event_progress_enum_to_str (EventProgress progress)
 	__attribute__ ((warn_unused_result));
 
+static const char * event_progress_enum_int_to_str (int raw_progress)
+	__attribute__ ((warn_unused_result));
+
 static EventProgress
 event_progress_str_to_enum (const char *name)
+	__attribute__ ((warn_unused_result));
+
+static int
+event_progress_str_to_enum_int (const char *name)
 	__attribute__ ((warn_unused_result));
 
 extern json_object *json_events;
@@ -614,7 +621,7 @@ event_serialise (const Event *event)
 		goto error;
 
 	if (! state_set_json_enum_var (json,
-				event_progress_enum_to_str,
+				event_progress_enum_int_to_str,
 				"progress", event->progress))
 		goto error;
 
@@ -725,7 +732,7 @@ event_deserialise (json_object *json)
 	event->session = session_from_index (session_index);
 
 	if (! state_get_json_enum_var (json,
-				event_progress_str_to_enum,
+				event_progress_str_to_enum_int,
 				"progress", event->progress))
 		goto error;
 
@@ -815,6 +822,12 @@ event_progress_enum_to_str (EventProgress progress)
 	return NULL;
 }
 
+static const char *
+event_progress_enum_int_to_str (int raw_progress)
+{
+	return event_progress_enum_to_str (raw_progress);
+}
+
 /**
  * event_progress_str_to_enum:
  *
@@ -833,6 +846,12 @@ event_progress_str_to_enum (const char *progress)
 	state_str_to_enum (EVENT_FINISHED, progress);
 
 	return -1;
+}
+
+static int
+event_progress_str_to_enum_int (const char *progress)
+{
+	return event_progress_str_to_enum (progress);
 }
 
 /**

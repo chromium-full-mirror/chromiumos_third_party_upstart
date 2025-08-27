@@ -2847,7 +2847,7 @@ job_process_data_deserialise (void *parent, Job *job, json_object *json)
 		return NULL;
 
 	if (! state_get_json_enum_var (json,
-				process_type_str_to_enum,
+				process_type_str_to_enum_int,
 				"process", process))
 		return NULL;
 

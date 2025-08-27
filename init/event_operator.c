@@ -883,6 +883,12 @@ event_operator_type_enum_to_str (EventOperatorType type)
 	return NULL;
 }
 
+static const char *
+event_operator_type_enum_int_to_str (int raw_type)
+{
+	return event_operator_type_enum_to_str (raw_type);
+}
+
 /**
  * event_operator_type_str_to_enum:
  *
@@ -902,6 +908,12 @@ event_operator_type_str_to_enum (const char *type)
 	state_str_to_enum (EVENT_MATCH, type);
 
 	return -1;
+}
+
+static int
+event_operator_type_str_to_enum_int (const char *type)
+{
+	return event_operator_type_str_to_enum(type);
 }
 
 /**
@@ -926,7 +938,7 @@ event_operator_serialise (const EventOperator *oper)
 		return NULL;
 
 	if (! state_set_json_enum_var (json,
-				event_operator_type_enum_to_str,
+				event_operator_type_enum_int_to_str,
 				"type", oper->type))
 		goto error;
 
@@ -1028,7 +1040,7 @@ event_operator_deserialise (void *parent, json_object *json)
 	}
 
 	if (! state_get_json_enum_var (json,
-				event_operator_type_str_to_enum,
+				event_operator_type_str_to_enum_int,
 				"type", type))
 		goto error;
 

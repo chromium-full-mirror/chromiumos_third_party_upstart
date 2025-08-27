@@ -95,6 +95,14 @@ static char * conf_get_best_override   (const char *name,
                                         const ConfSource *last_source)
 	__attribute__ ((warn_unused_result));
 
+static const char *
+conf_source_type_enum_to_str_int (int raw_type)
+	__attribute__ ((warn_unused_result));
+
+static int
+conf_source_type_str_to_enum_int (const char *type)
+	__attribute__ ((warn_unused_result));
+
 /**
  * user_mode:
  *
@@ -1375,7 +1383,7 @@ conf_source_serialise (const ConfSource *source)
 		goto error;
 
 	if (! state_set_json_enum_var (json,
-				conf_source_type_enum_to_str,
+				conf_source_type_enum_to_str_int,
 				"type", source->type))
 		goto error;
 
@@ -1481,7 +1489,7 @@ conf_source_deserialise (void *parent, json_object *json)
 		goto error;
 
 	if (! state_get_json_enum_var (json,
-				conf_source_type_str_to_enum,
+				conf_source_type_str_to_enum_int,
 				"type", type))
 		goto error;
 
@@ -1557,6 +1565,12 @@ error:
 	return -1;
 }
 
+static const char *
+conf_source_type_enum_to_str_int (int raw_type)
+{
+	return conf_source_type_enum_to_str (raw_type);
+}
+
 /**
  * conf_source_type_enum_to_str:
  *
@@ -1574,6 +1588,12 @@ conf_source_type_enum_to_str (ConfSourceType type)
 	state_enum_to_str (CONF_JOB_DIR, type);
 
 	return NULL;
+}
+
+static int
+conf_source_type_str_to_enum_int (const char *type)
+{
+	return conf_source_type_str_to_enum (type);
 }
 
 /**

@@ -74,6 +74,24 @@ extern char **environ;
 static void  job_class_add (JobClass *class);
 static int   job_class_remove (JobClass *class, const Session *session);
 
+static const char *
+job_class_console_type_enum_to_str_int (int raw_console)
+	__attribute__ ((warn_unused_result));
+
+static int
+job_class_console_type_str_to_enum_int (const char *name)
+	__attribute__ ((warn_unused_result));
+
+static const char *
+job_class_expect_type_enum_to_str_int (int raw_expect)
+	__attribute__ ((warn_unused_result));
+
+static int
+job_class_expect_type_str_to_enum_int (const char *name)
+	__attribute__ ((warn_unused_result));
+
+
+
 /**
  * default_console:
  *
@@ -2072,7 +2090,7 @@ job_class_serialise (JobClass *class)
 	json_object_object_add (json, "process", json_processes);
 
 	if (! state_set_json_enum_var (json,
-				job_class_expect_type_enum_to_str,
+				job_class_expect_type_enum_to_str_int,
 				"expect", class->expect))
 		goto error;
 
@@ -2105,7 +2123,7 @@ job_class_serialise (JobClass *class)
 	json_object_object_add (json, "normalexit", json_normalexit);
 
 	if (! state_set_json_enum_var (json,
-				job_class_console_type_enum_to_str,
+				job_class_console_type_enum_to_str_int,
 				"console", class->console))
 		goto error;
 
@@ -2386,7 +2404,7 @@ job_class_deserialise (json_object *json)
 		goto error;
 
 	if (! state_get_json_enum_var (json,
-				job_class_expect_type_str_to_enum,
+				job_class_expect_type_str_to_enum_int,
 				"expect", class->expect))
 		goto error;
 
@@ -2415,7 +2433,7 @@ job_class_deserialise (json_object *json)
 		goto error;
 
 	if (! state_get_json_enum_var (json,
-				job_class_console_type_str_to_enum,
+				job_class_console_type_str_to_enum_int,
 				"console", class->console))
 		goto error;
 
@@ -2578,6 +2596,12 @@ error:
 }
 
 
+static const char *
+job_class_expect_type_enum_to_str_int (int raw_expect)
+{
+	return job_class_expect_type_enum_to_str (raw_expect);
+}
+
 /**
  * job_class_expect_type_enum_to_str:
  *
@@ -2596,6 +2620,12 @@ job_class_expect_type_enum_to_str (ExpectType expect)
 	state_enum_to_str (EXPECT_FORK, expect);
 
 	return NULL;
+}
+
+static int
+job_class_expect_type_str_to_enum_int (const char *expect)
+{
+	return job_class_expect_type_str_to_enum (expect);
 }
 
 /**
@@ -2620,6 +2650,12 @@ job_class_expect_type_str_to_enum (const char *expect)
 	return -1;
 }
 
+static const char *
+job_class_console_type_enum_to_str_int (int raw_console)
+{
+	return job_class_console_type_enum_to_str (raw_console);
+}
+
 /**
  * job_class_console_type_enum_to_str:
  *
@@ -2638,6 +2674,12 @@ job_class_console_type_enum_to_str (ConsoleType console)
 	state_enum_to_str (CONSOLE_LOG, console);
 
 	return NULL;
+}
+
+static int
+job_class_console_type_str_to_enum_int (const char *console)
+{
+	return job_class_console_type_str_to_enum (console);
 }
 
 /**

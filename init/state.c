@@ -1396,6 +1396,12 @@ error:
 	return -1;
 }
 
+static const char *
+blocked_type_enum_int_to_str (int raw_type)
+{
+	return blocked_type_enum_to_str (raw_type);
+}
+
 /**
  * state_serialise_blocked:
  *
@@ -1544,7 +1550,7 @@ state_serialise_blocked (const Blocked *blocked)
 	}
 
 	if (! state_set_json_enum_var (json,
-				blocked_type_enum_to_str,
+				blocked_type_enum_int_to_str,
 				"type", blocked->type))
 		goto error;
 

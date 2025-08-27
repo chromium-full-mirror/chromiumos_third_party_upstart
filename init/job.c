@@ -67,18 +67,30 @@
 
 /* Prototypes for static functions */
 static const char *
-job_goal_enum_to_str (JobGoal goal)
+job_goal_enum_to_str (int raw_goal)
 	__attribute__ ((warn_unused_result));
 
-static JobGoal job_goal_str_to_enum (const char *goal)
+static int job_goal_str_to_enum (const char *goal)
+	__attribute__ ((warn_unused_result));
+
+static const char *
+job_state_enum_to_str_int (int raw_state)
 	__attribute__ ((warn_unused_result));
 
 static const char *
 job_trace_state_enum_to_str (TraceState state)
 	__attribute__ ((warn_unused_result));
 
+static const char *
+job_trace_state_enum_to_str_int (int raw_state)
+	__attribute__ ((warn_unused_result));
+
 static TraceState
 job_trace_state_str_to_enum (const char *state)
+	__attribute__ ((warn_unused_result));
+
+static int
+job_trace_state_str_to_enum_int (const char *state)
 	__attribute__ ((warn_unused_result));
 
 static json_object *
@@ -1888,7 +1900,7 @@ job_serialise (const Job *job)
 		goto error;
 
 	if (! state_set_json_enum_var (json,
-				job_state_enum_to_str,
+				job_state_enum_to_str_int,
 				"state", job->state))
 		goto error;
 
@@ -1967,7 +1979,7 @@ job_serialise (const Job *job)
 	}
 
 	if (! state_set_json_enum_var (json,
-				process_type_enum_to_str,
+				process_type_enum_to_str_int,
 				"kill_process", job->kill_process))
 		goto error;
 
@@ -1975,7 +1987,7 @@ job_serialise (const Job *job)
 		goto error;
 
 	if (! state_set_json_enum_var (json,
-				process_type_enum_to_str,
+				process_type_enum_to_str_int,
 				"failed_process", job->failed_process))
 		goto error;
 
@@ -1992,7 +2004,7 @@ job_serialise (const Job *job)
 		goto error;
 
 	if (! state_set_json_enum_var (json,
-				job_trace_state_enum_to_str,
+				job_trace_state_enum_to_str_int,
 				"trace_state", job->trace_state))
 		goto error;
 
@@ -2085,6 +2097,12 @@ error:
 	return NULL;
 }
 
+static int
+job_state_str_to_enum_int (const char *state)
+{
+	return job_state_str_to_enum (state);
+}
+
 /**
  * job_deserialise:
  * @parent: job class for JSON-encoded jobs,
@@ -2132,7 +2150,7 @@ job_deserialise (JobClass *parent, json_object *json)
 		goto error;
 
 	if (! state_get_json_enum_var (json,
-				job_state_str_to_enum,
+				job_state_str_to_enum_int,
 				"state", job->state))
 		goto error;
 
@@ -2212,7 +2230,7 @@ job_deserialise (JobClass *parent, json_object *json)
 	}
 
 	if (! state_get_json_enum_var (json,
-				process_type_str_to_enum,
+				process_type_str_to_enum_int,
 				"kill_process", job->kill_process))
 		goto error;
 
@@ -2251,7 +2269,7 @@ job_deserialise (JobClass *parent, json_object *json)
 			goto error;
 
 	if (! state_get_json_enum_var (json,
-				process_type_str_to_enum,
+				process_type_str_to_enum_int,
 				"failed_process", job->failed_process))
 		goto error;
 
@@ -2300,7 +2318,7 @@ job_deserialise (JobClass *parent, json_object *json)
 			goto error;
 
 	if (! state_get_json_enum_var (json,
-				job_trace_state_str_to_enum,
+				job_trace_state_str_to_enum_int,
 				"trace_state", job->trace_state))
 		goto error;
 
@@ -2428,8 +2446,9 @@ error:
  * Returns: string representation of @goal, or NULL if not known.
  **/
 static const char *
-job_goal_enum_to_str (JobGoal goal)
+job_goal_enum_to_str (int raw_goal)
 {
+	JobGoal goal = raw_goal;
 	state_enum_to_str (JOB_STOP, goal);
 	state_enum_to_str (JOB_START, goal);
 	state_enum_to_str (JOB_RESPAWN, goal);
@@ -2446,7 +2465,7 @@ job_goal_enum_to_str (JobGoal goal)
  *
  * Returns: JobGoal representation of @goal, or -1 if not known.
  **/
-static JobGoal
+static int
 job_goal_str_to_enum (const char *goal)
 {
 	state_str_to_enum (JOB_STOP, goal);
@@ -2454,6 +2473,12 @@ job_goal_str_to_enum (const char *goal)
 	state_str_to_enum (JOB_RESPAWN, goal);
 
 	return -1;
+}
+
+static const char *
+job_state_enum_to_str_int (int raw_state)
+{
+	return job_state_enum_to_str (raw_state);
 }
 
 /**
@@ -2522,6 +2547,12 @@ job_state_str_to_enum (const char *state)
 	return -1;
 }
 
+static const char *
+job_trace_state_enum_to_str_int (int raw_state)
+{
+	return job_trace_state_enum_to_str (raw_state);
+}
+
 /**
  * job_state_enum_to_str:
  *
@@ -2540,6 +2571,12 @@ job_trace_state_enum_to_str (TraceState state)
 	state_enum_to_str (TRACE_NORMAL, state);
 
 	return NULL;
+}
+
+static int
+job_trace_state_str_to_enum_int (const char *state)
+{
+	return job_trace_state_str_to_enum (state);
 }
 
 /**

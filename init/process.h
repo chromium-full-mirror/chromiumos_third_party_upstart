@@ -97,7 +97,15 @@ process_deserialise_all (json_object *json, const void *parent,
 	__attribute__ ((warn_unused_result));
 
 const char *
+process_type_enum_to_str_int (int raw_type)
+	__attribute__ ((warn_unused_result));
+
+const char *
 process_type_enum_to_str (ProcessType type)
+	__attribute__ ((warn_unused_result));
+
+int
+process_type_str_to_enum_int (const char *type)
 	__attribute__ ((warn_unused_result));
 
 ProcessType
