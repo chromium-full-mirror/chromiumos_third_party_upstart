@@ -130,17 +130,18 @@ int disable_job_logging = 0;
 int no_inherit_env = FALSE;
 
 /* Prototypes for static functions */
-static void job_process_kill_timer      (Job *job, NihTimer *timer);
-static void job_process_terminated      (Job *job, ProcessType process,
+static void job_process_kill_timer            (Job *job, NihTimer *timer);
+static void job_process_kill_timer_callback   (void *job, NihTimer *timer);
+static void job_process_terminated            (Job *job, ProcessType process,
 					 int status, int state_only);
-static int  job_process_catch_runaway   (Job *job);
-static void job_process_stopped         (Job *job, ProcessType process);
-static void job_process_trace_new       (Job *job, ProcessType process);
-static void job_process_trace_new_child (Job *job, ProcessType process);
-static void job_process_trace_signal    (Job *job, ProcessType process,
+static int  job_process_catch_runaway         (Job *job);
+static void job_process_stopped               (Job *job, ProcessType process);
+static void job_process_trace_new             (Job *job, ProcessType process);
+static void job_process_trace_new_child       (Job *job, ProcessType process);
+static void job_process_trace_signal          (Job *job, ProcessType process,
 					 int signum);
-static void job_process_trace_fork      (Job *job, ProcessType process);
-static void job_process_trace_exec      (Job *job, ProcessType process);
+static void job_process_trace_fork            (Job *job, ProcessType process);
+static void job_process_trace_exec            (Job *job, ProcessType process);
 
 extern char         *control_server_address;
 extern int           user_mode;
@@ -1396,7 +1397,7 @@ job_process_set_term_timer (Job          *job,
 	job->kill_process = process;
 	job->kill_timer = NIH_MUST (nih_timer_add_timeout (
 			  job, timeout,
-			  (NihTimerCb)job_process_kill_timer, job));
+			  job_process_kill_timer_callback, job));
 }
 
 /**
@@ -1420,7 +1421,7 @@ job_process_set_kill_timer (Job          *job,
 	job->kill_process = process;
 	job->kill_timer = NIH_MUST (nih_timer_add_timeout (
 			  job, timeout,
-			  (NihTimerCb)job_process_kill_timer, job));
+			  job_process_kill_timer_callback, job));
 }
 
 /**
@@ -1505,6 +1506,13 @@ job_process_kill_timer (Job      *job,
 	}
 }
 
+/* job_process_kill_timer, but matching NihTimerCb's type. */
+static void
+job_process_kill_timer_callback (void      *job,
+			NihTimer *timer)
+{
+	job_process_kill_timer ((Job *)job, timer);
+}
 
 /**
  * job_process_handler:

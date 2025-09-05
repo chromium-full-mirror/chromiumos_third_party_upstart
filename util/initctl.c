@@ -73,10 +73,16 @@ char *        job_usage    (const void *parent,
 	__attribute__ ((warn_unused_result));
 
 /* Prototypes for static functions */
-static void   start_reply_handler (char **job_path, NihDBusMessage *message,
+static void   start_reply_handler          (char **job_path,
+				   NihDBusMessage *message,
 				   const char *instance);
-static void   reply_handler       (int *ret, NihDBusMessage *message);
-static void   error_handler       (void *data, NihDBusMessage *message);
+static void   start_reply_handler_callback (void *job_path,
+				   NihDBusMessage *message,
+				   const char *instance);
+static void   reply_handler                (int *ret, NihDBusMessage *message);
+static void   reply_handler_callback       (void *ret, NihDBusMessage *message);
+static void   error_handler                (void *data,
+				   NihDBusMessage *message);
 
 static void   job_class_condition_handler (void *data,
 		NihDBusMessage *message,
@@ -633,7 +639,7 @@ start_action (NihCommand *  command,
 		job->auto_start = FALSE;
 
 		pending_call = job_start (job, FALSE,
-					  (JobStartReply)reply_handler,
+					  reply_handler_callback,
 					  error_handler, &ret,
 					  NIH_DBUS_TIMEOUT_NEVER);
 		if (! pending_call)
@@ -643,7 +649,7 @@ start_action (NihCommand *  command,
 		 * be automatically freed.
 		 */
 		pending_call = job_class_start (job_class, &args[1], (! no_wait),
-						(JobClassStartReply)start_reply_handler,
+						start_reply_handler_callback,
 						error_handler, &job_path,
 						NIH_DBUS_TIMEOUT_NEVER);
 		if (! pending_call)
@@ -768,7 +774,7 @@ stop_action (NihCommand *  command,
 		job->auto_start = FALSE;
 
 		pending_call = job_stop (job, FALSE,
-					 (JobStopReply)reply_handler,
+					 reply_handler_callback,
 					 error_handler, &ret,
 					 NIH_DBUS_TIMEOUT_NEVER);
 		if (! pending_call)
@@ -788,7 +794,7 @@ stop_action (NihCommand *  command,
 		job->auto_start = FALSE;
 
 		pending_call = job_class_stop (job_class, &args[1], (! no_wait),
-					       (JobClassStopReply)reply_handler,
+					       reply_handler_callback,
 					       error_handler, &ret,
 					       NIH_DBUS_TIMEOUT_NEVER);
 		if (! pending_call)
@@ -896,7 +902,7 @@ restart_action (NihCommand *  command,
 		job->auto_start = FALSE;
 
 		pending_call = job_restart (job, FALSE,
-					    (JobRestartReply)reply_handler,
+					    reply_handler_callback,
 					    error_handler, &ret,
 					    NIH_DBUS_TIMEOUT_NEVER);
 		if (! pending_call)
@@ -906,7 +912,7 @@ restart_action (NihCommand *  command,
 		 * be automatically freed.
 		 */
 		pending_call = job_class_restart (job_class, &args[1], (! no_wait),
-						  (JobClassRestartReply)start_reply_handler,
+						  start_reply_handler_callback,
 						  error_handler, &job_path,
 						  NIH_DBUS_TIMEOUT_NEVER);
 
@@ -1750,7 +1756,7 @@ emit_action (NihCommand *  command,
 		return 1;
 
 	pending_call = upstart_emit_event (upstart, args[0], &args[1], (! no_wait),
-					   (UpstartEmitEventReply)reply_handler,
+					   reply_handler_callback,
 					   error_handler, &ret,
 					   NIH_DBUS_TIMEOUT_NEVER);
 	if (! pending_call)
@@ -2265,12 +2271,27 @@ start_reply_handler (char **         job_path,
 }
 
 static void
+start_reply_handler_callback (void *         job_path,
+		     NihDBusMessage *message,
+		     const char *    instance)
+{
+	start_reply_handler ((char **)job_path, message, instance);
+}
+
+static void
 reply_handler (int *           ret,
 	       NihDBusMessage *message)
 {
 	nih_assert (message != NULL);
 
 	*ret = 0;
+}
+
+static void
+reply_handler_callback (void *           ret,
+	       NihDBusMessage *message)
+{
+	reply_handler ((int *)ret, message);
 }
 
 static void

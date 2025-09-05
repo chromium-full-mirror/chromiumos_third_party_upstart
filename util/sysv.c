@@ -53,7 +53,8 @@
 
 
 /* Prototypes for static functions */
-static void error_handler (NihError **err, NihDBusMessage *message);
+static void error_handler          (NihError **err, NihDBusMessage *message);
+static void error_handler_callback (void *err, NihDBusMessage *message);
 
 
 /**
@@ -168,7 +169,7 @@ sysv_change_runlevel (int           runlevel,
 	pending_call = NIH_SHOULD (upstart_emit_event (
 					   upstart, "runlevel", env, FALSE,
 					   NULL,
-					   (NihDBusErrorHandler)error_handler,
+					   error_handler_callback,
 					   &err,
 					   NIH_DBUS_TIMEOUT_NEVER));
 	if (! pending_call)
@@ -198,4 +199,11 @@ error_handler (NihError **     err,
 	       NihDBusMessage *message)
 {
 	*err = nih_error_steal ();
+}
+
+static void
+error_handler_callback (void *     err,
+	       NihDBusMessage *message)
+{
+	error_handler ((NihError **)err, message);
 }
