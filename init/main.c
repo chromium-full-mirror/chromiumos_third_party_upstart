@@ -1585,7 +1585,7 @@ prefetch_override_file (const char *fpath, const struct stat *sb,
 {
 	struct stat conf_stat;
 	char *try_path=NULL;
-	char *ext;
+	const char *ext;
 	int fd;
 	int ret;
 	size_t len;

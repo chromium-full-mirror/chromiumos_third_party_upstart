@@ -186,7 +186,7 @@ system_mount (const char *type,
 	      const char *options)
 {
 	nih_local char *parent = NULL;
-	char *          ptr;
+	const char *    ptr;
 	struct stat     parent_stat;
 	struct stat     dir_stat;
 

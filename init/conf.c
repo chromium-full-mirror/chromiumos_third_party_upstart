@@ -147,7 +147,7 @@ is_conf_file_std (const char *path)
 {
 	nih_assert (path != NULL);
 
-	char *ptr = strrchr (path, '.');
+	const char *ptr = strrchr (path, '.');
 
 	if (ptr && IS_CONF_EXT_STD (ptr))
 		return TRUE;
@@ -171,7 +171,7 @@ is_conf_file_override (const char *path)
 {
 	nih_assert (path != NULL);
 
-	char *ptr = strrchr (path, '.');
+	const char *ptr = strrchr (path, '.');
 
 	if (ptr && IS_CONF_EXT_OVERRIDE (ptr))
 		return TRUE;
@@ -195,7 +195,7 @@ is_conf_file (const char *path)
 {
 	nih_assert (path != NULL);
 
-	char *ptr = strrchr (path, '.');
+	const char *ptr = strrchr (path, '.');
 
 	if (ptr && (ptr > path) && (ptr[-1] != '/') && IS_CONF_EXT (ptr))
 		return TRUE;
@@ -314,7 +314,7 @@ toggle_conf_name (const void     *parent,
 		 const char     *path)
 {
 	char *new_path;
-	char *ext;
+	const char *ext;
 	char *new_ext;
 	size_t len;
 

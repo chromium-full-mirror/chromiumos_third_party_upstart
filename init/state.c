@@ -1174,7 +1174,7 @@ error:
 char *
 state_collapse_env (const char **env)
 {
-	char          *p;
+	const char    *p;
 	char          *flattened = NULL;
 	const char  **elem;
 
