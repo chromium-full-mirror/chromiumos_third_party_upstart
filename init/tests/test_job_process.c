@@ -897,6 +897,8 @@ test_start (void)
 						   "FOO=SMACK"));
 			assert (nih_str_array_add (&job->stop_env, job, NULL,
 						   "CRACKLE=FIZZ"));
+			assert (nih_str_array_add (&job->stop_env, job, NULL,
+						   "ATTACK=%p.%p.%p"));
 		}
 
 		job_process_start (job, PROCESS_PRE_STOP);
@@ -910,6 +912,8 @@ test_start (void)
 		 * the job.
 		 */
 		output = fopen (filename, "r");
+		/* Assert that format specifiers are passed literally and not expanded */
+		TEST_FILE_EQ (output, "ATTACK=%p.%p.%p\n");
 		TEST_FILE_EQ (output, "BAR=BAZ\n");
 		TEST_FILE_EQ (output, "CRACKLE=FIZZ\n");
 		TEST_FILE_EQ (output, "FOO=SMACK\n");
@@ -954,6 +958,8 @@ test_start (void)
 						   "FOO=SMACK"));
 			assert (nih_str_array_add (&job->stop_env, job, NULL,
 						   "CRACKLE=FIZZ"));
+			assert (nih_str_array_add (&job->stop_env, job, NULL,
+						   "ATTACK=%p.%p.%p"));
 		}
 
 		job_process_start (job, PROCESS_POST_STOP);
@@ -967,6 +973,8 @@ test_start (void)
 		 * the job.
 		 */
 		output = fopen (filename, "r");
+		/* Assert that format specifiers are passed literally and not expanded */
+		TEST_FILE_EQ (output, "ATTACK=%p.%p.%p\n");
 		TEST_FILE_EQ (output, "BAR=BAZ\n");
 		TEST_FILE_EQ (output, "CRACKLE=FIZZ\n");
 		TEST_FILE_EQ (output, "FOO=SMACK\n");

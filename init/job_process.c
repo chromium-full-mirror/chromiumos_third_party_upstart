@@ -291,7 +291,7 @@ job_process_start (Job                    *job,
 	    && ((process == PROCESS_PRE_STOP)
 		|| (process == PROCESS_POST_STOP)))
 		for (e = job->stop_env; *e; e++)
-			NIH_MUST (environ_set (&env, NULL, &envc, TRUE, *e));
+			NIH_MUST (environ_add (&env, NULL, &envc, TRUE, *e));
 
 	NIH_MUST (environ_set (&env, NULL, &envc, TRUE,
 			       "UPSTART_JOB=%s", job->class->name));

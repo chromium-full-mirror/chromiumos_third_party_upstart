@@ -37,7 +37,8 @@ char **       environ_append    (char ***env, const void *parent, size_t *len,
 
 char **       environ_set       (char ***env, const void *parent, size_t *len,
 				 int replace, const char *format, ...)
-	__attribute__ ((warn_unused_result));
+	__attribute__ ((warn_unused_result))
+	__attribute__ ((format (printf, 5, 6)));
 
 char * const *environ_lookup    (char * const *env, const char *key,
 				 size_t len);
