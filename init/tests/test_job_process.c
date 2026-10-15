@@ -1025,7 +1025,7 @@ test_start (void)
 		TEST_EQ (WEXITSTATUS (status), 0);
 
 		output = fopen (filename, "r");
-		TEST_FILE_EQ_N (output, "/proc/self/fd/");
+		TEST_FILE_EQ_N (output, "/bin/sh");
 		TEST_FILE_EQ (output, "\n");
 		TEST_FILE_END (output);
 		fclose (output);
@@ -3650,7 +3650,7 @@ test_start (void)
 	TEST_NE_P (output, NULL);
 
 	TEST_TRUE (fgets (buffer, sizeof(buffer), output));
-	TEST_STR_MATCH (buffer, "/proc/self/fd/9*/this/command/does/not/exist:*");
+	TEST_STR_MATCH (buffer, "*sh:*/this/command/does/not/exist:*");
 
 	TEST_FILE_END (output);
 	fclose (output);

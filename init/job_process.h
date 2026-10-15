@@ -31,14 +31,6 @@
 #include "job.h"
 
 
-/**
- * JOB_PROCESS_SCRIPT_FD:
- *
- * The special fd used to pass the script to the shell process, this can be
- * anything from 3-9 (0-2 are stdin/out/err, 10 and above aren't guaranteed
- * by POSIX).
- **/
-#define JOB_PROCESS_SCRIPT_FD 9
 
 /**
  * JOB_PROCESS_LOG_REMAP_FROM_CHAR:
