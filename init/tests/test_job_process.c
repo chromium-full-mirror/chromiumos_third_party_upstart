@@ -1017,6 +1017,7 @@ test_start (void)
 		job_process_start (job, PROCESS_MAIN);
 
 		TEST_NE (job->pid[PROCESS_MAIN], 0);
+		TEST_NE_P (job->process_data[PROCESS_MAIN], NULL);
 
 		TEST_WATCH_LOOP ();
 
@@ -1029,6 +1030,24 @@ test_start (void)
 		TEST_FILE_EQ (output, "\n");
 		TEST_FILE_END (output);
 		fclose (output);
+		unlink (filename);
+
+		/* Restarting the process on the same job should free the
+		 * previous JobProcessData rather than leaking it.
+		 */
+		p = (char *)job->process_data[PROCESS_MAIN];
+		TEST_FREE_TAG (p);
+
+		job_process_start (job, PROCESS_MAIN);
+
+		TEST_FREE (p);
+		TEST_NE_P (job->process_data[PROCESS_MAIN], NULL);
+
+		TEST_WATCH_LOOP ();
+
+		waitpid (job->pid[PROCESS_MAIN], &status, 0);
+		TEST_TRUE (WIFEXITED (status));
+		TEST_EQ (WEXITSTATUS (status), 0);
 		unlink (filename);
 
 		nih_free (class);

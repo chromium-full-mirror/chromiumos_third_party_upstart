@@ -381,6 +381,11 @@ job_process_start (Job                    *job,
 	 *
 	 * job_process_child_reader() handles updating the jobs state.
 	 */
+	if (job->process_data[process]) {
+		nih_free (job->process_data[process]);
+		job->process_data[process] = NULL;
+	}
+
 	process_data = job->process_data[process] =
 		NIH_MUST (job_process_data_new
 				(job->process_data, job, process, job_process_fd));
@@ -2577,6 +2582,11 @@ job_process_child_reader (JobProcessData  *process_data,
 		process_data->shell_fd = -1;
 	}
 
+	if (process_data->script) {
+		nih_unref (process_data->script, process_data);
+		process_data->script = NULL;
+	}
+
 	if (job && job->class->console == CONSOLE_LOG && job->log[process]) {
 		/* Ensure the pty_master watch gets
 		 * removed and the fd closed.
@@ -2687,6 +2697,11 @@ void
 job_process_run_bottom (JobProcessData *process_data)
 {
 	nih_assert (process_data);
+
+	if (process_data->script) {
+		nih_unref (process_data->script, process_data);
+		process_data->script = NULL;
+	}
 }
 
 
